@@ -153,12 +153,68 @@
     @apply flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700;
   }
 
+  .notice-banner {
+    @apply flex items-start justify-between gap-3 rounded-xl border px-3 py-2 text-sm;
+  }
+
+  .notice-banner__text {
+    @apply min-w-0 flex-1 leading-6;
+  }
+
+  .notice-banner__close {
+    @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-base font-semibold text-current/70 transition hover:bg-white/60 hover:text-current;
+  }
+
   .color-panel-wrap {
     @apply inline-flex items-center;
   }
 
   .color-panel-wrap .t-color-picker {
     min-width: 0;
+  }
+
+  .setting-slider {
+    @apply rounded-lg border border-slate-200 bg-white px-3 py-3;
+  }
+
+  .setting-slider-disabled {
+    @apply bg-slate-50;
+  }
+
+  .setting-slider .t-slider {
+    width: 100%;
+  }
+
+  .setting-slider .t-slider__rail {
+    background: color-mix(in oklab, var(--brand) 14%, white 86%);
+  }
+
+  .setting-slider .t-slider__track {
+    background: color-mix(in oklab, var(--brand) 74%, white 26%);
+  }
+
+  .setting-slider .t-slider__button {
+    border-color: color-mix(in oklab, var(--brand) 76%, white 24%);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--brand) 12%, transparent 88%);
+  }
+
+  .setting-slider .t-slider__button:hover,
+  .setting-slider .t-slider__button:focus-visible {
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--brand) 18%, transparent 82%);
+  }
+
+  .setting-slider .t-input-number {
+    width: 88px;
+  }
+
+  .setting-slider .t-input-number .t-input__inner {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .setting-slider-disabled .t-slider,
+  .setting-slider .t-is-disabled {
+    opacity: 0.6;
   }
 
   .resume-page {

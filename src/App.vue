@@ -1,4 +1,5 @@
 <script setup>
+import { reactive, watch } from 'vue'
 import ResumeEditor from './components/resume/ResumeEditor.vue'
 import ResumePreview from './components/resume/ResumePreview.vue'
 import ResumeToolbar from './components/resume/ResumeToolbar.vue'
@@ -64,6 +65,43 @@ const {
   removePhoto,
   onPageOverflowChange,
 } = useResumeBuilder()
+
+const dismissedNotices = reactive({
+  jsonStatus: false,
+  actionStatus: false,
+  jsonError: false,
+  actionError: false,
+  exportWarning: false,
+  pageOverflow: false,
+})
+
+function dismissNotice(type) {
+  dismissedNotices[type] = true
+}
+
+watch(() => jsonStatusMessage.value, () => {
+  dismissedNotices.jsonStatus = false
+})
+
+watch(() => actionStatusMessage.value, () => {
+  dismissedNotices.actionStatus = false
+})
+
+watch(() => jsonErrorMessage.value, () => {
+  dismissedNotices.jsonError = false
+})
+
+watch(() => actionErrorMessage.value, () => {
+  dismissedNotices.actionError = false
+})
+
+watch(() => exportWarningMessage.value, () => {
+  dismissedNotices.exportWarning = false
+})
+
+watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
+  dismissedNotices.pageOverflow = false
+})
 </script>
 
 <template>
@@ -91,42 +129,90 @@ const {
       />
 
       <section class="no-print mb-4 space-y-2">
-        <p
-          v-if="jsonStatusMessage"
-          class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+        <div
+          v-if="jsonStatusMessage && !dismissedNotices.jsonStatus"
+          class="notice-banner border-emerald-200 bg-emerald-50 text-emerald-700"
         >
-          {{ jsonStatusMessage }}
-        </p>
-        <p
-          v-if="actionStatusMessage"
-          class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+          <span class="notice-banner__text">{{ jsonStatusMessage }}</span>
+          <button
+            type="button"
+            class="notice-banner__close"
+            aria-label="关闭提示"
+            @click="dismissNotice('jsonStatus')"
+          >
+            ×
+          </button>
+        </div>
+        <div
+          v-if="actionStatusMessage && !dismissedNotices.actionStatus"
+          class="notice-banner border-emerald-200 bg-emerald-50 text-emerald-700"
         >
-          {{ actionStatusMessage }}
-        </p>
-        <p
-          v-if="jsonErrorMessage"
-          class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+          <span class="notice-banner__text">{{ actionStatusMessage }}</span>
+          <button
+            type="button"
+            class="notice-banner__close"
+            aria-label="关闭提示"
+            @click="dismissNotice('actionStatus')"
+          >
+            ×
+          </button>
+        </div>
+        <div
+          v-if="jsonErrorMessage && !dismissedNotices.jsonError"
+          class="notice-banner border-rose-200 bg-rose-50 text-rose-700"
         >
-          {{ jsonErrorMessage }}
-        </p>
-        <p
-          v-if="actionErrorMessage"
-          class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+          <span class="notice-banner__text">{{ jsonErrorMessage }}</span>
+          <button
+            type="button"
+            class="notice-banner__close"
+            aria-label="关闭提示"
+            @click="dismissNotice('jsonError')"
+          >
+            ×
+          </button>
+        </div>
+        <div
+          v-if="actionErrorMessage && !dismissedNotices.actionError"
+          class="notice-banner border-rose-200 bg-rose-50 text-rose-700"
         >
-          {{ actionErrorMessage }}
-        </p>
-        <p
-          v-if="exportWarningMessage"
-          class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700"
+          <span class="notice-banner__text">{{ actionErrorMessage }}</span>
+          <button
+            type="button"
+            class="notice-banner__close"
+            aria-label="关闭提示"
+            @click="dismissNotice('actionError')"
+          >
+            ×
+          </button>
+        </div>
+        <div
+          v-if="exportWarningMessage && !dismissedNotices.exportWarning"
+          class="notice-banner border-amber-200 bg-amber-50 text-amber-700"
         >
-          {{ exportWarningMessage }}
-        </p>
-        <p
-          v-if="pageOverflow"
-          class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700"
+          <span class="notice-banner__text">{{ exportWarningMessage }}</span>
+          <button
+            type="button"
+            class="notice-banner__close"
+            aria-label="关闭提示"
+            @click="dismissNotice('exportWarning')"
+          >
+            ×
+          </button>
+        </div>
+        <div
+          v-if="pageOverflow && !dismissedNotices.pageOverflow"
+          class="notice-banner border-amber-200 bg-amber-50 text-amber-700"
         >
-          当前内容已超过一页 A4，高度约 {{ pageHeight }}px，导出时可能分页。
-        </p>
+          <span class="notice-banner__text">当前内容已超过一页 A4，高度约 {{ pageHeight }}px，导出时可能分页。</span>
+          <button
+            type="button"
+            class="notice-banner__close"
+            aria-label="关闭提示"
+            @click="dismissNotice('pageOverflow')"
+          >
+            ×
+          </button>
+        </div>
       </section>
 
       <section class="grid gap-5 xl:grid-cols-[560px_1fr]">

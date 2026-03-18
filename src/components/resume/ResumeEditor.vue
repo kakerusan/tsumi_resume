@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import Draggable from 'vuedraggable'
-import { ColorPicker } from 'tdesign-vue-next'
+import { ColorPicker, Slider } from 'tdesign-vue-next'
 import { BrowseIcon, BrowseOffIcon } from 'tdesign-icons-vue-next'
 import {
   PHOTO_RATIO_OPTIONS,
@@ -99,6 +99,10 @@ const nameFontSizeMax = NAME_FONT_SIZE_MAX
 const schoolFontSizeMin = SCHOOL_FONT_SIZE_MIN
 const schoolFontSizeMax = SCHOOL_FONT_SIZE_MAX
 const photoConfig = computed(() => props.resume.theme.photoConfig)
+const sliderInputProps = {
+  theme: 'column',
+  size: 'small',
+}
 
 function updatePhotoConfig(patch = {}) {
   props.resume.theme.photoConfig = normalizePhotoConfig({
@@ -241,45 +245,26 @@ function onSchoolFontSizeChange(value) {
             </label>
             <label class="field-wrap">
               <span class="field-label">宽度（{{ photoSizeMin }}-{{ photoSizeMax }}）</span>
-              <div class="mt-1 flex items-center gap-2">
-                <input
-                  type="range"
-                  class="w-full accent-sky-600"
+              <div class="setting-slider mt-1">
+                <Slider
+                  :model-value="photoConfig.width"
                   :min="photoSizeMin"
                   :max="photoSizeMax"
-                  :value="photoConfig.width"
-                  @input="onPhotoWidthChange($event.target.value)"
-                />
-                <input
-                  type="number"
-                  class="field-input !w-20 !px-2 !py-1.5 text-center"
-                  :min="photoSizeMin"
-                  :max="photoSizeMax"
-                  :value="photoConfig.width"
-                  @input="onPhotoWidthChange($event.target.value)"
+                  :input-number-props="sliderInputProps"
+                  @change="onPhotoWidthChange"
                 />
               </div>
             </label>
             <label class="field-wrap">
               <span class="field-label">高度（{{ photoSizeMin }}-{{ photoSizeMax }}）</span>
-              <div class="mt-1 flex items-center gap-2">
-                <input
-                  type="range"
-                  class="w-full accent-sky-600"
+              <div class="setting-slider mt-1" :class="{ 'setting-slider-disabled': photoConfig.lockRatio }">
+                <Slider
+                  :model-value="photoConfig.height"
                   :min="photoSizeMin"
                   :max="photoSizeMax"
-                  :value="photoConfig.height"
                   :disabled="photoConfig.lockRatio"
-                  @input="onPhotoHeightChange($event.target.value)"
-                />
-                <input
-                  type="number"
-                  class="field-input !w-20 !px-2 !py-1.5 text-center"
-                  :min="photoSizeMin"
-                  :max="photoSizeMax"
-                  :value="photoConfig.height"
-                  :disabled="photoConfig.lockRatio"
-                  @input="onPhotoHeightChange($event.target.value)"
+                  :input-number-props="sliderInputProps"
+                  @change="onPhotoHeightChange"
                 />
               </div>
             </label>
@@ -1027,24 +1012,14 @@ function onSchoolFontSizeChange(value) {
         </div>
         <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
           <label class="field-label mb-2 block">姓名字号</label>
-          <div class="flex items-center gap-2">
-            <input
-              type="range"
-              class="w-full accent-sky-600"
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.nameFontSize"
               :min="nameFontSizeMin"
               :max="nameFontSizeMax"
               :step="0.5"
-              :value="resume.theme.nameFontSize"
-              @input="onNameFontSizeChange($event.target.value)"
-            />
-            <input
-              type="number"
-              class="field-input !w-20 !px-2 !py-1.5 text-center"
-              :min="nameFontSizeMin"
-              :max="nameFontSizeMax"
-              :step="0.5"
-              :value="resume.theme.nameFontSize"
-              @input="onNameFontSizeChange($event.target.value)"
+              :input-number-props="sliderInputProps"
+              @change="onNameFontSizeChange"
             />
           </div>
         </div>
@@ -1058,24 +1033,14 @@ function onSchoolFontSizeChange(value) {
         </div>
         <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
           <label class="field-label mb-2 block">学校字号</label>
-          <div class="flex items-center gap-2">
-            <input
-              type="range"
-              class="w-full accent-sky-600"
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.schoolFontSize"
               :min="schoolFontSizeMin"
               :max="schoolFontSizeMax"
               :step="0.5"
-              :value="resume.theme.schoolFontSize"
-              @input="onSchoolFontSizeChange($event.target.value)"
-            />
-            <input
-              type="number"
-              class="field-input !w-20 !px-2 !py-1.5 text-center"
-              :min="schoolFontSizeMin"
-              :max="schoolFontSizeMax"
-              :step="0.5"
-              :value="resume.theme.schoolFontSize"
-              @input="onSchoolFontSizeChange($event.target.value)"
+              :input-number-props="sliderInputProps"
+              @change="onSchoolFontSizeChange"
             />
           </div>
         </div>
