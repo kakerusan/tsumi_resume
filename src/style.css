@@ -1,0 +1,449 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #ffffff;
+    font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #app {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .title-font {
+    font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", "Songti SC", serif;
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-sky-100 bg-white shadow-[0_10px_28px_-24px_rgba(56,124,193,0.45)];
+  }
+
+  .panel-card {
+    @apply rounded-xl border border-slate-300 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)];
+  }
+
+  .panel-head {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .panel-head-main {
+    @apply flex min-w-0 items-center gap-2 text-left;
+  }
+
+  .panel-caret {
+    @apply text-sm text-slate-600;
+  }
+
+  .panel-title {
+    @apply text-[19px] font-semibold leading-6 text-slate-900;
+  }
+
+  .panel-eye {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-md text-[20px] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .panel-eye-off {
+    @apply text-slate-400;
+  }
+
+  .panel-eye .t-icon {
+    font-size: 23px;
+  }
+
+  .panel-body {
+    @apply border-t border-slate-200 pt-3;
+  }
+
+  .sub-card {
+    @apply rounded-lg border border-slate-200 bg-slate-50/40 p-3;
+  }
+
+  .drag-list {
+    @apply space-y-3;
+  }
+
+  .drag-item {
+    @apply transition-shadow;
+  }
+
+  .drag-handle {
+    @apply inline-flex h-6 w-6 cursor-grab items-center justify-center rounded-md border border-sky-200 bg-sky-50 text-[13px] leading-none tracking-[-1px] text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 active:cursor-grabbing;
+  }
+
+  .drag-ghost {
+    opacity: 0.72;
+    border-color: rgba(93, 162, 255, 0.85) !important;
+    background: rgba(232, 243, 255, 0.9) !important;
+    box-shadow: 0 10px 20px -14px rgba(56, 124, 193, 0.6);
+  }
+
+  .drag-chosen {
+    border-color: rgba(93, 162, 255, 0.85) !important;
+    box-shadow: 0 14px 24px -18px rgba(56, 124, 193, 0.7);
+  }
+
+  .field-wrap {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .field-label {
+    @apply text-[15px] font-medium text-slate-800;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-[15px] text-slate-800 outline-none transition;
+  }
+
+  .field-input:focus {
+    @apply border-sky-400 bg-white ring-2 ring-sky-100;
+  }
+
+  .field-textarea {
+    @apply resize-y leading-6;
+  }
+
+  .file-input {
+    @apply w-full max-w-[240px] cursor-pointer rounded-lg border border-dashed border-slate-300 bg-white px-3 py-2 text-xs text-slate-600;
+  }
+
+  .toolbar-btn {
+    @apply rounded-lg border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800 transition hover:border-sky-300 hover:bg-sky-100;
+  }
+
+  .toolbar-btn-primary {
+    @apply border-transparent bg-sky-500 text-white hover:bg-sky-600;
+  }
+
+  .small-btn {
+    @apply rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 transition hover:border-slate-400 hover:bg-slate-100;
+  }
+
+  .small-btn-danger {
+    @apply border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100;
+  }
+
+  .danger-btn {
+    @apply rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-medium text-rose-500 transition hover:bg-rose-50;
+  }
+
+  .switch-field {
+    @apply flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700;
+  }
+
+  .resume-page {
+    width: min(100%, 820px);
+    min-height: 1100px;
+    background: #ffffff;
+    border: 1px solid rgba(175, 216, 247, 0.8);
+    box-shadow:
+      0 18px 40px -30px rgba(38, 109, 189, 0.22),
+      0 0 28px rgba(164, 215, 255, 0.18);
+    border-radius: 8px;
+    padding: 20px 22px 22px;
+  }
+
+  .resume-head {
+    border-bottom: 0;
+    padding-bottom: 4px;
+  }
+
+  .resume-identity {
+    @apply flex gap-3;
+  }
+
+  .resume-identity--no-photo {
+    @apply justify-center;
+  }
+
+  .resume-identity--with-photo {
+    @apply items-start justify-between;
+  }
+
+  .resume-info {
+    max-width: 100%;
+  }
+
+  .resume-identity--with-photo .resume-info {
+    max-width: calc(100% - 116px);
+  }
+
+  .resume-photo {
+    width: 74px;
+    height: 100px;
+    border-radius: 0;
+    border: 1px solid rgba(199, 217, 235, 0.9);
+    background: #fff;
+    object-fit: cover;
+    object-position: center;
+    flex-shrink: 0;
+  }
+
+  .resume-contacts {
+    @apply mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] leading-5 text-slate-600;
+  }
+
+  .resume-identity--with-photo .resume-contacts {
+    @apply justify-start;
+  }
+
+  .resume-contact {
+    @apply inline-flex items-center gap-1.5 break-all text-slate-600 no-underline transition-colors hover:text-[color:var(--brand-deep)];
+  }
+
+  .resume-contact svg {
+    width: 13px;
+    height: 13px;
+    color: var(--brand);
+    flex-shrink: 0;
+  }
+
+  .resume-section {
+    margin-top: 10px;
+  }
+
+  .resume-section-title {
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    font-weight: 700;
+    color: var(--brand);
+    border-bottom: 2px solid color-mix(in oklab, var(--brand) 72%, white 28%);
+    padding-bottom: 4px;
+  }
+
+  .resume-section-subtitle {
+    @apply ml-2 text-[11px] font-normal uppercase tracking-[0.04em] text-slate-400;
+  }
+
+  .skill-list {
+    @apply mt-2 space-y-1.5;
+  }
+
+  .skill-line {
+    @apply flex items-start gap-2 text-[12.5px] leading-5 text-slate-800;
+  }
+
+  .skill-line-dot {
+    @apply mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--brand)];
+  }
+
+  .skill-line-text strong {
+    @apply font-bold text-slate-900;
+  }
+
+  .resume-list {
+    @apply mt-2 space-y-3;
+  }
+
+  .resume-list--compact {
+    @apply space-y-2;
+  }
+
+  .resume-entry {
+    @apply space-y-1.5;
+  }
+
+  .entry-strip {
+    @apply grid items-center gap-2 rounded-md px-2.5 py-1;
+    border: 1px solid color-mix(in oklab, var(--brand) 18%, white 82%);
+    background: color-mix(in oklab, var(--brand) 14%, white 86%);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .entry-strip-main {
+    @apply grid min-w-0 items-center gap-x-3;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .entry-time {
+    @apply text-[12px] leading-5 text-slate-500;
+  }
+
+  .entry-brand {
+    @apply flex flex-wrap items-center gap-x-1 text-[13px] font-bold leading-5 text-[color:var(--brand-deep)];
+  }
+
+  .entry-divider {
+    @apply text-slate-400;
+  }
+
+  .entry-location {
+    @apply font-normal text-slate-400;
+  }
+
+  .entry-role {
+    @apply text-[12px] leading-5 text-slate-700;
+  }
+
+  .entry-logo {
+    @apply w-auto max-w-[132px] shrink-0 object-contain;
+  }
+
+  .entry-body {
+    @apply text-[12.5px] leading-5 text-slate-800;
+  }
+
+  .entry-meta {
+    @apply text-[12px] leading-5 text-slate-500;
+  }
+
+  .entry-summary {
+    @apply text-[12.5px] leading-5 text-slate-800;
+  }
+
+  .entry-label {
+    @apply font-bold text-slate-900;
+  }
+
+  .entry-bullets {
+    @apply space-y-0.5;
+  }
+
+  .entry-bullet {
+    @apply flex items-start gap-2 text-[12.5px] leading-5 text-slate-800;
+  }
+
+  .entry-bullet-dot {
+    @apply mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--brand)];
+  }
+
+  .project-entry {
+    @apply space-y-1.5;
+  }
+
+  .project-entry-head {
+    @apply space-y-1;
+  }
+
+  .project-entry-title-row {
+    @apply flex flex-wrap items-start justify-between gap-x-3 gap-y-0.5;
+  }
+
+  .project-entry-name {
+    @apply text-[13px] font-bold leading-5 text-slate-900;
+  }
+
+  .project-entry-meta {
+    @apply text-[12px] leading-5 text-slate-500;
+  }
+
+  .project-tag-row {
+    @apply flex flex-wrap gap-1.5;
+  }
+
+  .project-tag {
+    @apply rounded-sm bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium leading-4 text-sky-700;
+  }
+
+  .plain-meta {
+    @apply space-y-0.5;
+  }
+
+  .plain-meta-head {
+    @apply flex flex-wrap items-start justify-between gap-x-3 gap-y-0.5;
+  }
+
+  .plain-meta-title {
+    @apply text-[13px] font-bold leading-5 text-slate-900;
+  }
+
+  .plain-meta-level {
+    @apply ml-2 text-[12px] font-medium text-sky-700;
+  }
+
+  .plain-meta-issuer {
+    @apply ml-2 text-[12px] font-normal text-slate-500;
+  }
+
+  .plain-meta-date {
+    @apply text-[12px] leading-5 text-slate-500;
+  }
+
+  .plain-meta-sub {
+    @apply text-[12px] leading-5 text-slate-500;
+  }
+
+  .plain-meta-desc {
+    @apply text-[12.5px] leading-5 text-slate-800;
+  }
+
+  .summary-text {
+    @apply mt-2 text-[12.5px] leading-5 text-slate-800;
+  }
+}
+
+@media (max-width: 1280px) {
+  .panel-title {
+    @apply text-[17px] leading-6;
+  }
+
+  .field-input {
+    @apply text-[14px];
+  }
+}
+
+@media (max-width: 640px) {
+  .resume-page {
+    min-height: auto;
+    padding: 16px 12px 18px;
+  }
+
+  .resume-photo {
+    width: 64px;
+    height: 88px;
+  }
+
+  .resume-identity--with-photo .resume-info {
+    max-width: calc(100% - 92px);
+  }
+
+  .entry-strip-main {
+    @apply grid-cols-1 gap-y-0.5;
+  }
+
+  .entry-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .glass-card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  .resume-page {
+    width: 100%;
+    min-height: auto;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    background: #fff;
+  }
+}
