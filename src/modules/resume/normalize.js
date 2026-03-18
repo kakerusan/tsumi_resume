@@ -7,6 +7,8 @@ import {
   createProjectItem,
   createSectionVisibility,
 } from './factories'
+import { normalizePhotoConfig } from './photoConfig'
+import { createDefaultLayout, normalizeLayoutOrder } from './sections'
 import { createEmptyResume } from './templates'
 
 function clone(data) {
@@ -83,12 +85,15 @@ export function normalizeResumeData(source = {}) {
   }
 
   normalized.sectionVisibility = createSectionVisibility(source.sectionVisibility || {})
+  normalized.layout = createDefaultLayout()
+  normalized.layout.order = normalizeLayoutOrder(source.layout?.order)
 
   if (source.theme && typeof source.theme === 'object') {
     Object.assign(normalized.theme, source.theme)
   }
   normalized.theme.boldMajor = Boolean(normalized.theme.boldMajor)
   normalized.theme.educationFirst = normalized.theme.educationFirst !== false
+  normalized.theme.photoConfig = normalizePhotoConfig(normalized.theme.photoConfig)
 
   normalized.meta.schemaVersion = Number(source.meta?.schemaVersion || SCHEMA_VERSION)
 

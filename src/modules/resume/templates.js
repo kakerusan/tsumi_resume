@@ -7,6 +7,8 @@ import {
   createProjectItem,
   createSectionVisibility,
 } from './factories'
+import { normalizePhotoConfig } from './photoConfig'
+import { createDefaultLayout } from './sections'
 
 export function createEmptyResume() {
   return {
@@ -33,10 +35,12 @@ export function createEmptyResume() {
       hidden: false,
     },
     sectionVisibility: createSectionVisibility(),
+    layout: createDefaultLayout(),
     theme: {
       primaryColor: '#4a9fff',
       boldMajor: false,
       educationFirst: true,
+      photoConfig: normalizePhotoConfig(),
     },
   }
 }
@@ -125,10 +129,12 @@ export function createDemoResume() {
       hidden: false,
     },
     sectionVisibility: createSectionVisibility(),
+    layout: createDefaultLayout(),
     theme: {
       primaryColor: '#4a9fff',
       boldMajor: false,
       educationFirst: true,
+      photoConfig: normalizePhotoConfig(),
     },
   }
 }

@@ -9,18 +9,25 @@ const {
   panels,
   photoUploadMessage,
   photoUploadError,
+  educationLogoFeedback,
   jsonStatusMessage,
   jsonErrorMessage,
+  actionStatusMessage,
+  actionErrorMessage,
+  exportWarningMessage,
   jsonInputRef,
   pageOverflow,
   pageHeight,
   brandStyle,
   togglePanel,
+  expandAllPanels,
+  collapseAllPanels,
   loadDemo,
   clearAll,
   saveDraft,
   restoreDraft,
   exportPdf,
+  exportImage,
   exportJson,
   triggerJsonImport,
   handleJsonImport,
@@ -29,6 +36,8 @@ const {
   toggleEducationHidden,
   moveEducationUp,
   moveEducationDown,
+  onEducationLogoChange,
+  removeEducationLogo,
   addInternship,
   removeInternship,
   toggleInternshipHidden,
@@ -51,6 +60,7 @@ const {
   toggleCertificateHidden,
   moveCertificateUp,
   moveCertificateDown,
+  updateLayoutOrder,
   onPhotoChange,
   removePhoto,
   onPageOverflowChange,
@@ -68,6 +78,9 @@ const {
         @export-json="exportJson"
         @import-json="triggerJsonImport"
         @export-pdf="exportPdf"
+        @export-image="exportImage"
+        @expand-all-panels="expandAllPanels"
+        @collapse-all-panels="collapseAllPanels"
       />
 
       <input
@@ -86,10 +99,28 @@ const {
           {{ jsonStatusMessage }}
         </p>
         <p
+          v-if="actionStatusMessage"
+          class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+        >
+          {{ actionStatusMessage }}
+        </p>
+        <p
           v-if="jsonErrorMessage"
           class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
         >
           {{ jsonErrorMessage }}
+        </p>
+        <p
+          v-if="actionErrorMessage"
+          class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+        >
+          {{ actionErrorMessage }}
+        </p>
+        <p
+          v-if="exportWarningMessage"
+          class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700"
+        >
+          {{ exportWarningMessage }}
         </p>
         <p
           v-if="pageOverflow"
@@ -105,6 +136,7 @@ const {
           :panels="panels"
           :photo-upload-message="photoUploadMessage"
           :photo-upload-error="photoUploadError"
+          :education-logo-feedback="educationLogoFeedback"
           @toggle-panel="togglePanel"
           @photo-change="onPhotoChange"
           @remove-photo="removePhoto"
@@ -113,6 +145,8 @@ const {
           @toggle-education-hidden="toggleEducationHidden"
           @move-education-up="moveEducationUp"
           @move-education-down="moveEducationDown"
+          @education-logo-change="onEducationLogoChange"
+          @remove-education-logo="removeEducationLogo"
           @add-internship="addInternship"
           @remove-internship="removeInternship"
           @toggle-internship-hidden="toggleInternshipHidden"
@@ -135,6 +169,7 @@ const {
           @toggle-certificate-hidden="toggleCertificateHidden"
           @move-certificate-up="moveCertificateUp"
           @move-certificate-down="moveCertificateDown"
+          @update-layout-order="updateLayoutOrder"
         />
         <ResumePreview :resume="resume" @page-overflow-change="onPageOverflowChange" />
       </section>

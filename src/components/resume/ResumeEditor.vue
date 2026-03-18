@@ -3,15 +3,36 @@ import { computed } from 'vue'
 import Draggable from 'vuedraggable'
 import { ColorPicker } from 'tdesign-vue-next'
 import { BrowseIcon, BrowseOffIcon } from 'tdesign-icons-vue-next'
+import {
+  PHOTO_RATIO_OPTIONS,
+  PHOTO_SIZE_MAX,
+  PHOTO_SIZE_MIN,
+  clampPhotoSize,
+  getPhotoHeightByRatio,
+  normalizePhotoConfig,
+} from '../../modules/resume/photoConfig'
+import {
+  ORDERABLE_SECTION_LABELS,
+  ORDERABLE_SECTION_IDS,
+  normalizeLayoutOrder,
+} from '../../modules/resume/sections'
 
 const props = defineProps({
   resume: { type: Object, required: true },
   panels: { type: Object, required: true },
   photoUploadMessage: { type: String, default: '' },
   photoUploadError: { type: String, default: '' },
+  educationLogoFeedback: {
+    type: Object,
+    default: () => ({
+      id: '',
+      message: '',
+      error: '',
+    }),
+  },
 })
 
-defineEmits([
+const emit = defineEmits([
   'toggle-panel',
   'photo-change',
   'remove-photo',
@@ -20,6 +41,8 @@ defineEmits([
   'toggle-education-hidden',
   'move-education-up',
   'move-education-down',
+  'education-logo-change',
+  'remove-education-logo',
   'add-internship',
   'remove-internship',
   'toggle-internship-hidden',
@@ -42,6 +65,7 @@ defineEmits([
   'toggle-certificate-hidden',
   'move-certificate-up',
   'move-certificate-down',
+  'update-layout-order',
 ])
 
 const photoMetaSummary = computed(() => {
@@ -58,11 +82,112 @@ function getColorValue(value, fallback = '#4a9fff') {
   if (typeof value === 'string' && value.trim()) return value
   return fallback
 }
+
+const moduleOrderItems = computed({
+  get() {
+    const current = normalizeLayoutOrder(props.resume.layout?.order)
+    return current.map((id) => ({
+      id,
+      label: ORDERABLE_SECTION_LABELS[id] || id,
+    }))
+  },
+  set(items) {
+    const nextOrder = normalizeLayoutOrder(items.map((item) => item.id))
+    props.resume.layout.order = nextOrder
+    emit('update-layout-order', nextOrder)
+  },
+})
+
+const sectionOrderMap = computed(() => {
+  const current = normalizeLayoutOrder(props.resume.layout?.order)
+  const map = {}
+  current.forEach((id, index) => {
+    map[id] = index + 1
+  })
+  return map
+})
+
+function getModuleOrder(id) {
+  if (!ORDERABLE_SECTION_IDS.includes(id)) return 999
+  return sectionOrderMap.value[id] ?? 999
+}
+
+props.resume.theme.photoConfig = normalizePhotoConfig(props.resume.theme?.photoConfig || {})
+
+const photoRatioOptions = PHOTO_RATIO_OPTIONS
+const photoSizeMin = PHOTO_SIZE_MIN
+const photoSizeMax = PHOTO_SIZE_MAX
+const photoConfig = computed(() => props.resume.theme.photoConfig)
+
+function updatePhotoConfig(patch = {}) {
+  props.resume.theme.photoConfig = normalizePhotoConfig({
+    ...photoConfig.value,
+    ...patch,
+  })
+}
+
+function onPhotoRatioChange(value) {
+  updatePhotoConfig({ ratio: value })
+}
+
+function onPhotoLockChange(value) {
+  updatePhotoConfig({ lockRatio: Boolean(value) })
+}
+
+function onPhotoWidthChange(value) {
+  const width = clampPhotoSize(value, photoConfig.value.width)
+  if (photoConfig.value.lockRatio) {
+    updatePhotoConfig({
+      width,
+      height: getPhotoHeightByRatio(width, photoConfig.value.ratio),
+    })
+    return
+  }
+  updatePhotoConfig({ width })
+}
+
+function onPhotoHeightChange(value) {
+  if (photoConfig.value.lockRatio) return
+  updatePhotoConfig({
+    height: clampPhotoSize(value, photoConfig.value.height),
+  })
+}
 </script>
 
 <template>
-  <aside class="no-print space-y-4 xl:sticky xl:top-5 xl:h-[calc(100vh-5rem)] xl:overflow-auto">
-    <article class="panel-card">
+  <aside class="no-print flex flex-col gap-4 xl:sticky xl:top-5 xl:h-[calc(100vh-5rem)] xl:overflow-auto">
+    <article class="panel-card" :style="{ order: 999 }">
+      <div class="panel-head">
+        <div class="panel-head-main">
+          <span class="panel-title">模块顺序管理</span>
+        </div>
+      </div>
+      <div class="panel-body mt-4">
+        <draggable
+          v-model="moduleOrderItems"
+          item-key="id"
+          handle=".module-drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
+          <template #item="{ element: item, index }">
+            <div class="module-order-row">
+              <div class="flex items-center gap-2">
+                <button type="button" class="module-drag-handle" title="拖拽模块排序">::</button>
+                <span class="text-xs text-slate-400">{{ index + 1 }}</span>
+                <span class="text-sm font-medium text-slate-700">{{ item.label }}</span>
+              </div>
+            </div>
+          </template>
+        </draggable>
+        <p class="mt-2 text-xs text-slate-500">拖拽后，左侧编辑区与右侧预览区会同步调整模块顺序。</p>
+      </div>
+    </article>
+
+    <article class="panel-card" :style="{ order: getModuleOrder('profile') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'profile')">
           <span class="panel-caret">{{ panels.profile ? '▾' : '▸' }}</span>
@@ -74,13 +199,16 @@ function getColorValue(value, fallback = '#4a9fff') {
         </button>
       </div>
       <div v-if="panels.profile" class="panel-body mt-4 grid gap-3 md:grid-cols-3">
-        <label class="field-wrap"><span class="field-label">姓名</span><input v-model="resume.profile.name" class="field-input" /></label>
+        <label class="field-wrap"><span class="field-label">姓名</span><input v-model="resume.profile.name" class="field-input" placeholder="例如：黄龙翔" /></label>
         <label class="field-wrap"><span class="field-label">证件照</span><button type="button" class="danger-btn mt-[2px]" @click="$emit('remove-photo')">移除证件照</button></label>
-        <label class="field-wrap"><span class="field-label">布局顺序</span><label class="switch-field"><input v-model="resume.theme.educationFirst" type="checkbox" class="h-4 w-4 accent-sky-600" /><span>教育背景优先</span></label></label>
-        <label class="field-wrap"><span class="field-label">邮箱</span><input v-model="resume.profile.email" class="field-input" /></label>
-        <label class="field-wrap"><span class="field-label">联系方式</span><input v-model="resume.profile.phone" class="field-input" /></label>
-        <label class="field-wrap"><span class="field-label">个人网站</span><input v-model="resume.profile.website" class="field-input" /></label>
-        <label class="field-wrap md:col-span-3"><span class="field-label">求职意向</span><input v-model="resume.profile.title" class="field-input" /></label>
+        <label class="field-wrap">
+          <span class="field-label">布局顺序</span>
+          <span class="switch-field">请在“模块顺序管理”中拖拽调整</span>
+        </label>
+        <label class="field-wrap"><span class="field-label">邮箱</span><input v-model="resume.profile.email" class="field-input" placeholder="例如：name@example.com" /></label>
+        <label class="field-wrap"><span class="field-label">联系方式</span><input v-model="resume.profile.phone" class="field-input" placeholder="例如：18976420973" /></label>
+        <label class="field-wrap"><span class="field-label">个人网站</span><input v-model="resume.profile.website" class="field-input" placeholder="例如：https://github.com/yourname" /></label>
+        <label class="field-wrap md:col-span-3"><span class="field-label">求职意向</span><input v-model="resume.profile.title" class="field-input" placeholder="不填写则不展示" /></label>
         <label class="field-wrap md:col-span-3">
           <span class="field-label">证件照上传（JPG / PNG / WebP，5MB 内保留原图）</span>
           <div class="mt-2 flex flex-wrap items-center gap-3"><input type="file" accept="image/jpeg,image/png,image/webp" class="file-input" @change="$emit('photo-change', $event)" /></div>
@@ -88,10 +216,83 @@ function getColorValue(value, fallback = '#4a9fff') {
           <p v-if="photoUploadError" class="mt-2 text-xs font-medium text-rose-600">{{ photoUploadError }}</p>
           <p v-if="photoMetaSummary" class="mt-1 text-xs text-slate-500">{{ photoMetaSummary }}</p>
         </label>
+        <div class="field-wrap md:col-span-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <span class="field-label">证件照尺寸设置</span>
+          <div class="mt-2 grid gap-3 sm:grid-cols-2">
+            <label class="field-wrap">
+              <span class="field-label">比例</span>
+              <select
+                class="field-input"
+                :value="photoConfig.ratio"
+                @change="onPhotoRatioChange($event.target.value)"
+              >
+                <option v-for="ratio in photoRatioOptions" :key="ratio" :value="ratio">
+                  {{ ratio }}
+                </option>
+              </select>
+            </label>
+            <label class="switch-field mt-auto">
+              <input
+                type="checkbox"
+                class="h-4 w-4 accent-sky-600"
+                :checked="photoConfig.lockRatio"
+                @change="onPhotoLockChange($event.target.checked)"
+              />
+              <span>锁定比例</span>
+            </label>
+            <label class="field-wrap">
+              <span class="field-label">宽度（{{ photoSizeMin }}-{{ photoSizeMax }}）</span>
+              <div class="mt-1 flex items-center gap-2">
+                <input
+                  type="range"
+                  class="w-full accent-sky-600"
+                  :min="photoSizeMin"
+                  :max="photoSizeMax"
+                  :value="photoConfig.width"
+                  @input="onPhotoWidthChange($event.target.value)"
+                />
+                <input
+                  type="number"
+                  class="field-input !w-20 !px-2 !py-1.5 text-center"
+                  :min="photoSizeMin"
+                  :max="photoSizeMax"
+                  :value="photoConfig.width"
+                  @input="onPhotoWidthChange($event.target.value)"
+                />
+              </div>
+            </label>
+            <label class="field-wrap">
+              <span class="field-label">高度（{{ photoSizeMin }}-{{ photoSizeMax }}）</span>
+              <div class="mt-1 flex items-center gap-2">
+                <input
+                  type="range"
+                  class="w-full accent-sky-600"
+                  :min="photoSizeMin"
+                  :max="photoSizeMax"
+                  :value="photoConfig.height"
+                  :disabled="photoConfig.lockRatio"
+                  @input="onPhotoHeightChange($event.target.value)"
+                />
+                <input
+                  type="number"
+                  class="field-input !w-20 !px-2 !py-1.5 text-center"
+                  :min="photoSizeMin"
+                  :max="photoSizeMax"
+                  :value="photoConfig.height"
+                  :disabled="photoConfig.lockRatio"
+                  @input="onPhotoHeightChange($event.target.value)"
+                />
+              </div>
+            </label>
+          </div>
+          <p class="mt-2 text-xs text-slate-500">
+            当前尺寸：{{ photoConfig.width }} × {{ photoConfig.height }} px
+          </p>
+        </div>
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('education') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'education')">
           <span class="panel-caret">{{ panels.education ? '▾' : '▸' }}</span>
@@ -121,10 +322,40 @@ function getColorValue(value, fallback = '#4a9fff') {
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">学校</span><input v-model="item.school" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">学历</span><input v-model="item.degree" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">专业</span><input v-model="item.major" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">起止时间</span><input v-model="item.studyPeriod" class="field-input" /></label>
+                <label class="field-wrap"><span class="field-label">学校</span><input v-model="item.school" class="field-input" placeholder="例如：电子科技大学 (985)" /></label>
+                <label class="field-wrap"><span class="field-label">学历</span><input v-model="item.degree" class="field-input" placeholder="例如：本科" /></label>
+                <label class="field-wrap"><span class="field-label">专业</span><input v-model="item.major" class="field-input" placeholder="例如：网络工程" /></label>
+                <label class="field-wrap"><span class="field-label">起止时间</span><input v-model="item.studyPeriod" class="field-input" placeholder="例如：2023-2027" /></label>
+                <div class="field-wrap sm:col-span-2">
+                  <span class="field-label">学校 Logo（JPG / PNG / WebP，≤2MB）</span>
+                  <div class="mt-2 flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      class="file-input"
+                      @change="$emit('education-logo-change', item.id, $event)"
+                    />
+                    <button
+                      type="button"
+                      class="toolbar-btn !px-3 !py-1.5 !text-xs"
+                      @click="$emit('remove-education-logo', item.id)"
+                    >
+                      移除
+                    </button>
+                  </div>
+                  <p
+                    v-if="educationLogoFeedback?.id === item.id && educationLogoFeedback.message"
+                    class="mt-1 text-xs font-medium text-emerald-600"
+                  >
+                    {{ educationLogoFeedback.message }}
+                  </p>
+                  <p
+                    v-if="educationLogoFeedback?.id === item.id && educationLogoFeedback.error"
+                    class="mt-1 text-xs font-medium text-rose-600"
+                  >
+                    {{ educationLogoFeedback.error }}
+                  </p>
+                </div>
               </div>
             </article>
           </template>
@@ -133,7 +364,7 @@ function getColorValue(value, fallback = '#4a9fff') {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('skills') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'skills')">
           <span class="panel-caret">{{ panels.skills ? '▾' : '▸' }}</span>
@@ -152,7 +383,7 @@ function getColorValue(value, fallback = '#4a9fff') {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('internships') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'internship')">
           <span class="panel-caret">{{ panels.internship ? '▾' : '▸' }}</span>
@@ -182,13 +413,13 @@ function getColorValue(value, fallback = '#4a9fff') {
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">公司名称</span><input v-model="item.company" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">岗位</span><input v-model="item.role" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">业务线 / 部门</span><input v-model="item.department" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">时间</span><input v-model="item.period" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">地点（可留空）</span><input v-model="item.location" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">工作简介</span><textarea v-model="item.summary" class="field-input field-textarea h-24"></textarea></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">成果亮点（按行输入）</span><textarea v-model="item.highlights" class="field-input field-textarea h-28"></textarea></label>
+                <label class="field-wrap"><span class="field-label">公司名称</span><input v-model="item.company" class="field-input" placeholder="例如：腾讯" /></label>
+                <label class="field-wrap"><span class="field-label">岗位</span><input v-model="item.role" class="field-input" placeholder="例如：后端开发实习生" /></label>
+                <label class="field-wrap"><span class="field-label">业务线 / 部门</span><input v-model="item.department" class="field-input" placeholder="例如：S3 人力资源产品线" /></label>
+                <label class="field-wrap"><span class="field-label">时间</span><input v-model="item.period" class="field-input" placeholder="例如：2026.03 - 2026.08" /></label>
+                <label class="field-wrap sm:col-span-2"><span class="field-label">地点（可留空）</span><input v-model="item.location" class="field-input" placeholder="例如：深圳" /></label>
+                <label class="field-wrap sm:col-span-2"><span class="field-label">工作简介</span><textarea v-model="item.summary" class="field-input field-textarea h-24" placeholder="简要描述职责范围和业务背景"></textarea></label>
+                <label class="field-wrap sm:col-span-2"><span class="field-label">成果亮点（按行输入）</span><textarea v-model="item.highlights" class="field-input field-textarea h-28" placeholder="每行一条，可用 **关键词** 强调"></textarea></label>
                 <div class="field-wrap sm:col-span-2">
                   <span class="field-label">公司 Logo</span>
                   <div class="mt-2 flex items-center gap-3">
@@ -228,7 +459,7 @@ function getColorValue(value, fallback = '#4a9fff') {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('projects') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'project')">
           <span class="panel-caret">{{ panels.project ? '▾' : '▸' }}</span>
@@ -258,11 +489,11 @@ function getColorValue(value, fallback = '#4a9fff') {
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">项目名称</span><input v-model="item.name" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">项目角色</span><input v-model="item.role" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">项目周期</span><input v-model="item.period" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">技术标签（逗号分隔）</span><input v-model="item.tags" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">项目描述</span><textarea v-model="item.summary" class="field-input field-textarea h-28"></textarea></label>
+                <label class="field-wrap"><span class="field-label">项目名称</span><input v-model="item.name" class="field-input" placeholder="例如：TsumiMusic" /></label>
+                <label class="field-wrap"><span class="field-label">项目角色</span><input v-model="item.role" class="field-input" placeholder="例如：后端负责人" /></label>
+                <label class="field-wrap sm:col-span-2"><span class="field-label">项目周期</span><input v-model="item.period" class="field-input" placeholder="例如：2025.09 - 2026.01" /></label>
+                <label class="field-wrap sm:col-span-2"><span class="field-label">技术标签（逗号分隔）</span><input v-model="item.tags" class="field-input" placeholder="例如：SpringBoot, Redis, MySQL" /></label>
+                <label class="field-wrap sm:col-span-2"><span class="field-label">项目描述</span><textarea v-model="item.summary" class="field-input field-textarea h-28" placeholder="建议包含业务目标、核心能力和结果"></textarea></label>
               </div>
             </article>
           </template>
@@ -271,7 +502,7 @@ function getColorValue(value, fallback = '#4a9fff') {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('awards') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'awards')">
           <span class="panel-caret">{{ panels.awards ? '▾' : '▸' }}</span>
@@ -310,7 +541,7 @@ function getColorValue(value, fallback = '#4a9fff') {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('certificates') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'certificates')">
           <span class="panel-caret">{{ panels.certificates ? '▾' : '▸' }}</span>
@@ -349,7 +580,7 @@ function getColorValue(value, fallback = '#4a9fff') {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getModuleOrder('selfSummary') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'selfSummary')">
           <span class="panel-caret">{{ panels.selfSummary ? '▾' : '▸' }}</span>

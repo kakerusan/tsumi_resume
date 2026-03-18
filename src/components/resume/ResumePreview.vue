@@ -1,5 +1,9 @@
 ﻿<script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { Image as TImage } from 'tdesign-vue-next'
+
+import { normalizePhotoConfig } from '../../modules/resume/photoConfig'
+import { normalizeLayoutOrder } from '../../modules/resume/sections'
 
 const A4_HEIGHT_PX = 1122
 
@@ -109,6 +113,14 @@ watch(
 )
 
 const hasPhoto = computed(() => Boolean(props.resume.profile.photo))
+const photoConfig = computed(() => normalizePhotoConfig(props.resume.theme?.photoConfig || {}))
+const photoStyle = computed(() => ({
+  width: `${photoConfig.value.width}px`,
+  height: `${photoConfig.value.height}px`,
+}))
+const resumeInfoStyle = computed(() => ({
+  maxWidth: `calc(100% - ${photoConfig.value.width + 42}px)`,
+}))
 
 const sectionVisibility = computed(() => ({
   profile: props.resume.sectionVisibility?.profile !== false,
@@ -122,9 +134,9 @@ const sectionVisibility = computed(() => ({
 }))
 
 const visibleEducations = computed(() => (props.resume.educations || []).filter((item) => !item.hidden))
-const showEducations = computed(() => sectionVisibility.value.education && visibleEducations.value.length > 0)
 const showProfile = computed(() => sectionVisibility.value.profile)
-const showHeader = computed(() => showProfile.value || showEducations.value)
+const showEducationSection = computed(() => sectionVisibility.value.education && visibleEducations.value.length > 0)
+const showHeader = computed(() => showProfile.value || showEducationSection.value)
 
 const skillLines = computed(() => splitLines(props.resume.skills))
 const showSkills = computed(() => sectionVisibility.value.skills && skillLines.value.length > 0)
@@ -152,6 +164,24 @@ const showSelfSummary = computed(() => {
 
 const educationFirst = computed(() => Boolean(props.resume.theme?.educationFirst))
 const profileTitle = computed(() => cleanText(props.resume.profile.title))
+const sectionOrderMap = computed(() => {
+  const map = {}
+  normalizeLayoutOrder(props.resume.layout?.order).forEach((id, index) => {
+    map[id] = index + 1
+  })
+  return map
+})
+
+function getSectionOrder(id) {
+  return sectionOrderMap.value[id] ?? 99
+}
+
+const headerOrder = computed(() => {
+  const orderList = []
+  if (showProfile.value) orderList.push(getSectionOrder('profile'))
+  if (showEducationSection.value) orderList.push(getSectionOrder('education'))
+  return orderList.length ? Math.min(...orderList) : 99
+})
 
 const contactItems = computed(() => {
   const items = []
@@ -164,128 +194,165 @@ const contactItems = computed(() => {
   if (website) items.push({ type: getWebsiteType(website), text: formatWebsiteLabel(website), href: website })
   return items
 })
+
+const hasAnyVisibleSection = computed(
+  () =>
+    showHeader.value ||
+    showEducationSection.value ||
+    showSkills.value ||
+    visibleInternships.value.length > 0 ||
+    visibleProjects.value.length > 0 ||
+    visibleAwards.value.length > 0 ||
+    visibleCertificates.value.length > 0 ||
+    showSelfSummary.value
+)
 </script>
 
 <template>
   <section class="glass-card flex justify-center p-2 sm:p-4 lg:p-5">
-    <article ref="pageRef" class="resume-page resume-page--editorial">
-      <header v-if="showHeader" class="resume-head resume-head--plain">
-        <div :class="['resume-identity', hasPhoto ? 'resume-identity--with-photo' : 'resume-identity--no-photo']">
-          <div class="resume-info" :class="hasPhoto ? 'text-left' : 'text-center'">
-            <template v-if="showProfile">
-              <h2 class="title-font text-[18px] font-bold tracking-tight text-[color:var(--brand-deep)]">
-                {{ resume.profile.name || '你的姓名' }}
-              </h2>
-              <p v-if="profileTitle" class="mt-0 text-[12px] font-semibold text-slate-700">
-                {{ profileTitle }}
-              </p>
-            </template>
+    <article id="resume-preview-page" ref="pageRef" class="resume-page resume-page--editorial">
+      <div class="resume-flow">
+        <header v-if="showHeader" class="resume-head resume-head--plain" :style="{ order: headerOrder }">
+          <div :class="['resume-identity', hasPhoto ? 'resume-identity--with-photo' : 'resume-identity--no-photo']">
+            <div class="resume-info" :class="hasPhoto ? 'text-left' : 'text-center'" :style="hasPhoto ? resumeInfoStyle : null">
+              <template v-if="showProfile">
+                <h2 class="title-font text-[18px] font-bold tracking-tight text-[color:var(--brand-deep)]">
+                  {{ resume.profile.name || '你的姓名' }}
+                </h2>
+                <p v-if="profileTitle" class="mt-0 text-[12px] font-semibold text-slate-700">
+                  {{ profileTitle }}
+                </p>
+              </template>
 
-            <div v-if="showEducations && educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
-              <p v-for="item in visibleEducations" :key="item.id">
-                <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
-                <span class="mx-1 text-slate-300">/</span>
-                <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
-                <template v-if="item.major">
-                  <span class="mx-1 text-slate-300">/</span>
-                  <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
-                    {{ item.major }}
+              <div v-if="showEducationSection && educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
+                <p v-for="item in visibleEducations" :key="item.id">
+                  <span class="education-school-wrap">
+                    <img
+                      v-if="item.logo"
+                      :src="item.logo"
+                      alt="school logo"
+                      class="education-school-logo"
+                    />
+                    <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                   </span>
-                </template>
-                <template v-if="item.studyPeriod">
                   <span class="mx-1 text-slate-300">/</span>
-                  <span class="text-slate-500">{{ item.studyPeriod }}</span>
-                </template>
-              </p>
-            </div>
+                  <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
+                  <template v-if="item.major">
+                    <span class="mx-1 text-slate-300">/</span>
+                    <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
+                      {{ item.major }}
+                    </span>
+                  </template>
+                  <template v-if="item.studyPeriod">
+                    <span class="mx-1 text-slate-300">/</span>
+                    <span class="text-slate-500">{{ item.studyPeriod }}</span>
+                  </template>
+                </p>
+              </div>
 
-            <div v-if="showProfile && contactItems.length" class="resume-contacts">
-              <a
-                v-for="item in contactItems"
-                :key="`${item.type}-${item.text}`"
-                :href="item.href"
-                class="resume-contact"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <svg
-                  v-if="item.type === 'phone'"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  aria-hidden="true"
+              <div v-if="showProfile && contactItems.length" class="resume-contacts">
+                <a
+                  v-for="item in contactItems"
+                  :key="`${item.type}-${item.text}`"
+                  :href="item.href"
+                  class="resume-contact"
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M22 16.92v3a2 2 0 0 1-2.18 2a19.8 19.8 0 0 1-8.63-3.07a19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.78.68 2.62a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.46-1.25a2 2 0 0 1 2.11-.45c.84.33 1.72.56 2.62.68A2 2 0 0 1 22 16.92Z"
-                  />
-                </svg>
-                <svg
-                  v-else-if="item.type === 'email'"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  aria-hidden="true"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m22 8l-8.97 5.7a2 2 0 0 1-2.06 0L2 8" />
-                </svg>
-                <svg
-                  v-else-if="item.type === 'github'"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  aria-hidden="true"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.8A5.3 5.3 0 0 0 19 4.8a4.9 4.9 0 0 0-.1-3.8s-1.1-.3-3.8 1.5a13.2 13.2 0 0 0-7 0C5.4.7 4.3 1 4.3 1a4.9 4.9 0 0 0-.1 3.8A5.3 5.3 0 0 0 2.9 8.7c0 5.3 3.2 6.5 6.2 6.8a3.4 3.4 0 0 0-.9 2.6V22" />
-                </svg>
-                <svg v-else-if="item.type === 'gitee'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M3 6.8A3.8 3.8 0 0 1 6.8 3h10.4A3.8 3.8 0 0 1 21 6.8v10.4A3.8 3.8 0 0 1 17.2 21H6.8A3.8 3.8 0 0 1 3 17.2Zm4.8.2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 0-2H8.8V13h5.3a1 1 0 1 0 0-2H8.8V9h6a1 1 0 0 0 0-2Z" />
-                </svg>
-                <svg
-                  v-else
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  aria-hidden="true"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 13a5 5 0 0 0 0-7l-1-1a5 5 0 0 0-7 7" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 11a5 5 0 0 0 0 7l1 1a5 5 0 0 0 7-7" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8" />
-                </svg>
-                <span>{{ item.text }}</span>
-              </a>
-            </div>
+                  <svg
+                    v-if="item.type === 'phone'"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M22 16.92v3a2 2 0 0 1-2.18 2a19.8 19.8 0 0 1-8.63-3.07a19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.35 1.78.68 2.62a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.46-1.25a2 2 0 0 1 2.11-.45c.84.33 1.72.56 2.62.68A2 2 0 0 1 22 16.92Z"
+                    />
+                  </svg>
+                  <svg
+                    v-else-if="item.type === 'email'"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m22 8l-8.97 5.7a2 2 0 0 1-2.06 0L2 8" />
+                  </svg>
+                  <svg
+                    v-else-if="item.type === 'github'"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.8A5.3 5.3 0 0 0 19 4.8a4.9 4.9 0 0 0-.1-3.8s-1.1-.3-3.8 1.5a13.2 13.2 0 0 0-7 0C5.4.7 4.3 1 4.3 1a4.9 4.9 0 0 0-.1 3.8A5.3 5.3 0 0 0 2.9 8.7c0 5.3 3.2 6.5 6.2 6.8a3.4 3.4 0 0 0-.9 2.6V22" />
+                  </svg>
+                  <svg v-else-if="item.type === 'gitee'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M3 6.8A3.8 3.8 0 0 1 6.8 3h10.4A3.8 3.8 0 0 1 21 6.8v10.4A3.8 3.8 0 0 1 17.2 21H6.8A3.8 3.8 0 0 1 3 17.2Zm4.8.2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h7a1 1 0 0 0 0-2H8.8V13h5.3a1 1 0 1 0 0-2H8.8V9h6a1 1 0 0 0 0-2Z" />
+                  </svg>
+                  <svg
+                    v-else
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 13a5 5 0 0 0 0-7l-1-1a5 5 0 0 0-7 7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 11a5 5 0 0 0 0 7l1 1a5 5 0 0 0 7-7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8" />
+                  </svg>
+                  <span>{{ item.text }}</span>
+                </a>
+              </div>
 
-            <div v-if="showEducations && !educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
-              <p v-for="item in visibleEducations" :key="`edu-tail-${item.id}`">
-                <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
-                <span class="mx-1 text-slate-300">/</span>
-                <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
-                <template v-if="item.major">
-                  <span class="mx-1 text-slate-300">/</span>
-                  <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
-                    {{ item.major }}
+              <div v-if="showEducationSection && !educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
+                <p v-for="item in visibleEducations" :key="`edu-tail-${item.id}`">
+                  <span class="education-school-wrap">
+                    <img
+                      v-if="item.logo"
+                      :src="item.logo"
+                      alt="school logo"
+                      class="education-school-logo"
+                    />
+                    <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                   </span>
-                </template>
-                <template v-if="item.studyPeriod">
                   <span class="mx-1 text-slate-300">/</span>
-                  <span class="text-slate-500">{{ item.studyPeriod }}</span>
-                </template>
-              </p>
+                  <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
+                  <template v-if="item.major">
+                    <span class="mx-1 text-slate-300">/</span>
+                    <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
+                      {{ item.major }}
+                    </span>
+                  </template>
+                  <template v-if="item.studyPeriod">
+                    <span class="mx-1 text-slate-300">/</span>
+                    <span class="text-slate-500">{{ item.studyPeriod }}</span>
+                  </template>
+                </p>
+              </div>
             </div>
+
+            <TImage
+              v-if="hasPhoto && showProfile"
+              class="resume-photo resume-photo--plain"
+              fit="cover"
+              shape="round"
+              :src="resume.profile.photo"
+              alt="profile photo"
+              :style="photoStyle"
+            />
           </div>
+        </header>
 
-          <img v-if="hasPhoto && showProfile" :src="resume.profile.photo" alt="profile photo" class="resume-photo resume-photo--plain" />
-        </div>
-      </header>
-
-      <section v-if="showSkills" class="resume-section">
+        <section v-if="showSkills" class="resume-section" :style="{ order: getSectionOrder('skills') }">
         <h3 class="resume-section-title">
           相关技能
           <span class="resume-section-subtitle">TECH STACK</span>
@@ -298,7 +365,7 @@ const contactItems = computed(() => {
         </ul>
       </section>
 
-      <section v-if="visibleInternships.length" class="resume-section">
+        <section v-if="visibleInternships.length" class="resume-section" :style="{ order: getSectionOrder('internships') }">
         <h3 class="resume-section-title">
           实习经历
           <span class="resume-section-subtitle">INTERNSHIP EXPERIENCE</span>
@@ -334,7 +401,7 @@ const contactItems = computed(() => {
         </div>
       </section>
 
-      <section v-if="visibleProjects.length" class="resume-section">
+        <section v-if="visibleProjects.length" class="resume-section" :style="{ order: getSectionOrder('projects') }">
         <h3 class="resume-section-title">
           项目经历
           <span class="resume-section-subtitle">PROJECTS</span>
@@ -364,7 +431,7 @@ const contactItems = computed(() => {
         </div>
       </section>
 
-      <section v-if="visibleAwards.length" class="resume-section">
+        <section v-if="visibleAwards.length" class="resume-section" :style="{ order: getSectionOrder('awards') }">
         <h3 class="resume-section-title">
           荣誉奖项
           <span class="resume-section-subtitle">AWARDS</span>
@@ -384,7 +451,7 @@ const contactItems = computed(() => {
         </div>
       </section>
 
-      <section v-if="visibleCertificates.length" class="resume-section">
+        <section v-if="visibleCertificates.length" class="resume-section" :style="{ order: getSectionOrder('certificates') }">
         <h3 class="resume-section-title">
           证书
           <span class="resume-section-subtitle">CERTIFICATES</span>
@@ -405,13 +472,18 @@ const contactItems = computed(() => {
         </div>
       </section>
 
-      <section v-if="showSelfSummary" class="resume-section">
+        <section v-if="showSelfSummary" class="resume-section" :style="{ order: getSectionOrder('selfSummary') }">
         <h3 class="resume-section-title">
           自我评价
           <span class="resume-section-subtitle">SUMMARY</span>
         </h3>
         <p class="summary-text" v-html="richText(resume.selfSummary.content)"></p>
-      </section>
+        </section>
+
+        <section v-if="!hasAnyVisibleSection" class="resume-section" :style="{ order: 999 }">
+          <p class="summary-text text-slate-400">暂无可展示内容，请在左侧编辑区填写信息。</p>
+        </section>
+      </div>
     </article>
   </section>
 </template>

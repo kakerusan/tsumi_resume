@@ -1,6 +1,6 @@
 export const STORAGE_KEY = 'resume-builder-draft-v1'
 export const PANELS_STORAGE_KEY = 'resume-builder-panels-v1'
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 6
 
 export const PHOTO_RULES = {
   MAX_BYTES: 5 * 1024 * 1024,

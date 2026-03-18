@@ -9,9 +9,13 @@ import {
   createProjectItem,
 } from '../modules/resume/factories'
 import { normalizeResumeData } from '../modules/resume/normalize'
+import { normalizeLayoutOrder } from '../modules/resume/sections'
 import { createDemoResume, createEmptyResume } from '../modules/resume/templates'
 import { processProfilePhoto } from '../modules/resume/photo'
 import { deepBrandFrom } from '../modules/resume/color'
+
+const EDUCATION_LOGO_MAX_BYTES = 2 * 1024 * 1024
+const EDUCATION_LOGO_SUPPORTED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
 
 function moveItem(list, fromIndex, toIndex) {
   if (toIndex < 0 || toIndex >= list.length || fromIndex < 0 || fromIndex >= list.length) return
@@ -27,6 +31,14 @@ export function useResumeBuilder() {
   const photoUploadError = ref('')
   const jsonStatusMessage = ref('')
   const jsonErrorMessage = ref('')
+  const actionStatusMessage = ref('')
+  const actionErrorMessage = ref('')
+  const exportWarningMessage = ref('')
+  const educationLogoFeedback = reactive({
+    id: '',
+    message: '',
+    error: '',
+  })
   const jsonInputRef = ref(null)
   const pageOverflow = ref(false)
   const pageHeight = ref(0)
@@ -64,19 +76,41 @@ export function useResumeBuilder() {
     photoUploadError.value = ''
   }
 
+  function resetEducationLogoFeedback(id = '') {
+    educationLogoFeedback.id = id
+    educationLogoFeedback.message = ''
+    educationLogoFeedback.error = ''
+  }
+
   function togglePanel(name) {
     panels[name] = !panels[name]
+    savePanelsState()
+  }
+
+  function expandAllPanels() {
+    Object.keys(panels).forEach((key) => {
+      panels[key] = true
+    })
+    savePanelsState()
+  }
+
+  function collapseAllPanels() {
+    Object.keys(panels).forEach((key) => {
+      panels[key] = false
+    })
     savePanelsState()
   }
 
   function loadDemo() {
     applyResumeData(createDemoResume())
     resetPhotoFeedback()
+    resetEducationLogoFeedback()
   }
 
   function clearAll() {
     applyResumeData(createEmptyResume())
     resetPhotoFeedback()
+    resetEducationLogoFeedback()
   }
 
   function saveDraft() {
@@ -91,13 +125,91 @@ export function useResumeBuilder() {
       const parsed = JSON.parse(raw)
       applyResumeData(parsed)
       resetPhotoFeedback()
+      resetEducationLogoFeedback()
     } catch (error) {
       console.error('Restore draft failed:', error)
     }
   }
 
   function exportPdf() {
+    validateBeforeExport()
     window.print()
+  }
+
+  function readStyleText() {
+    let cssText = ''
+    Array.from(document.styleSheets).forEach((sheet) => {
+      try {
+        Array.from(sheet.cssRules || []).forEach((rule) => {
+          cssText += `${rule.cssText}\n`
+        })
+      } catch (error) {
+        // Ignore cross-origin stylesheets.
+      }
+    })
+    return cssText
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error('IMAGE_LOAD_FAILED'))
+      image.src = src
+    })
+  }
+
+  async function exportImage() {
+    validateBeforeExport()
+    actionStatusMessage.value = ''
+    actionErrorMessage.value = ''
+
+    const target = document.getElementById('resume-preview-page')
+    if (!target) {
+      actionErrorMessage.value = '导出图片失败：未找到简历预览区域。'
+      return
+    }
+
+    try {
+      const cloned = target.cloneNode(true)
+      const width = Math.ceil(target.scrollWidth)
+      const height = Math.ceil(target.scrollHeight)
+      const cssText = readStyleText()
+      const serialized = new XMLSerializer().serializeToString(cloned)
+      const svgText = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+          <foreignObject width="100%" height="100%">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;background:#ffffff;">
+              <style>${cssText}</style>
+              ${serialized}
+            </div>
+          </foreignObject>
+        </svg>
+      `
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`
+      const image = await loadImage(svgUrl)
+      const scale = 2
+      const canvas = document.createElement('canvas')
+      canvas.width = width * scale
+      canvas.height = height * scale
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('CANVAS_CONTEXT_UNAVAILABLE')
+
+      context.fillStyle = '#ffffff'
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+      const url = canvas.toDataURL('image/png')
+      const anchor = document.createElement('a')
+      const dateText = new Date().toISOString().slice(0, 10)
+      anchor.href = url
+      anchor.download = `resume-${dateText}.png`
+      anchor.click()
+      actionStatusMessage.value = '图片导出成功（PNG）。'
+    } catch (error) {
+      console.error(error)
+      actionErrorMessage.value = '图片导出失败，请稍后重试。'
+    }
   }
 
   function exportJson() {
@@ -179,6 +291,54 @@ export function useResumeBuilder() {
 
   function moveEducationDown(index) {
     moveItem(resume.educations, index, index + 1)
+  }
+
+  function onEducationLogoChange(id, event) {
+    const input = event?.target
+    const [file] = input?.files || []
+    if (!file) return
+
+    resetEducationLogoFeedback(id)
+
+    if (!EDUCATION_LOGO_SUPPORTED_TYPES.has(file.type)) {
+      educationLogoFeedback.error = '学校 Logo 仅支持 JPG / PNG / WebP。'
+      input.value = ''
+      return
+    }
+
+    if (file.size > EDUCATION_LOGO_MAX_BYTES) {
+      educationLogoFeedback.error = '学校 Logo 不能超过 2MB。'
+      input.value = ''
+      return
+    }
+
+    const target = resume.educations.find((item) => item.id === id)
+    if (!target) {
+      input.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      target.logo = String(reader.result || '')
+      educationLogoFeedback.message = `学校 Logo 上传成功（${(file.size / 1024).toFixed(1)}KB）。`
+      educationLogoFeedback.error = ''
+    }
+    reader.onerror = () => {
+      educationLogoFeedback.error = '学校 Logo 读取失败，请重试。'
+      educationLogoFeedback.message = ''
+    }
+    reader.readAsDataURL(file)
+    input.value = ''
+  }
+
+  function removeEducationLogo(id) {
+    const target = resume.educations.find((item) => item.id === id)
+    if (target) {
+      target.logo = ''
+      resetEducationLogoFeedback(id)
+      educationLogoFeedback.message = '已移除学校 Logo。'
+    }
   }
 
   function addInternship() {
@@ -269,6 +429,10 @@ export function useResumeBuilder() {
     moveItem(resume.certificates, index, index + 1)
   }
 
+  function updateLayoutOrder(nextOrder) {
+    resume.layout.order = normalizeLayoutOrder(nextOrder)
+  }
+
   function onLogoChange(id, event) {
     const [file] = event.target.files || []
     if (!file) return
@@ -324,6 +488,36 @@ export function useResumeBuilder() {
     pageHeight.value = Number(payload?.height || 0)
   }
 
+  function hasVisibleSection() {
+    return Object.values(resume.sectionVisibility || {}).some((visible) => visible !== false)
+  }
+
+  function hasCoreContent() {
+    const hasSkills = Boolean(String(resume.skills || '').trim())
+    const hasInternships = resume.internships.some(
+      (item) => Boolean(String(item.company || item.summary || item.highlights || '').trim()) && !item.hidden
+    )
+    const hasProjects = resume.projects.some(
+      (item) => Boolean(String(item.name || item.summary || '').trim()) && !item.hidden
+    )
+    return hasSkills || hasInternships || hasProjects
+  }
+
+  function validateBeforeExport() {
+    const warnings = []
+    if (!String(resume.profile.name || '').trim()) {
+      warnings.push('姓名未填写')
+    }
+    if (!hasVisibleSection()) {
+      warnings.push('所有栏目当前都处于隐藏状态')
+    }
+    if (!hasCoreContent()) {
+      warnings.push('技术栈/实习经历/项目经历均为空')
+    }
+    exportWarningMessage.value = warnings.length ? `导出提醒：${warnings.join('；')}。` : ''
+    return warnings
+  }
+
   const brandStyle = computed(() => ({
     '--brand': resume.theme.primaryColor || '#4a9fff',
     '--brand-deep': deepBrandFrom(resume.theme.primaryColor),
@@ -334,18 +528,25 @@ export function useResumeBuilder() {
     panels,
     photoUploadMessage,
     photoUploadError,
+    educationLogoFeedback,
     jsonStatusMessage,
     jsonErrorMessage,
+    actionStatusMessage,
+    actionErrorMessage,
+    exportWarningMessage,
     jsonInputRef,
     pageOverflow,
     pageHeight,
     brandStyle,
     togglePanel,
+    expandAllPanels,
+    collapseAllPanels,
     loadDemo,
     clearAll,
     saveDraft,
     restoreDraft,
     exportPdf,
+    exportImage,
     exportJson,
     triggerJsonImport,
     handleJsonImport,
@@ -354,6 +555,8 @@ export function useResumeBuilder() {
     toggleEducationHidden,
     moveEducationUp,
     moveEducationDown,
+    onEducationLogoChange,
+    removeEducationLogo,
     addInternship,
     removeInternship,
     toggleInternshipHidden,
@@ -376,6 +579,7 @@ export function useResumeBuilder() {
     toggleCertificateHidden,
     moveCertificateUp,
     moveCertificateDown,
+    updateLayoutOrder,
     onPhotoChange,
     removePhoto,
     onPageOverflowChange,

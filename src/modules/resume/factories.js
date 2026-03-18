@@ -16,6 +16,7 @@ export function createEducationItem(partial = {}) {
   return {
     id: partial.id || createId('education'),
     hidden: Boolean(partial.hidden),
+    logo: partial.logo || '',
     school: partial.school || '',
     degree: partial.degree || '',
     major: partial.major || '',
