@@ -107,15 +107,48 @@ function rgbToHex({ r, g, b }) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
 
-export function deepBrandFrom(primaryColor) {
+function brandToneFrom(primaryColor, { saturationBoost = 0, minSaturation = 65, maxSaturation = 90, minLightness = 22, maxLightness = 32, lightnessShift = -35 } = {}) {
   const rgb = parseColorToRgb(primaryColor)
   if (!rgb) return '#1D3A8A'
 
   const hsl = rgbToHsl(rgb)
-  const deepHsl = {
+  const nextHsl = {
     h: hsl.h,
-    s: Math.min(90, Math.max(65, hsl.s + 15)),
-    l: Math.max(22, Math.min(32, hsl.l - 35)),
+    s: Math.min(maxSaturation, Math.max(minSaturation, hsl.s + saturationBoost)),
+    l: Math.max(minLightness, Math.min(maxLightness, hsl.l + lightnessShift)),
   }
-  return rgbToHex(hslToRgb(deepHsl))
+  return rgbToHex(hslToRgb(nextHsl))
+}
+
+export function deepBrandFrom(primaryColor) {
+  return brandToneFrom(primaryColor, {
+    saturationBoost: 15,
+    minSaturation: 65,
+    maxSaturation: 90,
+    minLightness: 22,
+    maxLightness: 32,
+    lightnessShift: -35,
+  })
+}
+
+export function nameBrandFrom(primaryColor) {
+  return brandToneFrom(primaryColor, {
+    saturationBoost: 18,
+    minSaturation: 68,
+    maxSaturation: 92,
+    minLightness: 18,
+    maxLightness: 28,
+    lightnessShift: -42,
+  })
+}
+
+export function schoolBrandFrom(primaryColor) {
+  return brandToneFrom(primaryColor, {
+    saturationBoost: 12,
+    minSaturation: 60,
+    maxSaturation: 86,
+    minLightness: 36,
+    maxLightness: 48,
+    lightnessShift: -12,
+  })
 }

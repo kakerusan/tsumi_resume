@@ -137,6 +137,7 @@ const visibleEducations = computed(() => (props.resume.educations || []).filter(
 const showProfile = computed(() => sectionVisibility.value.profile)
 const showEducationSection = computed(() => sectionVisibility.value.education && visibleEducations.value.length > 0)
 const showHeader = computed(() => showProfile.value || showEducationSection.value)
+const hasEducationLogo = computed(() => visibleEducations.value.some((item) => Boolean(item.logo)))
 
 const skillLines = computed(() => splitLines(props.resume.skills))
 const showSkills = computed(() => sectionVisibility.value.skills && skillLines.value.length > 0)
@@ -224,33 +225,50 @@ const hasAnyVisibleSection = computed(
                 </p>
               </template>
 
-              <div v-if="showEducationSection && educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
-                <p v-for="item in visibleEducations" :key="item.id">
-                  <span class="education-school-wrap">
+              <div
+                v-if="showEducationSection && educationFirst"
+                class="mt-1 space-y-0 text-[12.5px] leading-5"
+                :class="{ 'resume-education-block--with-logo': hasEducationLogo }"
+              >
+                <p
+                  v-for="item in visibleEducations"
+                  :key="item.id"
+                  class="education-line"
+                  :class="{ 'education-line--with-slot': hasEducationLogo }"
+                >
+                  <span v-if="hasEducationLogo" class="education-line-logo-slot">
                     <img
                       v-if="item.logo"
                       :src="item.logo"
                       alt="school logo"
                       class="education-school-logo"
                     />
-                    <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                   </span>
-                  <span class="mx-1 text-slate-300">/</span>
-                  <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
-                  <template v-if="item.major">
-                    <span class="mx-1 text-slate-300">/</span>
-                    <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
-                      {{ item.major }}
+                  <span class="education-line-content">
+                    <span class="education-school-wrap">
+                      <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                     </span>
-                  </template>
-                  <template v-if="item.studyPeriod">
                     <span class="mx-1 text-slate-300">/</span>
-                    <span class="text-slate-500">{{ item.studyPeriod }}</span>
-                  </template>
+                    <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
+                    <template v-if="item.major">
+                      <span class="mx-1 text-slate-300">/</span>
+                      <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
+                        {{ item.major }}
+                      </span>
+                    </template>
+                    <template v-if="item.studyPeriod">
+                      <span class="mx-1 text-slate-300">/</span>
+                      <span class="text-slate-500">{{ item.studyPeriod }}</span>
+                    </template>
+                  </span>
                 </p>
               </div>
 
-              <div v-if="showProfile && contactItems.length" class="resume-contacts">
+              <div
+                v-if="showProfile && contactItems.length"
+                class="resume-contacts"
+                :class="{ 'resume-contacts--with-education-logo': hasEducationLogo }"
+              >
                 <a
                   v-for="item in contactItems"
                   :key="`${item.type}-${item.text}`"
@@ -313,29 +331,42 @@ const hasAnyVisibleSection = computed(
                 </a>
               </div>
 
-              <div v-if="showEducationSection && !educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
-                <p v-for="item in visibleEducations" :key="`edu-tail-${item.id}`">
-                  <span class="education-school-wrap">
+              <div
+                v-if="showEducationSection && !educationFirst"
+                class="mt-1 space-y-0 text-[12.5px] leading-5"
+                :class="{ 'resume-education-block--with-logo': hasEducationLogo }"
+              >
+                <p
+                  v-for="item in visibleEducations"
+                  :key="`edu-tail-${item.id}`"
+                  class="education-line"
+                  :class="{ 'education-line--with-slot': hasEducationLogo }"
+                >
+                  <span v-if="hasEducationLogo" class="education-line-logo-slot">
                     <img
                       v-if="item.logo"
                       :src="item.logo"
                       alt="school logo"
                       class="education-school-logo"
                     />
-                    <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                   </span>
-                  <span class="mx-1 text-slate-300">/</span>
-                  <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
-                  <template v-if="item.major">
-                    <span class="mx-1 text-slate-300">/</span>
-                    <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
-                      {{ item.major }}
+                  <span class="education-line-content">
+                    <span class="education-school-wrap">
+                      <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                     </span>
-                  </template>
-                  <template v-if="item.studyPeriod">
                     <span class="mx-1 text-slate-300">/</span>
-                    <span class="text-slate-500">{{ item.studyPeriod }}</span>
-                  </template>
+                    <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
+                    <template v-if="item.major">
+                      <span class="mx-1 text-slate-300">/</span>
+                      <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
+                        {{ item.major }}
+                      </span>
+                    </template>
+                    <template v-if="item.studyPeriod">
+                      <span class="mx-1 text-slate-300">/</span>
+                      <span class="text-slate-500">{{ item.studyPeriod }}</span>
+                    </template>
+                  </span>
                 </p>
               </div>
             </div>

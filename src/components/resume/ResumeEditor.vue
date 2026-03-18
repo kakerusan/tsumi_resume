@@ -11,11 +11,6 @@ import {
   getPhotoHeightByRatio,
   normalizePhotoConfig,
 } from '../../modules/resume/photoConfig'
-import {
-  ORDERABLE_SECTION_LABELS,
-  ORDERABLE_SECTION_IDS,
-  normalizeLayoutOrder,
-} from '../../modules/resume/sections'
 
 const props = defineProps({
   resume: { type: Object, required: true },
@@ -32,7 +27,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits([
+defineEmits([
   'toggle-panel',
   'photo-change',
   'remove-photo',
@@ -65,51 +60,23 @@ const emit = defineEmits([
   'toggle-certificate-hidden',
   'move-certificate-up',
   'move-certificate-down',
-  'update-layout-order',
 ])
 
 const photoMetaSummary = computed(() => {
   const meta = props.resume.profile.photoMeta
   if (!meta) return ''
+
   const finalFormat = meta.finalFormat || 'JPG'
   if (meta.compressed === false && finalFormat === meta.originalFormat) {
     return `原图 ${meta.originalFormat} ${meta.originalSizeKB}KB（未压缩，${meta.width}×${meta.height}）`
   }
+
   return `原图 ${meta.originalFormat} ${meta.originalSizeKB}KB -> ${finalFormat} ${meta.finalSizeKB}KB（${meta.width}×${meta.height}）`
 })
 
 function getColorValue(value, fallback = '#4a9fff') {
   if (typeof value === 'string' && value.trim()) return value
   return fallback
-}
-
-const moduleOrderItems = computed({
-  get() {
-    const current = normalizeLayoutOrder(props.resume.layout?.order)
-    return current.map((id) => ({
-      id,
-      label: ORDERABLE_SECTION_LABELS[id] || id,
-    }))
-  },
-  set(items) {
-    const nextOrder = normalizeLayoutOrder(items.map((item) => item.id))
-    props.resume.layout.order = nextOrder
-    emit('update-layout-order', nextOrder)
-  },
-})
-
-const sectionOrderMap = computed(() => {
-  const current = normalizeLayoutOrder(props.resume.layout?.order)
-  const map = {}
-  current.forEach((id, index) => {
-    map[id] = index + 1
-  })
-  return map
-})
-
-function getModuleOrder(id) {
-  if (!ORDERABLE_SECTION_IDS.includes(id)) return 999
-  return sectionOrderMap.value[id] ?? 999
 }
 
 props.resume.theme.photoConfig = normalizePhotoConfig(props.resume.theme?.photoConfig || {})
@@ -156,64 +123,74 @@ function onPhotoHeightChange(value) {
 
 <template>
   <aside class="no-print flex flex-col gap-4 xl:sticky xl:top-5 xl:h-[calc(100vh-5rem)] xl:overflow-auto">
-    <article class="panel-card" :style="{ order: 999 }">
-      <div class="panel-head">
-        <div class="panel-head-main">
-          <span class="panel-title">模块顺序管理</span>
-        </div>
-      </div>
-      <div class="panel-body mt-4">
-        <draggable
-          v-model="moduleOrderItems"
-          item-key="id"
-          handle=".module-drag-handle"
-          class="drag-list"
-          ghost-class="drag-ghost"
-          chosen-class="drag-chosen"
-          drag-class="drag-dragging"
-          :animation="180"
-        >
-          <template #item="{ element: item, index }">
-            <div class="module-order-row">
-              <div class="flex items-center gap-2">
-                <button type="button" class="module-drag-handle" title="拖拽模块排序">::</button>
-                <span class="text-xs text-slate-400">{{ index + 1 }}</span>
-                <span class="text-sm font-medium text-slate-700">{{ item.label }}</span>
-              </div>
-            </div>
-          </template>
-        </draggable>
-        <p class="mt-2 text-xs text-slate-500">拖拽后，左侧编辑区与右侧预览区会同步调整模块顺序。</p>
-      </div>
-    </article>
-
-    <article class="panel-card" :style="{ order: getModuleOrder('profile') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'profile')">
           <span class="panel-caret">{{ panels.profile ? '▾' : '▸' }}</span>
           <span class="panel-title">基本信息</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.profile ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.profile = !resume.sectionVisibility.profile">
-          <browse-icon v-if="resume.sectionVisibility.profile" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.profile ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.profile = !resume.sectionVisibility.profile"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.profile"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.profile" class="panel-body mt-4 grid gap-3 md:grid-cols-3">
-        <label class="field-wrap"><span class="field-label">姓名</span><input v-model="resume.profile.name" class="field-input" placeholder="例如：黄龙翔" /></label>
-        <label class="field-wrap"><span class="field-label">证件照</span><button type="button" class="danger-btn mt-[2px]" @click="$emit('remove-photo')">移除证件照</button></label>
         <label class="field-wrap">
-          <span class="field-label">布局顺序</span>
-          <span class="switch-field">请在“模块顺序管理”中拖拽调整</span>
+          <span class="field-label">姓名</span>
+          <input v-model="resume.profile.name" class="field-input" placeholder="请输入姓名" />
         </label>
-        <label class="field-wrap"><span class="field-label">邮箱</span><input v-model="resume.profile.email" class="field-input" placeholder="例如：name@example.com" /></label>
-        <label class="field-wrap"><span class="field-label">联系方式</span><input v-model="resume.profile.phone" class="field-input" placeholder="例如：18976420973" /></label>
-        <label class="field-wrap"><span class="field-label">个人网站</span><input v-model="resume.profile.website" class="field-input" placeholder="例如：https://github.com/yourname" /></label>
-        <label class="field-wrap md:col-span-3"><span class="field-label">求职意向</span><input v-model="resume.profile.title" class="field-input" placeholder="不填写则不展示" /></label>
+        <label class="field-wrap">
+          <span class="field-label">邮箱</span>
+          <input v-model="resume.profile.email" class="field-input" placeholder="请输入邮箱" />
+        </label>
+        <label class="field-wrap">
+          <span class="field-label">联系方式</span>
+          <input v-model="resume.profile.phone" class="field-input" placeholder="请输入电话号" />
+        </label>
+        <label class="field-wrap md:col-span-3">
+          <span class="field-label">个人网站</span>
+          <input
+            v-model="resume.profile.website"
+            class="field-input"
+            placeholder="请输入个人网站,支持github、gitee图标自动解析"
+          />
+        </label>
+        <label class="field-wrap md:col-span-3">
+          <span class="field-label">求职意向</span>
+          <input v-model="resume.profile.title" class="field-input" placeholder="不填写则不展示" />
+        </label>
         <label class="field-wrap md:col-span-3">
           <span class="field-label">证件照上传（JPG / PNG / WebP，5MB 内保留原图）</span>
-          <div class="mt-2 flex flex-wrap items-center gap-3"><input type="file" accept="image/jpeg,image/png,image/webp" class="file-input" @change="$emit('photo-change', $event)" /></div>
-          <p v-if="photoUploadMessage" class="mt-2 text-xs font-medium text-emerald-600">{{ photoUploadMessage }}</p>
-          <p v-if="photoUploadError" class="mt-2 text-xs font-medium text-rose-600">{{ photoUploadError }}</p>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              class="file-input"
+              @change="$emit('photo-change', $event)"
+            />
+            <button type="button" class="danger-btn" @click="$emit('remove-photo')">移除证件照</button>
+          </div>
+          <p v-if="photoUploadMessage" class="mt-2 text-xs font-medium text-emerald-600">
+            {{ photoUploadMessage }}
+          </p>
+          <p v-if="photoUploadError" class="mt-2 text-xs font-medium text-rose-600">
+            {{ photoUploadError }}
+          </p>
           <p v-if="photoMetaSummary" class="mt-1 text-xs text-slate-500">{{ photoMetaSummary }}</p>
         </label>
         <div class="field-wrap md:col-span-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
@@ -292,40 +269,105 @@ function onPhotoHeightChange(value) {
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('education') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'education')">
           <span class="panel-caret">{{ panels.education ? '▾' : '▸' }}</span>
           <span class="panel-title">教育背景</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.education ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.education = !resume.sectionVisibility.education">
-          <browse-icon v-if="resume.sectionVisibility.education" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.education ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.education = !resume.sectionVisibility.education"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.education"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.education" class="panel-body mt-4 space-y-3">
-        <div v-if="!resume.educations.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">暂无教育经历，点击下方按钮新增。</div>
-        <draggable v-else v-model="resume.educations" item-key="id" handle=".drag-handle" class="drag-list" ghost-class="drag-ghost" chosen-class="drag-chosen" drag-class="drag-dragging" :animation="180">
+        <div
+          v-if="!resume.educations.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无教育经历，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.educations"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
           <template #item="{ element: item, index }">
             <article class="sub-card drag-item">
               <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <button type="button" class="drag-handle" title="拖拽排序">::</button>
                   <span class="text-sm font-semibold text-slate-800">教育 {{ index + 1 }}</span>
-                  <span v-if="item.hidden" class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">已隐藏（预览不显示）</span>
+                  <span
+                    v-if="item.hidden"
+                    class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                  >
+                    已隐藏（预览不显示）
+                  </span>
                 </div>
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" class="small-btn" @click="$emit('toggle-education-hidden', item.id)">{{ item.hidden ? '显示' : '隐藏' }}</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===0" @click="$emit('move-education-up', index)">上移</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===resume.educations.length-1" @click="$emit('move-education-down', index)">下移</button>
-                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-education', item.id)">删除</button>
+                  <button type="button" class="small-btn" @click="$emit('toggle-education-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-education-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.educations.length - 1"
+                    @click="$emit('move-education-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-education', item.id)">
+                    删除
+                  </button>
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">学校</span><input v-model="item.school" class="field-input" placeholder="例如：电子科技大学 (985)" /></label>
-                <label class="field-wrap"><span class="field-label">学历</span><input v-model="item.degree" class="field-input" placeholder="例如：本科" /></label>
-                <label class="field-wrap"><span class="field-label">专业</span><input v-model="item.major" class="field-input" placeholder="例如：网络工程" /></label>
-                <label class="field-wrap"><span class="field-label">起止时间</span><input v-model="item.studyPeriod" class="field-input" placeholder="例如：2023-2027" /></label>
+                <label class="field-wrap">
+                  <span class="field-label">学校</span>
+                  <input v-model="item.school" class="field-input" placeholder="例如：北京大学(985)" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">学历</span>
+                  <input v-model="item.degree" class="field-input" placeholder="例如：本科" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">专业</span>
+                  <input v-model="item.major" class="field-input" placeholder="例如：网络工程" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">起止时间</span>
+                  <input v-model="item.studyPeriod" class="field-input" placeholder="例如：2023-2027" />
+                </label>
                 <div class="field-wrap sm:col-span-2">
                   <span class="field-label">学校 Logo（JPG / PNG / WebP，≤2MB）</span>
                   <div class="mt-2 flex items-center gap-3">
@@ -360,19 +402,36 @@ function onPhotoHeightChange(value) {
             </article>
           </template>
         </draggable>
-        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-education')">+ 新增教育经历</button>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-education')">
+          + 新增教育经历
+        </button>
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('skills') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'skills')">
           <span class="panel-caret">{{ panels.skills ? '▾' : '▸' }}</span>
           <span class="panel-title">技术栈</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.skills ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.skills = !resume.sectionVisibility.skills">
-          <browse-icon v-if="resume.sectionVisibility.skills" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.skills ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.skills = !resume.sectionVisibility.skills"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.skills"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.skills" class="panel-body mt-4">
@@ -383,48 +442,132 @@ function onPhotoHeightChange(value) {
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('internships') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'internship')">
           <span class="panel-caret">{{ panels.internship ? '▾' : '▸' }}</span>
           <span class="panel-title">实习经历</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.internships ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.internships = !resume.sectionVisibility.internships">
-          <browse-icon v-if="resume.sectionVisibility.internships" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.internships ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.internships = !resume.sectionVisibility.internships"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.internships"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.internship" class="panel-body mt-4 space-y-3">
-        <div v-if="!resume.internships.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">暂无实习经历，点击下方按钮新增。</div>
-        <draggable v-else v-model="resume.internships" item-key="id" handle=".drag-handle" class="drag-list" ghost-class="drag-ghost" chosen-class="drag-chosen" drag-class="drag-dragging" :animation="180">
+        <div
+          v-if="!resume.internships.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无实习经历，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.internships"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
           <template #item="{ element: item, index }">
             <article class="sub-card drag-item">
               <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <button type="button" class="drag-handle" title="拖拽排序">::</button>
                   <span class="text-sm font-semibold text-slate-800">实习 {{ index + 1 }}</span>
-                  <span v-if="item.hidden" class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">已隐藏（预览不显示）</span>
+                  <span
+                    v-if="item.hidden"
+                    class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                  >
+                    已隐藏（预览不显示）
+                  </span>
                 </div>
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" class="small-btn" @click="$emit('toggle-internship-hidden', item.id)">{{ item.hidden ? '显示' : '隐藏' }}</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===0" @click="$emit('move-internship-up', index)">上移</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===resume.internships.length-1" @click="$emit('move-internship-down', index)">下移</button>
-                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-internship', item.id)">删除</button>
+                  <button type="button" class="small-btn" @click="$emit('toggle-internship-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-internship-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.internships.length - 1"
+                    @click="$emit('move-internship-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-internship', item.id)">
+                    删除
+                  </button>
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">公司名称</span><input v-model="item.company" class="field-input" placeholder="例如：腾讯" /></label>
-                <label class="field-wrap"><span class="field-label">岗位</span><input v-model="item.role" class="field-input" placeholder="例如：后端开发实习生" /></label>
-                <label class="field-wrap"><span class="field-label">业务线 / 部门</span><input v-model="item.department" class="field-input" placeholder="例如：S3 人力资源产品线" /></label>
-                <label class="field-wrap"><span class="field-label">时间</span><input v-model="item.period" class="field-input" placeholder="例如：2026.03 - 2026.08" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">地点（可留空）</span><input v-model="item.location" class="field-input" placeholder="例如：深圳" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">工作简介</span><textarea v-model="item.summary" class="field-input field-textarea h-24" placeholder="简要描述职责范围和业务背景"></textarea></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">成果亮点（按行输入）</span><textarea v-model="item.highlights" class="field-input field-textarea h-28" placeholder="每行一条，可用 **关键词** 强调"></textarea></label>
+                <label class="field-wrap">
+                  <span class="field-label">公司名称</span>
+                  <input v-model="item.company" class="field-input" placeholder="例如：阿里巴巴" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">岗位</span>
+                  <input v-model="item.role" class="field-input" placeholder="例如：后端开发实习生" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">业务线 / 部门</span>
+                  <input v-model="item.department" class="field-input" placeholder="例如：技术部-后端组" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">时间</span>
+                  <input v-model="item.period" class="field-input" placeholder="例如:2026.03 - 2026.08" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">地点（可留空）</span>
+                  <input v-model="item.location" class="field-input" placeholder="例如：深圳" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">工作简介</span>
+                  <textarea
+                    v-model="item.summary"
+                    class="field-input field-textarea h-24"
+                    placeholder="简要描述职责范围和业务背景"
+                  ></textarea>
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">成果亮点（按行输入）</span>
+                  <textarea
+                    v-model="item.highlights"
+                    class="field-input field-textarea h-28"
+                    placeholder="每行一条，可用 **关键字** 强调"
+                  ></textarea>
+                </label>
                 <div class="field-wrap sm:col-span-2">
                   <span class="field-label">公司 Logo</span>
                   <div class="mt-2 flex items-center gap-3">
                     <input type="file" accept="image/*" class="file-input" @change="$emit('logo-change', item.id, $event)" />
-                    <button type="button" class="toolbar-btn !px-3 !py-1.5 !text-xs" @click="$emit('remove-logo', item.id)">移除</button>
+                    <button type="button" class="toolbar-btn !px-3 !py-1.5 !text-xs" @click="$emit('remove-logo', item.id)">
+                      移除
+                    </button>
                   </div>
                 </div>
                 <div class="field-wrap">
@@ -448,152 +591,399 @@ function onPhotoHeightChange(value) {
                   <span class="field-label">Logo 大小</span>
                   <div class="mt-2 flex items-center gap-2">
                     <input v-model.number="item.logoSize" type="range" min="14" max="48" class="w-full accent-sky-600" />
-                    <input v-model.number="item.logoSize" type="number" min="14" max="48" class="field-input !w-20 !px-2 !py-1.5 text-center" />
+                    <input
+                      v-model.number="item.logoSize"
+                      type="number"
+                      min="14"
+                      max="48"
+                      class="field-input !w-20 !px-2 !py-1.5 text-center"
+                    />
                   </div>
                 </div>
               </div>
             </article>
           </template>
         </draggable>
-        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-internship')">+ 新增实习经历</button>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-internship')">
+          + 新增实习经历
+        </button>
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('projects') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'project')">
           <span class="panel-caret">{{ panels.project ? '▾' : '▸' }}</span>
           <span class="panel-title">项目经历</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.projects ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.projects = !resume.sectionVisibility.projects">
-          <browse-icon v-if="resume.sectionVisibility.projects" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.projects ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.projects = !resume.sectionVisibility.projects"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.projects"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.project" class="panel-body mt-4 space-y-3">
-        <div v-if="!resume.projects.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">暂无项目经历，点击下方按钮新增。</div>
-        <draggable v-else v-model="resume.projects" item-key="id" handle=".drag-handle" class="drag-list" ghost-class="drag-ghost" chosen-class="drag-chosen" drag-class="drag-dragging" :animation="180">
+        <div
+          v-if="!resume.projects.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无项目经历，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.projects"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
           <template #item="{ element: item, index }">
             <article class="sub-card drag-item">
               <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <button type="button" class="drag-handle" title="拖拽排序">::</button>
                   <span class="text-sm font-semibold text-slate-800">项目 {{ index + 1 }}</span>
-                  <span v-if="item.hidden" class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">已隐藏（预览不显示）</span>
+                  <span
+                    v-if="item.hidden"
+                    class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                  >
+                    已隐藏（预览不显示）
+                  </span>
                 </div>
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" class="small-btn" @click="$emit('toggle-project-hidden', item.id)">{{ item.hidden ? '显示' : '隐藏' }}</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===0" @click="$emit('move-project-up', index)">上移</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===resume.projects.length-1" @click="$emit('move-project-down', index)">下移</button>
-                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-project', item.id)">删除</button>
+                  <button type="button" class="small-btn" @click="$emit('toggle-project-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-project-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.projects.length - 1"
+                    @click="$emit('move-project-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-project', item.id)">
+                    删除
+                  </button>
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">项目名称</span><input v-model="item.name" class="field-input" placeholder="例如：TsumiMusic" /></label>
-                <label class="field-wrap"><span class="field-label">项目角色</span><input v-model="item.role" class="field-input" placeholder="例如：后端负责人" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">项目周期</span><input v-model="item.period" class="field-input" placeholder="例如：2025.09 - 2026.01" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">技术标签（逗号分隔）</span><input v-model="item.tags" class="field-input" placeholder="例如：SpringBoot, Redis, MySQL" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">项目描述</span><textarea v-model="item.summary" class="field-input field-textarea h-28" placeholder="建议包含业务目标、核心能力和结果"></textarea></label>
+                <label class="field-wrap">
+                  <span class="field-label">项目名称</span>
+                  <input v-model="item.name" class="field-input" placeholder="例如：TsumiMusic" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">项目角色</span>
+                  <input v-model="item.role" class="field-input" placeholder="例如：后端负责人" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">项目周期</span>
+                  <input v-model="item.period" class="field-input" placeholder="例如：2025.09 - 2026.01" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">技术标签（逗号分隔）</span>
+                  <input
+                    v-model="item.tags"
+                    class="field-input"
+                    placeholder="例如：SpringBoot, Redis, MySQL"
+                  />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">项目描述</span>
+                  <textarea
+                    v-model="item.summary"
+                    class="field-input field-textarea h-28"
+                    placeholder="建议包含业务目标、核心能力和结果"
+                  ></textarea>
+                </label>
               </div>
             </article>
           </template>
         </draggable>
-        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-project')">+ 新增项目经历</button>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-project')">
+          + 新增项目经历
+        </button>
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('awards') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'awards')">
           <span class="panel-caret">{{ panels.awards ? '▾' : '▸' }}</span>
           <span class="panel-title">荣誉奖项</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.awards ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.awards = !resume.sectionVisibility.awards">
-          <browse-icon v-if="resume.sectionVisibility.awards" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.awards ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.awards = !resume.sectionVisibility.awards"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.awards"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.awards" class="panel-body mt-4 space-y-3">
-        <div v-if="!resume.awards.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">暂无荣誉奖项，点击下方按钮新增。</div>
-        <draggable v-else v-model="resume.awards" item-key="id" handle=".drag-handle" class="drag-list" ghost-class="drag-ghost" chosen-class="drag-chosen" drag-class="drag-dragging" :animation="180">
+        <div
+          v-if="!resume.awards.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无荣誉奖项，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.awards"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
           <template #item="{ element: item, index }">
             <article class="sub-card drag-item">
               <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2"><button type="button" class="drag-handle" title="拖拽排序">::</button><span class="text-sm font-semibold text-slate-800">奖项 {{ index + 1 }}</span></div>
+                <div class="flex items-center gap-2">
+                  <button type="button" class="drag-handle" title="拖拽排序">::</button>
+                  <span class="text-sm font-semibold text-slate-800">奖项 {{ index + 1 }}</span>
+                </div>
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" class="small-btn" @click="$emit('toggle-award-hidden', item.id)">{{ item.hidden ? '显示' : '隐藏' }}</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===0" @click="$emit('move-award-up', index)">上移</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===resume.awards.length-1" @click="$emit('move-award-down', index)">下移</button>
-                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-award', item.id)">删除</button>
+                  <button type="button" class="small-btn" @click="$emit('toggle-award-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-award-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.awards.length - 1"
+                    @click="$emit('move-award-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-award', item.id)">
+                    删除
+                  </button>
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">奖项名称</span><input v-model="item.name" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">获奖级别</span><input v-model="item.level" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">颁发单位</span><input v-model="item.issuer" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">获奖时间</span><input v-model="item.date" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">补充描述</span><textarea v-model="item.description" class="field-input field-textarea h-24"></textarea></label>
+                <label class="field-wrap">
+                  <span class="field-label">奖项名称</span>
+                  <input v-model="item.name" class="field-input" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">获奖级别</span>
+                  <input v-model="item.level" class="field-input" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">颁发单位</span>
+                  <input v-model="item.issuer" class="field-input" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">获奖时间</span>
+                  <input v-model="item.date" class="field-input" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">补充描述</span>
+                  <textarea v-model="item.description" class="field-input field-textarea h-24"></textarea>
+                </label>
               </div>
             </article>
           </template>
         </draggable>
-        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-award')">+ 新增荣誉奖项</button>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-award')">
+          + 新增荣誉奖项
+        </button>
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('certificates') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'certificates')">
           <span class="panel-caret">{{ panels.certificates ? '▾' : '▸' }}</span>
           <span class="panel-title">证书</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.certificates ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.certificates = !resume.sectionVisibility.certificates">
-          <browse-icon v-if="resume.sectionVisibility.certificates" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.certificates ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.certificates = !resume.sectionVisibility.certificates"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.certificates"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.certificates" class="panel-body mt-4 space-y-3">
-        <div v-if="!resume.certificates.length" class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">暂无证书，点击下方按钮新增。</div>
-        <draggable v-else v-model="resume.certificates" item-key="id" handle=".drag-handle" class="drag-list" ghost-class="drag-ghost" chosen-class="drag-chosen" drag-class="drag-dragging" :animation="180">
+        <div
+          v-if="!resume.certificates.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无证书，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.certificates"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
           <template #item="{ element: item, index }">
             <article class="sub-card drag-item">
               <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2"><button type="button" class="drag-handle" title="拖拽排序">::</button><span class="text-sm font-semibold text-slate-800">证书 {{ index + 1 }}</span></div>
+                <div class="flex items-center gap-2">
+                  <button type="button" class="drag-handle" title="拖拽排序">::</button>
+                  <span class="text-sm font-semibold text-slate-800">证书 {{ index + 1 }}</span>
+                </div>
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" class="small-btn" @click="$emit('toggle-certificate-hidden', item.id)">{{ item.hidden ? '显示' : '隐藏' }}</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===0" @click="$emit('move-certificate-up', index)">上移</button>
-                  <button type="button" class="small-btn disabled:cursor-not-allowed disabled:opacity-40" :disabled="index===resume.certificates.length-1" @click="$emit('move-certificate-down', index)">下移</button>
-                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-certificate', item.id)">删除</button>
+                  <button type="button" class="small-btn" @click="$emit('toggle-certificate-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-certificate-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.certificates.length - 1"
+                    @click="$emit('move-certificate-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn small-btn-danger"
+                    @click="$emit('remove-certificate', item.id)"
+                  >
+                    删除
+                  </button>
                 </div>
               </div>
               <div class="grid gap-3 sm:grid-cols-2">
-                <label class="field-wrap"><span class="field-label">证书名称</span><input v-model="item.name" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">颁发机构</span><input v-model="item.issuer" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">获得时间</span><input v-model="item.date" class="field-input" /></label>
-                <label class="field-wrap"><span class="field-label">证书编号</span><input v-model="item.credentialId" class="field-input" /></label>
-                <label class="field-wrap sm:col-span-2"><span class="field-label">补充描述</span><textarea v-model="item.description" class="field-input field-textarea h-24"></textarea></label>
+                <label class="field-wrap">
+                  <span class="field-label">证书名称</span>
+                  <input v-model="item.name" class="field-input" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">颁发机构</span>
+                  <input v-model="item.issuer" class="field-input" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">获得时间</span>
+                  <input v-model="item.date" class="field-input" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">证书编号</span>
+                  <input v-model="item.credentialId" class="field-input" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">补充描述</span>
+                  <textarea v-model="item.description" class="field-input field-textarea h-24"></textarea>
+                </label>
               </div>
             </article>
           </template>
         </draggable>
-        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-certificate')">+ 新增证书</button>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-certificate')">
+          + 新增证书
+        </button>
       </div>
     </article>
 
-    <article class="panel-card" :style="{ order: getModuleOrder('selfSummary') }">
+    <article class="panel-card">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'selfSummary')">
           <span class="panel-caret">{{ panels.selfSummary ? '▾' : '▸' }}</span>
           <span class="panel-title">自我评价</span>
         </button>
-        <button type="button" class="panel-eye" :class="resume.sectionVisibility.selfSummary ? '' : 'panel-eye-off'" @click="resume.sectionVisibility.selfSummary = !resume.sectionVisibility.selfSummary">
-          <browse-icon v-if="resume.sectionVisibility.selfSummary" :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
-          <browse-off-icon v-else :fill-color='["transparent","transparent"]' :stroke-color='["currentColor","#0052d9"]' :stroke-width="2" />
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.selfSummary ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.selfSummary = !resume.sectionVisibility.selfSummary"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.selfSummary"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
         </button>
       </div>
       <div v-if="panels.selfSummary" class="panel-body mt-4 space-y-3">
-        <label class="field-wrap"><span class="field-label">内容</span><textarea v-model="resume.selfSummary.content" class="field-input field-textarea h-28"></textarea></label>
-        <label class="switch-field"><input v-model="resume.selfSummary.hidden" type="checkbox" class="h-4 w-4 accent-sky-600" /><span>仅隐藏这段内容（预览不显示）</span></label>
+        <label class="field-wrap">
+          <span class="field-label">内容</span>
+          <textarea v-model="resume.selfSummary.content" class="field-input field-textarea h-28"></textarea>
+        </label>
+        <label class="switch-field">
+          <input v-model="resume.selfSummary.hidden" type="checkbox" class="h-4 w-4 accent-sky-600" />
+          <span>仅隐藏这段内容（预览不显示）</span>
+        </label>
       </div>
     </article>
 
@@ -619,7 +1009,10 @@ function onPhotoHeightChange(value) {
             />
           </div>
         </div>
-        <label class="switch-field"><input v-model="resume.theme.boldMajor" type="checkbox" class="h-4 w-4 accent-sky-600" /><span>专业加粗显示</span></label>
+        <label class="switch-field">
+          <input v-model="resume.theme.boldMajor" type="checkbox" class="h-4 w-4 accent-sky-600" />
+          <span>专业加粗显示</span>
+        </label>
       </div>
     </article>
   </aside>

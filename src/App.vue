@@ -60,7 +60,6 @@ const {
   toggleCertificateHidden,
   moveCertificateUp,
   moveCertificateDown,
-  updateLayoutOrder,
   onPhotoChange,
   removePhoto,
   onPageOverflowChange,
@@ -169,7 +168,6 @@ const {
           @toggle-certificate-hidden="toggleCertificateHidden"
           @move-certificate-up="moveCertificateUp"
           @move-certificate-down="moveCertificateDown"
-          @update-layout-order="updateLayoutOrder"
         />
         <ResumePreview :resume="resume" @page-overflow-change="onPageOverflowChange" />
       </section>

@@ -1,5 +1,5 @@
-import { computed, reactive, ref } from 'vue'
-import { STORAGE_KEY, PANELS_STORAGE_KEY, SCHEMA_VERSION } from '../modules/resume/constants'
+import { computed, reactive, ref, watch } from 'vue'
+import { PANELS_STORAGE_KEY, SCHEMA_VERSION } from '../modules/resume/constants'
 import {
   createAwardItem,
   createCertificateItem,
@@ -13,9 +13,16 @@ import { normalizeLayoutOrder } from '../modules/resume/sections'
 import { createDemoResume, createEmptyResume } from '../modules/resume/templates'
 import { processProfilePhoto } from '../modules/resume/photo'
 import { deepBrandFrom } from '../modules/resume/color'
+import {
+  deleteResumeDraft,
+  loadResumeDraft,
+  migrateLegacyDraftIfNeeded,
+  saveResumeDraft,
+} from '../modules/resume/storage'
 
 const EDUCATION_LOGO_MAX_BYTES = 2 * 1024 * 1024
 const EDUCATION_LOGO_SUPPORTED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
+const AUTO_SAVE_DELAY = 800
 
 function moveItem(list, fromIndex, toIndex) {
   if (toIndex < 0 || toIndex >= list.length || fromIndex < 0 || fromIndex >= list.length) return
@@ -42,6 +49,12 @@ export function useResumeBuilder() {
   const jsonInputRef = ref(null)
   const pageOverflow = ref(false)
   const pageHeight = ref(0)
+  const storageBackend = ref('indexeddb')
+
+  let autoSaveTimer = null
+  let bootstrapping = true
+  let skipNextAutoSave = false
+  let hasShownFallbackNotice = false
 
   function restorePanelsState() {
     const raw = localStorage.getItem(PANELS_STORAGE_KEY)
@@ -71,6 +84,10 @@ export function useResumeBuilder() {
     Object.assign(resume, normalizeResumeData(source))
   }
 
+  function createResumeSnapshot() {
+    return normalizeResumeData(JSON.parse(JSON.stringify(resume)))
+  }
+
   function resetPhotoFeedback() {
     photoUploadMessage.value = ''
     photoUploadError.value = ''
@@ -80,6 +97,62 @@ export function useResumeBuilder() {
     educationLogoFeedback.id = id
     educationLogoFeedback.message = ''
     educationLogoFeedback.error = ''
+  }
+
+  function clearActionFeedback() {
+    actionStatusMessage.value = ''
+    actionErrorMessage.value = ''
+  }
+
+  function scheduleAutoSave() {
+    if (bootstrapping) return
+    if (skipNextAutoSave) {
+      skipNextAutoSave = false
+      return
+    }
+
+    if (autoSaveTimer) {
+      window.clearTimeout(autoSaveTimer)
+    }
+
+    autoSaveTimer = window.setTimeout(() => {
+      persistDraft({ manual: false })
+    }, AUTO_SAVE_DELAY)
+  }
+
+  async function persistDraft({ manual = false } = {}) {
+    if (autoSaveTimer) {
+      window.clearTimeout(autoSaveTimer)
+      autoSaveTimer = null
+    }
+
+    if (manual) {
+      clearActionFeedback()
+    }
+
+    try {
+      const result = await saveResumeDraft(createResumeSnapshot())
+      storageBackend.value = result.backend
+
+      if (result.backend === 'localstorage') {
+        if (!hasShownFallbackNotice) {
+          actionErrorMessage.value = 'IndexedDB 不可用，已回退到浏览器本地轻量存储。'
+          hasShownFallbackNotice = true
+        }
+        if (manual) {
+          actionStatusMessage.value = '草稿已保存到浏览器本地存储。'
+        }
+        return
+      }
+
+      hasShownFallbackNotice = false
+      if (manual) {
+        actionStatusMessage.value = '草稿已保存到浏览器本地数据库。'
+      }
+    } catch (error) {
+      console.error('Save draft failed:', error)
+      actionErrorMessage.value = '草稿保存失败，请稍后重试。'
+    }
   }
 
   function togglePanel(name) {
@@ -102,32 +175,50 @@ export function useResumeBuilder() {
   }
 
   function loadDemo() {
+    clearActionFeedback()
     applyResumeData(createDemoResume())
     resetPhotoFeedback()
     resetEducationLogoFeedback()
   }
 
-  function clearAll() {
+  async function clearAll() {
+    clearActionFeedback()
+    skipNextAutoSave = true
     applyResumeData(createEmptyResume())
     resetPhotoFeedback()
     resetEducationLogoFeedback()
-  }
-
-  function saveDraft() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(resume))
-  }
-
-  function restoreDraft() {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
 
     try {
-      const parsed = JSON.parse(raw)
-      applyResumeData(parsed)
+      await deleteResumeDraft()
+      actionStatusMessage.value = '已清空当前内容，并移除本地草稿。'
+    } catch (error) {
+      console.error('Clear draft failed:', error)
+      actionErrorMessage.value = '内容已清空，但本地草稿删除失败。'
+    }
+  }
+
+  async function saveDraft() {
+    await persistDraft({ manual: true })
+  }
+
+  async function restoreDraft() {
+    clearActionFeedback()
+
+    try {
+      const draft = await loadResumeDraft()
+      if (!draft) {
+        actionErrorMessage.value = '当前没有可恢复的本地草稿。'
+        return
+      }
+
+      skipNextAutoSave = true
+      applyResumeData(draft)
       resetPhotoFeedback()
       resetEducationLogoFeedback()
+      actionStatusMessage.value = '本地草稿已恢复。'
     } catch (error) {
       console.error('Restore draft failed:', error)
+      actionErrorMessage.value = '恢复本地草稿失败，请稍后重试。'
     }
   }
 
@@ -161,8 +252,7 @@ export function useResumeBuilder() {
 
   async function exportImage() {
     validateBeforeExport()
-    actionStatusMessage.value = ''
-    actionErrorMessage.value = ''
+    clearActionFeedback()
 
     const target = document.getElementById('resume-preview-page')
     if (!target) {
@@ -261,6 +351,7 @@ export function useResumeBuilder() {
       if (!parsed || typeof parsed !== 'object') {
         throw new Error('INVALID_JSON_SHAPE')
       }
+
       applyResumeData(parsed)
       jsonStatusMessage.value = 'JSON 导入成功，已替换当前简历。'
     } catch (error) {
@@ -512,11 +603,46 @@ export function useResumeBuilder() {
       warnings.push('所有栏目当前都处于隐藏状态')
     }
     if (!hasCoreContent()) {
-      warnings.push('技术栈/实习经历/项目经历均为空')
+      warnings.push('技术栈、实习经历、项目经历目前都为空')
     }
     exportWarningMessage.value = warnings.length ? `导出提醒：${warnings.join('；')}。` : ''
     return warnings
   }
+
+  async function bootstrapDraft() {
+    try {
+      const migrated = await migrateLegacyDraftIfNeeded()
+      const draft = await loadResumeDraft()
+
+      if (draft) {
+        skipNextAutoSave = true
+        applyResumeData(draft)
+        resetPhotoFeedback()
+        resetEducationLogoFeedback()
+      }
+
+      if (migrated) {
+        actionStatusMessage.value = '已将旧版本地草稿迁移到 IndexedDB。'
+        await persistDraft({ manual: false })
+      }
+    } catch (error) {
+      console.error('Bootstrap draft failed:', error)
+      storageBackend.value = 'localstorage'
+      actionErrorMessage.value = '本地数据库初始化失败，已回退到浏览器本地存储。'
+    } finally {
+      bootstrapping = false
+    }
+  }
+
+  watch(
+    resume,
+    () => {
+      scheduleAutoSave()
+    },
+    { deep: true }
+  )
+
+  bootstrapDraft()
 
   const brandStyle = computed(() => ({
     '--brand': resume.theme.primaryColor || '#4a9fff',
@@ -537,6 +663,7 @@ export function useResumeBuilder() {
     jsonInputRef,
     pageOverflow,
     pageHeight,
+    storageBackend,
     brandStyle,
     togglePanel,
     expandAllPanels,

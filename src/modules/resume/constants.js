@@ -1,5 +1,9 @@
 export const STORAGE_KEY = 'resume-builder-draft-v1'
 export const PANELS_STORAGE_KEY = 'resume-builder-panels-v1'
+export const RESUME_DB_NAME = 'resume-builder-db'
+export const RESUME_DB_VERSION = 1
+export const RESUME_DRAFT_STORE = 'drafts'
+export const RESUME_DRAFT_KEY = 'current'
 export const SCHEMA_VERSION = 6
 
 export const PHOTO_RULES = {
