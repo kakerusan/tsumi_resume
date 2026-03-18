@@ -8,6 +8,21 @@ function normalizeHexColor(hex = '') {
   return ''
 }
 
+function parseRgbColor(color = '') {
+  const value = String(color).trim()
+  const match = value.match(
+    /^rgba?\(\s*([+-]?\d*\.?\d+)\s*[, ]\s*([+-]?\d*\.?\d+)\s*[, ]\s*([+-]?\d*\.?\d+)(?:\s*[,/]\s*([+-]?\d*\.?\d+%?))?\s*\)$/i
+  )
+  if (!match) return null
+
+  const clamp = (n, min, max) => Math.min(max, Math.max(min, n))
+  return {
+    r: clamp(Math.round(Number(match[1])), 0, 255),
+    g: clamp(Math.round(Number(match[2])), 0, 255),
+    b: clamp(Math.round(Number(match[3])), 0, 255),
+  }
+}
+
 function hexToRgb(hex = '') {
   const normalized = normalizeHexColor(hex)
   if (!normalized) return null
@@ -16,6 +31,10 @@ function hexToRgb(hex = '') {
     g: parseInt(normalized.slice(3, 5), 16),
     b: parseInt(normalized.slice(5, 7), 16),
   }
+}
+
+function parseColorToRgb(color = '') {
+  return hexToRgb(color) || parseRgbColor(color)
 }
 
 function rgbToHsl({ r, g, b }) {
@@ -89,7 +108,7 @@ function rgbToHex({ r, g, b }) {
 }
 
 export function deepBrandFrom(primaryColor) {
-  const rgb = hexToRgb(primaryColor)
+  const rgb = parseColorToRgb(primaryColor)
   if (!rgb) return '#1D3A8A'
 
   const hsl = rgbToHsl(rgb)

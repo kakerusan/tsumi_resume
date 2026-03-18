@@ -173,15 +173,15 @@ const contactItems = computed(() => {
         <div :class="['resume-identity', hasPhoto ? 'resume-identity--with-photo' : 'resume-identity--no-photo']">
           <div class="resume-info" :class="hasPhoto ? 'text-left' : 'text-center'">
             <template v-if="showProfile">
-              <h2 class="title-font text-[22px] font-bold tracking-tight text-[color:var(--brand-deep)]">
+              <h2 class="title-font text-[18px] font-bold tracking-tight text-[color:var(--brand-deep)]">
                 {{ resume.profile.name || '你的姓名' }}
               </h2>
-              <p v-if="profileTitle" class="mt-0.5 text-[13px] font-semibold text-slate-700">
+              <p v-if="profileTitle" class="mt-0 text-[12px] font-semibold text-slate-700">
                 {{ profileTitle }}
               </p>
             </template>
 
-            <div v-if="showEducations && educationFirst" class="mt-1.5 space-y-0.5 text-[12.5px] leading-5">
+            <div v-if="showEducations && educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
               <p v-for="item in visibleEducations" :key="item.id">
                 <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                 <span class="mx-1 text-slate-300">/</span>
@@ -262,7 +262,7 @@ const contactItems = computed(() => {
               </a>
             </div>
 
-            <div v-if="showEducations && !educationFirst" class="mt-1.5 space-y-0.5 text-[12.5px] leading-5">
+            <div v-if="showEducations && !educationFirst" class="mt-1 space-y-0 text-[12.5px] leading-5">
               <p v-for="item in visibleEducations" :key="`edu-tail-${item.id}`">
                 <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
                 <span class="mx-1 text-slate-300">/</span>

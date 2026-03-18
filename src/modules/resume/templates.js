@@ -48,7 +48,7 @@ export function createDemoResume() {
     },
     profile: {
       name: '黄龙翔',
-      title: '后端开发工程师',
+      title: '',
       phone: '18976420973',
       email: '1832317010@qq.com',
       website: 'https://github.com/kakerusan',

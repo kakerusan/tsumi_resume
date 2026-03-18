@@ -145,6 +145,14 @@
     @apply flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700;
   }
 
+  .color-panel-wrap {
+    @apply inline-flex items-center;
+  }
+
+  .color-panel-wrap .t-color-picker {
+    min-width: 0;
+  }
+
   .resume-page {
     width: min(100%, 820px);
     min-height: 1100px;
@@ -159,11 +167,11 @@
 
   .resume-head {
     border-bottom: 0;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
   }
 
   .resume-identity {
-    @apply flex gap-3;
+    @apply flex gap-2;
   }
 
   .resume-identity--no-photo {
@@ -194,7 +202,7 @@
   }
 
   .resume-contacts {
-    @apply mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[12px] leading-5 text-slate-600;
+    @apply mt-0.5 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-0.5 text-[12px] leading-5 text-slate-600;
   }
 
   .resume-identity--with-photo .resume-contacts {

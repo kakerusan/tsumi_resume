@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import Draggable from 'vuedraggable'
+import { ColorPicker } from 'tdesign-vue-next'
 import { BrowseIcon, BrowseOffIcon } from 'tdesign-icons-vue-next'
 
 const props = defineProps({
@@ -52,6 +53,11 @@ const photoMetaSummary = computed(() => {
   }
   return `原图 ${meta.originalFormat} ${meta.originalSizeKB}KB -> ${finalFormat} ${meta.finalSizeKB}KB（${meta.width}×${meta.height}）`
 })
+
+function getColorValue(value, fallback = '#4a9fff') {
+  if (typeof value === 'string' && value.trim()) return value
+  return fallback
+}
 </script>
 
 <template>
@@ -193,12 +199,17 @@ const photoMetaSummary = computed(() => {
                 <div class="field-wrap">
                   <span class="field-label">条目背景色</span>
                   <div class="mt-2 flex items-center gap-2">
-                    <input
-                      type="color"
-                      :value="item.stripColor || resume.theme.primaryColor || '#4a9fff'"
-                      class="h-9 w-14 cursor-pointer rounded-md border border-slate-300 bg-white p-1"
-                      @input="item.stripColor = $event.target.value"
-                    />
+                    <div class="color-panel-wrap">
+                      <ColorPicker
+                        :model-value="getColorValue(item.stripColor, resume.theme.primaryColor || '#4a9fff')"
+                        format="RGBA"
+                        :enable-alpha="true"
+                        :show-primary-color-preview="false"
+                        :color-modes="['monochrome', 'linear-gradient']"
+                        @update:model-value="item.stripColor = $event"
+                        @change="item.stripColor = $event"
+                      />
+                    </div>
                     <button type="button" class="small-btn" @click="item.stripColor = ''">跟随主题</button>
                   </div>
                 </div>
@@ -363,9 +374,19 @@ const photoMetaSummary = computed(() => {
         </button>
       </div>
       <div v-if="panels.theme" class="panel-body mt-4 space-y-4">
-        <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-          <label class="field-label !mb-0">主题色（浅蓝系）</label>
-          <input v-model="resume.theme.primaryColor" type="color" class="h-9 w-14 cursor-pointer rounded-md border border-slate-300 bg-white p-1" />
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">主题色（支持透明）</label>
+          <div class="color-panel-wrap">
+            <ColorPicker
+              :model-value="getColorValue(resume.theme.primaryColor)"
+              format="RGBA"
+              :enable-alpha="true"
+              :show-primary-color-preview="false"
+              :color-modes="['monochrome', 'linear-gradient']"
+              @update:model-value="resume.theme.primaryColor = $event"
+              @change="resume.theme.primaryColor = $event"
+            />
+          </div>
         </div>
         <label class="switch-field"><input v-model="resume.theme.boldMajor" type="checkbox" class="h-4 w-4 accent-sky-600" /><span>专业加粗显示</span></label>
       </div>
