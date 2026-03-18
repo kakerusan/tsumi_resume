@@ -217,7 +217,10 @@ const hasAnyVisibleSection = computed(
           <div :class="['resume-identity', hasPhoto ? 'resume-identity--with-photo' : 'resume-identity--no-photo']">
             <div class="resume-info" :class="hasPhoto ? 'text-left' : 'text-center'" :style="hasPhoto ? resumeInfoStyle : null">
               <template v-if="showProfile">
-                <h2 class="title-font text-[18px] font-bold tracking-tight text-[color:var(--brand-deep)]">
+                <h2
+                  class="font-bold tracking-tight text-[color:var(--brand-name)]"
+                  style="font-family: var(--name-font); font-size: var(--name-font-size)"
+                >
                   {{ resume.profile.name || '你的姓名' }}
                 </h2>
                 <p v-if="profileTitle" class="mt-0 text-[12px] font-semibold text-slate-700">
@@ -246,10 +249,20 @@ const hasAnyVisibleSection = computed(
                   </span>
                   <span class="education-line-content">
                     <span class="education-school-wrap">
-                      <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
+                      <strong
+                        class="font-semibold text-[color:var(--brand-school)]"
+                        style="font-family: var(--school-font); font-size: var(--school-font-size)"
+                      >
+                        {{ item.school || '学校' }}
+                      </strong>
                     </span>
                     <span class="mx-1 text-slate-300">/</span>
-                    <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
+                    <strong
+                      class="font-semibold text-[color:var(--brand-school)]"
+                      style="font-size: var(--school-font-size)"
+                    >
+                      {{ item.degree || '学历' }}
+                    </strong>
                     <template v-if="item.major">
                       <span class="mx-1 text-slate-300">/</span>
                       <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
@@ -352,10 +365,20 @@ const hasAnyVisibleSection = computed(
                   </span>
                   <span class="education-line-content">
                     <span class="education-school-wrap">
-                      <strong class="font-semibold text-[color:var(--brand-deep)]">{{ item.school || '学校' }}</strong>
+                      <strong
+                        class="font-semibold text-[color:var(--brand-school)]"
+                        style="font-family: var(--school-font); font-size: var(--school-font-size)"
+                      >
+                        {{ item.school || '学校' }}
+                      </strong>
                     </span>
                     <span class="mx-1 text-slate-300">/</span>
-                    <strong class="font-semibold text-slate-800">{{ item.degree || '学历' }}</strong>
+                    <strong
+                      class="font-semibold text-[color:var(--brand-school)]"
+                      style="font-size: var(--school-font-size)"
+                    >
+                      {{ item.degree || '学历' }}
+                    </strong>
                     <template v-if="item.major">
                       <span class="mx-1 text-slate-300">/</span>
                       <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">

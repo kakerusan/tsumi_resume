@@ -9,6 +9,8 @@ import {
 } from './factories'
 import { normalizePhotoConfig } from './photoConfig'
 import { createDefaultLayout } from './sections'
+import { DEFAULT_NAME_FONT, DEFAULT_SCHOOL_FONT } from './nameFont'
+import { DEFAULT_NAME_FONT_SIZE, DEFAULT_SCHOOL_FONT_SIZE } from './typography'
 
 export function createEmptyResume() {
   return {
@@ -38,6 +40,12 @@ export function createEmptyResume() {
     layout: createDefaultLayout(),
     theme: {
       primaryColor: '#4a9fff',
+      nameColor: '',
+      schoolColor: '',
+      nameFont: DEFAULT_NAME_FONT,
+      nameFontSize: DEFAULT_NAME_FONT_SIZE,
+      schoolFont: DEFAULT_SCHOOL_FONT,
+      schoolFontSize: DEFAULT_SCHOOL_FONT_SIZE,
       boldMajor: false,
       educationFirst: true,
       photoConfig: normalizePhotoConfig(),
@@ -126,6 +134,12 @@ export function createDemoResume() {
     layout: createDefaultLayout(),
     theme: {
       primaryColor: '#4a9fff',
+      nameColor: '',
+      schoolColor: '',
+      nameFont: DEFAULT_NAME_FONT,
+      nameFontSize: DEFAULT_NAME_FONT_SIZE,
+      schoolFont: DEFAULT_SCHOOL_FONT,
+      schoolFontSize: DEFAULT_SCHOOL_FONT_SIZE,
       boldMajor: false,
       educationFirst: true,
       photoConfig: normalizePhotoConfig(),

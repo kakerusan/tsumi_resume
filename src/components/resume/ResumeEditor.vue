@@ -11,6 +11,15 @@ import {
   getPhotoHeightByRatio,
   normalizePhotoConfig,
 } from '../../modules/resume/photoConfig'
+import { NAME_FONT_OPTIONS } from '../../modules/resume/nameFont'
+import {
+  NAME_FONT_SIZE_MAX,
+  NAME_FONT_SIZE_MIN,
+  SCHOOL_FONT_SIZE_MAX,
+  SCHOOL_FONT_SIZE_MIN,
+  clampNameFontSize,
+  clampSchoolFontSize,
+} from '../../modules/resume/typography'
 
 const props = defineProps({
   resume: { type: Object, required: true },
@@ -82,8 +91,13 @@ function getColorValue(value, fallback = '#4a9fff') {
 props.resume.theme.photoConfig = normalizePhotoConfig(props.resume.theme?.photoConfig || {})
 
 const photoRatioOptions = PHOTO_RATIO_OPTIONS
+const nameFontOptions = NAME_FONT_OPTIONS
 const photoSizeMin = PHOTO_SIZE_MIN
 const photoSizeMax = PHOTO_SIZE_MAX
+const nameFontSizeMin = NAME_FONT_SIZE_MIN
+const nameFontSizeMax = NAME_FONT_SIZE_MAX
+const schoolFontSizeMin = SCHOOL_FONT_SIZE_MIN
+const schoolFontSizeMax = SCHOOL_FONT_SIZE_MAX
 const photoConfig = computed(() => props.resume.theme.photoConfig)
 
 function updatePhotoConfig(patch = {}) {
@@ -118,6 +132,14 @@ function onPhotoHeightChange(value) {
   updatePhotoConfig({
     height: clampPhotoSize(value, photoConfig.value.height),
   })
+}
+
+function onNameFontSizeChange(value) {
+  props.resume.theme.nameFontSize = clampNameFontSize(value, props.resume.theme.nameFontSize)
+}
+
+function onSchoolFontSizeChange(value) {
+  props.resume.theme.schoolFontSize = clampSchoolFontSize(value, props.resume.theme.schoolFontSize)
 }
 </script>
 
@@ -996,6 +1018,68 @@ function onPhotoHeightChange(value) {
       </div>
       <div v-if="panels.theme" class="panel-body mt-4 space-y-4">
         <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">姓名字体</label>
+          <select v-model="resume.theme.nameFont" class="field-input">
+            <option v-for="option in nameFontOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">姓名字号</label>
+          <div class="flex items-center gap-2">
+            <input
+              type="range"
+              class="w-full accent-sky-600"
+              :min="nameFontSizeMin"
+              :max="nameFontSizeMax"
+              :step="0.5"
+              :value="resume.theme.nameFontSize"
+              @input="onNameFontSizeChange($event.target.value)"
+            />
+            <input
+              type="number"
+              class="field-input !w-20 !px-2 !py-1.5 text-center"
+              :min="nameFontSizeMin"
+              :max="nameFontSizeMax"
+              :step="0.5"
+              :value="resume.theme.nameFontSize"
+              @input="onNameFontSizeChange($event.target.value)"
+            />
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">学校字体</label>
+          <select v-model="resume.theme.schoolFont" class="field-input">
+            <option v-for="option in nameFontOptions" :key="`school-${option.value}`" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">学校字号</label>
+          <div class="flex items-center gap-2">
+            <input
+              type="range"
+              class="w-full accent-sky-600"
+              :min="schoolFontSizeMin"
+              :max="schoolFontSizeMax"
+              :step="0.5"
+              :value="resume.theme.schoolFontSize"
+              @input="onSchoolFontSizeChange($event.target.value)"
+            />
+            <input
+              type="number"
+              class="field-input !w-20 !px-2 !py-1.5 text-center"
+              :min="schoolFontSizeMin"
+              :max="schoolFontSizeMax"
+              :step="0.5"
+              :value="resume.theme.schoolFontSize"
+              @input="onSchoolFontSizeChange($event.target.value)"
+            />
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
           <label class="field-label mb-2 block">主题色（支持透明）</label>
           <div class="color-panel-wrap">
             <ColorPicker
@@ -1007,6 +1091,40 @@ function onPhotoHeightChange(value) {
               @update:model-value="resume.theme.primaryColor = $event"
               @change="resume.theme.primaryColor = $event"
             />
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">姓名颜色</label>
+          <div class="flex items-center gap-2">
+            <div class="color-panel-wrap">
+              <ColorPicker
+                :model-value="getColorValue(resume.theme.nameColor, resume.theme.primaryColor || '#4a9fff')"
+                format="RGBA"
+                :enable-alpha="true"
+                :show-primary-color-preview="false"
+                :color-modes="['monochrome', 'linear-gradient']"
+                @update:model-value="resume.theme.nameColor = $event"
+                @change="resume.theme.nameColor = $event"
+              />
+            </div>
+            <button type="button" class="small-btn" @click="resume.theme.nameColor = ''">恢复默认</button>
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">学校颜色</label>
+          <div class="flex items-center gap-2">
+            <div class="color-panel-wrap">
+              <ColorPicker
+                :model-value="getColorValue(resume.theme.schoolColor, resume.theme.primaryColor || '#4a9fff')"
+                format="RGBA"
+                :enable-alpha="true"
+                :show-primary-color-preview="false"
+                :color-modes="['monochrome', 'linear-gradient']"
+                @update:model-value="resume.theme.schoolColor = $event"
+                @change="resume.theme.schoolColor = $event"
+              />
+            </div>
+            <button type="button" class="small-btn" @click="resume.theme.schoolColor = ''">恢复默认</button>
           </div>
         </div>
         <label class="switch-field">

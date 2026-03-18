@@ -10,6 +10,8 @@ import {
 import { normalizePhotoConfig } from './photoConfig'
 import { createDefaultLayout, normalizeLayoutOrder } from './sections'
 import { createEmptyResume } from './templates'
+import { normalizeNameFont, normalizeSchoolFont } from './nameFont'
+import { clampNameFontSize, clampSchoolFontSize } from './typography'
 
 function clone(data) {
   return JSON.parse(JSON.stringify(data))
@@ -91,6 +93,12 @@ export function normalizeResumeData(source = {}) {
   if (source.theme && typeof source.theme === 'object') {
     Object.assign(normalized.theme, source.theme)
   }
+  normalized.theme.nameColor = String(normalized.theme.nameColor || '')
+  normalized.theme.schoolColor = String(normalized.theme.schoolColor || '')
+  normalized.theme.nameFont = normalizeNameFont(normalized.theme.nameFont)
+  normalized.theme.nameFontSize = clampNameFontSize(normalized.theme.nameFontSize)
+  normalized.theme.schoolFont = normalizeSchoolFont(normalized.theme.schoolFont)
+  normalized.theme.schoolFontSize = clampSchoolFontSize(normalized.theme.schoolFontSize)
   normalized.theme.boldMajor = Boolean(normalized.theme.boldMajor)
   normalized.theme.educationFirst = normalized.theme.educationFirst !== false
   normalized.theme.photoConfig = normalizePhotoConfig(normalized.theme.photoConfig)

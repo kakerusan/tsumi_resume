@@ -12,7 +12,9 @@ import { normalizeResumeData } from '../modules/resume/normalize'
 import { normalizeLayoutOrder } from '../modules/resume/sections'
 import { createDemoResume, createEmptyResume } from '../modules/resume/templates'
 import { processProfilePhoto } from '../modules/resume/photo'
-import { deepBrandFrom } from '../modules/resume/color'
+import { deepBrandFrom, nameBrandFrom, schoolBrandFrom } from '../modules/resume/color'
+import { getNameFontFamily, getSchoolFontFamily } from '../modules/resume/nameFont'
+import { clampNameFontSize, clampSchoolFontSize } from '../modules/resume/typography'
 import {
   deleteResumeDraft,
   loadResumeDraft,
@@ -647,6 +649,12 @@ export function useResumeBuilder() {
   const brandStyle = computed(() => ({
     '--brand': resume.theme.primaryColor || '#4a9fff',
     '--brand-deep': deepBrandFrom(resume.theme.primaryColor),
+    '--brand-name': resume.theme.nameColor || nameBrandFrom(resume.theme.primaryColor),
+    '--brand-school': resume.theme.schoolColor || schoolBrandFrom(resume.theme.primaryColor),
+    '--name-font': getNameFontFamily(resume.theme.nameFont),
+    '--name-font-size': `${clampNameFontSize(resume.theme.nameFontSize)}px`,
+    '--school-font': getSchoolFontFamily(resume.theme.schoolFont),
+    '--school-font-size': `${clampSchoolFontSize(resume.theme.schoolFontSize)}px`,
   }))
 
   return {
