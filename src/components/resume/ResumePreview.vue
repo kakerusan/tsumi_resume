@@ -237,9 +237,9 @@ const hasAnyVisibleSection = computed(
                   v-for="item in visibleEducations"
                   :key="item.id"
                   class="education-line"
-                  :class="{ 'education-line--with-slot': hasEducationLogo }"
+                  :class="{ 'education-line--with-slot': item.logo }"
                 >
-                  <span v-if="hasEducationLogo" class="education-line-logo-slot">
+                  <span v-if="item.logo" class="education-line-logo-slot">
                     <img
                       v-if="item.logo"
                       :src="item.logo"
@@ -353,9 +353,9 @@ const hasAnyVisibleSection = computed(
                   v-for="item in visibleEducations"
                   :key="`edu-tail-${item.id}`"
                   class="education-line"
-                  :class="{ 'education-line--with-slot': hasEducationLogo }"
+                  :class="{ 'education-line--with-slot': item.logo }"
                 >
-                  <span v-if="hasEducationLogo" class="education-line-logo-slot">
+                  <span v-if="item.logo" class="education-line-logo-slot">
                     <img
                       v-if="item.logo"
                       :src="item.logo"
