@@ -20,6 +20,7 @@ import {
   clampNameFontSize,
   clampSchoolFontSize,
 } from '../../modules/resume/typography'
+import { createPersonalDetailItem } from '../../modules/resume/factories'
 import { ORDERABLE_SECTION_LABELS, normalizeLayoutOrder } from '../../modules/resume/sections'
 
 const props = defineProps({
@@ -91,6 +92,9 @@ function getColorValue(value, fallback = '#4a9fff') {
 }
 
 props.resume.theme.photoConfig = normalizePhotoConfig(props.resume.theme?.photoConfig || {})
+if (!Array.isArray(props.resume.profile.personalDetails)) {
+  props.resume.profile.personalDetails = []
+}
 
 const photoRatioOptions = PHOTO_RATIO_OPTIONS
 const nameFontOptions = NAME_FONT_OPTIONS
@@ -172,6 +176,23 @@ function onNameFontSizeChange(value) {
 function onSchoolFontSizeChange(value) {
   props.resume.theme.schoolFontSize = clampSchoolFontSize(value, props.resume.theme.schoolFontSize)
 }
+
+function addPersonalDetail() {
+  props.resume.profile.personalDetails.push(createPersonalDetailItem())
+}
+
+function removePersonalDetail(id) {
+  const index = props.resume.profile.personalDetails.findIndex((item) => item.id === id)
+  if (index >= 0) props.resume.profile.personalDetails.splice(index, 1)
+}
+
+function movePersonalDetail(index, offset) {
+  const list = props.resume.profile.personalDetails
+  const nextIndex = index + offset
+  if (index < 0 || nextIndex < 0 || index >= list.length || nextIndex >= list.length) return
+  const [target] = list.splice(index, 1)
+  list.splice(nextIndex, 0, target)
+}
 </script>
 
 <template>
@@ -249,6 +270,57 @@ function onSchoolFontSizeChange(value) {
           <span class="field-label">联系方式</span>
           <input v-model="resume.profile.phone" class="field-input" placeholder="请输入电话号" />
         </label>
+        <div class="field-wrap md:col-span-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <span class="field-label block">个人信息</span>
+              <p class="mt-1 text-xs text-slate-500">可添加 CET-6、GPA、排名、求职城市等头部信息。</p>
+            </div>
+            <button type="button" class="small-btn" @click="addPersonalDetail">+ 新增</button>
+          </div>
+          <div v-if="resume.profile.personalDetails.length" class="mt-3 space-y-2">
+            <div
+              v-for="(item, index) in resume.profile.personalDetails"
+              :key="item.id"
+              class="rounded-lg border border-slate-200 bg-white px-3 py-3"
+            >
+              <div class="grid gap-3 sm:grid-cols-[132px_1fr_auto]">
+                <label class="field-wrap">
+                  <span class="field-label">标签</span>
+                  <input v-model="item.label" class="field-input" placeholder="例如：GPA" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">内容</span>
+                  <input v-model="item.value" class="field-input" placeholder="例如：3.83/4.0" />
+                </label>
+                <div class="flex items-end gap-1.5">
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="movePersonalDetail(index, -1)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.profile.personalDetails.length - 1"
+                    @click="movePersonalDetail(index, 1)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="removePersonalDetail(item.id)">
+                    删除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p v-else class="mt-3 rounded-lg border border-dashed border-slate-300 px-3 py-3 text-sm text-slate-500">
+            还没有个人信息项，点击右上角“新增”即可添加。
+          </p>
+        </div>
         <label class="field-wrap md:col-span-3">
           <span class="field-label">个人网站</span>
           <input

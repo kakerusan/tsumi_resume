@@ -51,6 +51,31 @@ function cleanText(value = '') {
   return String(value).trim()
 }
 
+function getEducationDisplayParts(item = {}) {
+  const parts = []
+  const school = cleanText(item.school)
+  const major = cleanText(item.major)
+  const degree = cleanText(item.degree)
+  const studyPeriod = cleanText(item.studyPeriod)
+
+  if (school) parts.push({ key: 'school', text: school })
+  if (major) parts.push({ key: 'major', text: major })
+  if (degree) parts.push({ key: 'degree', text: degree })
+  if (studyPeriod) parts.push({ key: 'studyPeriod', text: studyPeriod })
+
+  return parts
+}
+
+function hasEducationContent(item = {}) {
+  return getEducationDisplayParts(item).length > 0
+}
+
+function formatPersonalDetail(item = {}) {
+  const label = cleanText(item.label)
+  const value = cleanText(item.value)
+  return label || value ? { label, value } : null
+}
+
 function formatWebsiteLabel(url = '') {
   return String(url).replace(/^https?:\/\//, '').replace(/\/$/, '')
 }
@@ -133,7 +158,9 @@ const sectionVisibility = computed(() => ({
   selfSummary: props.resume.sectionVisibility?.selfSummary !== false,
 }))
 
-const visibleEducations = computed(() => (props.resume.educations || []).filter((item) => !item.hidden))
+const visibleEducations = computed(() =>
+  (props.resume.educations || []).filter((item) => !item.hidden && hasEducationContent(item))
+)
 const showProfile = computed(() => sectionVisibility.value.profile)
 const showEducationSection = computed(() => sectionVisibility.value.education && visibleEducations.value.length > 0)
 const showHeader = computed(() => showProfile.value || showEducationSection.value)
@@ -165,6 +192,11 @@ const showSelfSummary = computed(() => {
 
 const educationFirst = computed(() => Boolean(props.resume.theme?.educationFirst))
 const profileTitle = computed(() => cleanText(props.resume.profile.title))
+const visiblePersonalDetails = computed(() =>
+  (props.resume.profile?.personalDetails || [])
+    .map((item) => formatPersonalDetail(item))
+    .filter(Boolean)
+)
 const sectionOrderMap = computed(() => {
   const map = {}
   normalizeLayoutOrder(props.resume.layout?.order).forEach((id, index) => {
@@ -241,33 +273,48 @@ const hasAnyVisibleSection = computed(
                     />
                   </span>
                   <span class="education-line-content">
-                    <span class="education-school-wrap">
-                      <strong
-                        class="font-semibold text-[color:var(--brand-school)]"
-                        style="font-family: var(--school-font); font-size: var(--school-font-size)"
-                      >
-                        {{ item.school || '学校' }}
-                      </strong>
-                    </span>
-                    <span class="mx-1 text-slate-300">/</span>
-                    <strong
-                      class="font-semibold text-[color:var(--brand-school)]"
-                      style="font-size: var(--school-font-size)"
-                    >
-                      {{ item.degree || '学历' }}
-                    </strong>
-                    <template v-if="item.major">
-                      <span class="mx-1 text-slate-300">/</span>
-                      <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
-                        {{ item.major }}
+                    <template v-for="(part, index) in getEducationDisplayParts(item)" :key="`${item.id}-${part.key}`">
+                      <span v-if="index > 0" class="mx-1 text-slate-300">/</span>
+                      <span v-if="part.key === 'school'" class="education-school-wrap">
+                        <strong
+                          class="font-semibold text-[color:var(--brand-school)]"
+                          style="font-family: var(--school-font); font-size: var(--school-font-size)"
+                        >
+                          {{ part.text }}
+                        </strong>
                       </span>
-                    </template>
-                    <template v-if="item.studyPeriod">
-                      <span class="mx-1 text-slate-300">/</span>
-                      <span class="text-slate-500">{{ item.studyPeriod }}</span>
+                      <strong v-else-if="part.key === 'major'" class="font-semibold text-slate-800">
+                        {{ part.text }}
+                      </strong>
+                      <span
+                        v-else-if="part.key === 'degree'"
+                        class="text-slate-600"
+                        style="font-size: var(--school-font-size)"
+                      >
+                        {{ part.text }}
+                      </span>
+                      <span v-else class="text-slate-500">{{ part.text }}</span>
                     </template>
                   </span>
                 </p>
+              </div>
+
+              <div
+                v-if="showProfile && visiblePersonalDetails.length"
+                class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] leading-5"
+                :class="hasPhoto ? 'justify-start' : 'justify-center'"
+              >
+                <template v-for="(item, index) in visiblePersonalDetails" :key="`personal-${index}-${item.label}-${item.value}`">
+                  <span v-if="index > 0" class="text-slate-300">/</span>
+                  <span>
+                    <strong v-if="item.label" class="font-semibold text-[color:var(--brand)]">{{ item.label }}</strong>
+                    <span v-if="item.label" class="text-[color:var(--brand)]">
+                      {{ item.value ? ':' : '' }}
+                    </span>
+                    <span v-if="item.label" class="text-[color:var(--brand)]">{{ item.value ? ' ' : '' }}</span>
+                    <span v-if="item.value" class="text-slate-500">{{ item.value }}</span>
+                  </span>
+                </template>
               </div>
 
               <div
@@ -357,30 +404,27 @@ const hasAnyVisibleSection = computed(
                     />
                   </span>
                   <span class="education-line-content">
-                    <span class="education-school-wrap">
-                      <strong
-                        class="font-semibold text-[color:var(--brand-school)]"
-                        style="font-family: var(--school-font); font-size: var(--school-font-size)"
-                      >
-                        {{ item.school || '学校' }}
-                      </strong>
-                    </span>
-                    <span class="mx-1 text-slate-300">/</span>
-                    <strong
-                      class="font-semibold text-[color:var(--brand-school)]"
-                      style="font-size: var(--school-font-size)"
-                    >
-                      {{ item.degree || '学历' }}
-                    </strong>
-                    <template v-if="item.major">
-                      <span class="mx-1 text-slate-300">/</span>
-                      <span :class="resume.theme.boldMajor ? 'font-semibold text-slate-800' : 'text-slate-600'">
-                        {{ item.major }}
+                    <template v-for="(part, index) in getEducationDisplayParts(item)" :key="`edu-tail-${item.id}-${part.key}`">
+                      <span v-if="index > 0" class="mx-1 text-slate-300">/</span>
+                      <span v-if="part.key === 'school'" class="education-school-wrap">
+                        <strong
+                          class="font-semibold text-[color:var(--brand-school)]"
+                          style="font-family: var(--school-font); font-size: var(--school-font-size)"
+                        >
+                          {{ part.text }}
+                        </strong>
                       </span>
-                    </template>
-                    <template v-if="item.studyPeriod">
-                      <span class="mx-1 text-slate-300">/</span>
-                      <span class="text-slate-500">{{ item.studyPeriod }}</span>
+                      <strong v-else-if="part.key === 'major'" class="font-semibold text-slate-800">
+                        {{ part.text }}
+                      </strong>
+                      <span
+                        v-else-if="part.key === 'degree'"
+                        class="text-slate-600"
+                        style="font-size: var(--school-font-size)"
+                      >
+                        {{ part.text }}
+                      </span>
+                      <span v-else class="text-slate-500">{{ part.text }}</span>
                     </template>
                   </span>
                 </p>

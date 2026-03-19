@@ -4,6 +4,7 @@ import {
   createCertificateItem,
   createEducationItem,
   createInternshipItem,
+  createPersonalDetailItem,
   createProjectItem,
   createSectionVisibility,
 } from './factories'
@@ -23,6 +24,7 @@ export function createEmptyResume() {
       phone: '',
       email: '',
       website: '',
+      personalDetails: [],
       photo: '',
       photoMeta: null,
     },
@@ -64,6 +66,18 @@ export function createDemoResume() {
       phone: '138****1234',
       email: 'zhangsan@example.com',
       website: 'https://github.com/zhangsan',
+      personalDetails: [
+        createPersonalDetailItem({
+          id: 'personal-detail-demo-1',
+          label: 'CET-6',
+          value: '612',
+        }),
+        createPersonalDetailItem({
+          id: 'personal-detail-demo-2',
+          label: 'GPA',
+          value: '3.83/4.0',
+        }),
+      ],
       photo: '',
       photoMeta: null,
     },

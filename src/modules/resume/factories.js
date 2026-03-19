@@ -24,6 +24,14 @@ export function createEducationItem(partial = {}) {
   }
 }
 
+export function createPersonalDetailItem(partial = {}) {
+  return {
+    id: partial.id || createId('personal-detail'),
+    label: partial.label || '',
+    value: partial.value || '',
+  }
+}
+
 export function createInternshipItem(partial = {}) {
   return {
     id: partial.id || createId('internship'),

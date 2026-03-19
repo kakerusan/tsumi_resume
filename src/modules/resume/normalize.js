@@ -4,6 +4,7 @@ import {
   createCertificateItem,
   createEducationItem,
   createInternshipItem,
+  createPersonalDetailItem,
   createProjectItem,
   createSectionVisibility,
 } from './factories'
@@ -22,6 +23,9 @@ export function normalizeResumeData(source = {}) {
 
   if (source.profile && typeof source.profile === 'object') {
     Object.assign(normalized.profile, source.profile)
+    normalized.profile.personalDetails = Array.isArray(source.profile.personalDetails)
+      ? source.profile.personalDetails.map((item) => createPersonalDetailItem(item))
+      : []
   }
 
   const sourceEducations = Array.isArray(source.educations)

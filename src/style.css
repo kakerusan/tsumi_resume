@@ -326,11 +326,11 @@
   }
 
   .resume-contacts--with-education-logo {
-    padding-left: 22px;
+    padding-left: 0;
   }
 
   .resume-identity--with-photo .resume-contacts--with-education-logo {
-    padding-left: 22px;
+    padding-left: 0;
   }
 
   .resume-section {
