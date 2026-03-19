@@ -127,8 +127,8 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white text-slate-700" :style="brandStyle">
-    <main class="mx-auto w-full max-w-[1480px] px-4 py-6 lg:px-8 lg:py-8">
+  <div class="app-shell min-h-screen bg-white text-slate-700" :style="brandStyle">
+    <main class="app-main mx-auto w-full max-w-[1480px] px-4 py-6 lg:px-8 lg:py-8">
       <ResumeToolbar
         @load-demo="loadDemo"
         @clear-all="requestClearAll"
@@ -256,7 +256,7 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
         </div>
       </section>
 
-      <section class="grid gap-5 xl:grid-cols-[560px_1fr]">
+      <section class="app-layout grid gap-5 xl:grid-cols-[560px_1fr]">
         <ResumeEditor
           :resume="resume"
           :panels="panels"
