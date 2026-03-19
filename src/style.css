@@ -212,6 +212,11 @@
     text-align: center;
   }
 
+  .internship-font-grid > :nth-child(2),
+  .internship-font-grid > :nth-child(3) {
+    display: none;
+  }
+
   .setting-slider-disabled .t-slider,
   .setting-slider .t-is-disabled {
     opacity: 0.6;
@@ -394,11 +399,13 @@
   }
 
   .entry-time {
-    @apply text-[12px] leading-5 text-slate-500;
+    @apply leading-5 text-slate-500;
+    font-size: var(--internship-time-font-size);
   }
 
   .entry-brand {
-    @apply flex flex-wrap items-center gap-x-1 text-[13px] font-bold leading-5 text-[color:var(--brand-deep)];
+    @apply flex flex-wrap items-center gap-x-1 font-bold leading-5 text-[color:var(--brand-deep)];
+    font-size: var(--internship-company-meta-font-size);
   }
 
   .entry-divider {
@@ -410,7 +417,8 @@
   }
 
   .entry-role {
-    @apply text-[13px] font-semibold leading-5 text-slate-700;
+    @apply font-semibold leading-5 text-slate-700;
+    font-size: var(--internship-role-font-size);
   }
 
   .entry-logo {
@@ -462,11 +470,13 @@
   }
 
   .project-entry-name {
-    @apply text-[13px] font-bold leading-5 text-slate-900;
+    @apply font-bold leading-5 text-slate-900;
+    font-size: var(--project-name-font-size);
   }
 
   .project-entry-meta {
-    @apply text-[12px] leading-5 text-slate-500;
+    @apply leading-5 text-slate-500;
+    font-size: var(--project-meta-font-size);
   }
 
   .project-tag-row {
@@ -474,7 +484,8 @@
   }
 
   .project-tag {
-    @apply rounded-sm bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium leading-4 text-sky-700;
+    @apply rounded-sm bg-sky-50 px-1.5 py-0.5 font-medium leading-4 text-sky-700;
+    font-size: var(--project-tag-font-size);
   }
 
   .project-summary {
@@ -510,23 +521,42 @@
   }
 
   .plain-meta-title {
-    @apply text-[13px] font-bold leading-5 text-slate-900;
+    @apply font-bold leading-5 text-slate-900;
   }
 
   .plain-meta-level {
-    @apply ml-2 text-[12px] font-medium text-sky-700;
+    @apply ml-2 font-medium text-sky-700;
   }
 
   .plain-meta-issuer {
-    @apply ml-2 text-[12px] font-normal text-slate-500;
+    @apply ml-2 font-normal text-slate-500;
   }
 
   .plain-meta-date {
-    @apply text-[12px] leading-5 text-slate-500;
+    @apply leading-5 text-slate-500;
   }
 
   .plain-meta-sub {
-    @apply text-[12px] leading-5 text-slate-500;
+    @apply leading-5 text-slate-500;
+  }
+
+  .plain-meta-title--award {
+    font-size: var(--award-title-font-size);
+  }
+
+  .plain-meta-level--award,
+  .plain-meta-issuer--award,
+  .plain-meta-date--award {
+    font-size: var(--award-meta-font-size);
+  }
+
+  .plain-meta-title--certificate {
+    font-size: var(--certificate-title-font-size);
+  }
+
+  .plain-meta-date--certificate,
+  .plain-meta-sub--certificate {
+    font-size: var(--certificate-meta-font-size);
   }
 
   .plain-meta-desc {

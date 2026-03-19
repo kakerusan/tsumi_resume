@@ -3,9 +3,19 @@ export const DEFAULT_SCHOOL_FONT_SIZE = 13
 export const DEFAULT_SKILLS_FONT_SIZE = 12.5
 export const DEFAULT_INTERNSHIP_SUMMARY_FONT_SIZE = 12.5
 export const DEFAULT_INTERNSHIP_HIGHLIGHTS_FONT_SIZE = 12.5
+export const DEFAULT_INTERNSHIP_TIME_FONT_SIZE = 12
+export const DEFAULT_INTERNSHIP_COMPANY_META_FONT_SIZE = 13
+export const DEFAULT_INTERNSHIP_ROLE_FONT_SIZE = 13
 export const DEFAULT_PROJECT_SUMMARY_FONT_SIZE = 12.5
 export const DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE = 12.5
+export const DEFAULT_PROJECT_NAME_FONT_SIZE = 13
+export const DEFAULT_PROJECT_META_FONT_SIZE = 12
+export const DEFAULT_PROJECT_TAG_FONT_SIZE = 11
+export const DEFAULT_AWARD_TITLE_FONT_SIZE = 13
+export const DEFAULT_AWARD_META_FONT_SIZE = 12
 export const DEFAULT_AWARD_DESCRIPTION_FONT_SIZE = 12.5
+export const DEFAULT_CERTIFICATE_TITLE_FONT_SIZE = 13
+export const DEFAULT_CERTIFICATE_META_FONT_SIZE = 12
 export const DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE = 12.5
 export const DEFAULT_SELF_SUMMARY_FONT_SIZE = 12.5
 
@@ -17,6 +27,10 @@ export const SCHOOL_FONT_SIZE_MAX = 22
 
 export const CONTENT_FONT_SIZE_MIN = 11
 export const CONTENT_FONT_SIZE_MAX = 16
+export const META_FONT_SIZE_MIN = 11
+export const META_FONT_SIZE_MAX = 16
+export const EMPHASIS_FONT_SIZE_MIN = 12
+export const EMPHASIS_FONT_SIZE_MAX = 18
 
 function clampSize(value, min, max, fallback) {
   const parsed = Number(value)
@@ -44,6 +58,21 @@ export function clampInternshipHighlightsFontSize(value, fallback = DEFAULT_INTE
   return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
 }
 
+export function clampInternshipTimeFontSize(value, fallback = DEFAULT_INTERNSHIP_TIME_FONT_SIZE) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
+export function clampInternshipCompanyMetaFontSize(
+  value,
+  fallback = DEFAULT_INTERNSHIP_COMPANY_META_FONT_SIZE
+) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
+export function clampInternshipRoleFontSize(value, fallback = DEFAULT_INTERNSHIP_ROLE_FONT_SIZE) {
+  return clampSize(value, EMPHASIS_FONT_SIZE_MIN, EMPHASIS_FONT_SIZE_MAX, fallback)
+}
+
 export function clampProjectSummaryFontSize(value, fallback = DEFAULT_PROJECT_SUMMARY_FONT_SIZE) {
   return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
 }
@@ -52,8 +81,36 @@ export function clampProjectHighlightsFontSize(value, fallback = DEFAULT_PROJECT
   return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
 }
 
+export function clampProjectNameFontSize(value, fallback = DEFAULT_PROJECT_NAME_FONT_SIZE) {
+  return clampSize(value, EMPHASIS_FONT_SIZE_MIN, EMPHASIS_FONT_SIZE_MAX, fallback)
+}
+
+export function clampProjectMetaFontSize(value, fallback = DEFAULT_PROJECT_META_FONT_SIZE) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
+export function clampProjectTagFontSize(value, fallback = DEFAULT_PROJECT_TAG_FONT_SIZE) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
+export function clampAwardTitleFontSize(value, fallback = DEFAULT_AWARD_TITLE_FONT_SIZE) {
+  return clampSize(value, EMPHASIS_FONT_SIZE_MIN, EMPHASIS_FONT_SIZE_MAX, fallback)
+}
+
+export function clampAwardMetaFontSize(value, fallback = DEFAULT_AWARD_META_FONT_SIZE) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
 export function clampAwardDescriptionFontSize(value, fallback = DEFAULT_AWARD_DESCRIPTION_FONT_SIZE) {
   return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampCertificateTitleFontSize(value, fallback = DEFAULT_CERTIFICATE_TITLE_FONT_SIZE) {
+  return clampSize(value, EMPHASIS_FONT_SIZE_MIN, EMPHASIS_FONT_SIZE_MAX, fallback)
+}
+
+export function clampCertificateMetaFontSize(value, fallback = DEFAULT_CERTIFICATE_META_FONT_SIZE) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
 }
 
 export function clampCertificateDescriptionFontSize(value, fallback = DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE) {

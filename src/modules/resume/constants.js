@@ -4,7 +4,7 @@ export const RESUME_DB_NAME = 'resume-builder-db'
 export const RESUME_DB_VERSION = 1
 export const RESUME_DRAFT_STORE = 'drafts'
 export const RESUME_DRAFT_KEY = 'current'
-export const SCHEMA_VERSION = 10
+export const SCHEMA_VERSION = 11
 
 export const PHOTO_RULES = {
   MAX_BYTES: 5 * 1024 * 1024,

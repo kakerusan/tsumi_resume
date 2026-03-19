@@ -13,13 +13,23 @@ import { createDefaultLayout, normalizeLayoutOrder } from './sections'
 import { createEmptyResume } from './templates'
 import { normalizeNameFont, normalizeSchoolFont } from './nameFont'
 import {
+  clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
+  clampAwardTitleFontSize,
+  clampCertificateMetaFontSize,
   clampCertificateDescriptionFontSize,
+  clampCertificateTitleFontSize,
+  clampInternshipCompanyMetaFontSize,
   clampInternshipHighlightsFontSize,
+  clampInternshipRoleFontSize,
   clampInternshipSummaryFontSize,
+  clampInternshipTimeFontSize,
   clampNameFontSize,
+  clampProjectMetaFontSize,
   clampProjectHighlightsFontSize,
+  clampProjectNameFontSize,
   clampProjectSummaryFontSize,
+  clampProjectTagFontSize,
   clampSchoolFontSize,
   clampSelfSummaryFontSize,
   clampSkillsFontSize,
@@ -117,9 +127,23 @@ export function normalizeResumeData(source = {}) {
   normalized.theme.skillsFontSize = clampSkillsFontSize(normalized.theme.skillsFontSize)
   normalized.theme.internshipSummaryFontSize = clampInternshipSummaryFontSize(normalized.theme.internshipSummaryFontSize)
   normalized.theme.internshipHighlightsFontSize = clampInternshipHighlightsFontSize(normalized.theme.internshipHighlightsFontSize)
+  normalized.theme.internshipTimeFontSize = clampInternshipTimeFontSize(normalized.theme.internshipTimeFontSize)
+  normalized.theme.internshipCompanyMetaFontSize = clampInternshipCompanyMetaFontSize(
+    normalized.theme.internshipCompanyMetaFontSize
+  )
+  normalized.theme.internshipRoleFontSize = clampInternshipRoleFontSize(normalized.theme.internshipRoleFontSize)
   normalized.theme.projectSummaryFontSize = clampProjectSummaryFontSize(normalized.theme.projectSummaryFontSize)
   normalized.theme.projectHighlightsFontSize = clampProjectHighlightsFontSize(normalized.theme.projectHighlightsFontSize)
+  normalized.theme.projectNameFontSize = clampProjectNameFontSize(normalized.theme.projectNameFontSize)
+  normalized.theme.projectMetaFontSize = clampProjectMetaFontSize(normalized.theme.projectMetaFontSize)
+  normalized.theme.projectTagFontSize = clampProjectTagFontSize(normalized.theme.projectTagFontSize)
+  normalized.theme.awardTitleFontSize = clampAwardTitleFontSize(normalized.theme.awardTitleFontSize)
+  normalized.theme.awardMetaFontSize = clampAwardMetaFontSize(normalized.theme.awardMetaFontSize)
   normalized.theme.awardDescriptionFontSize = clampAwardDescriptionFontSize(normalized.theme.awardDescriptionFontSize)
+  normalized.theme.certificateTitleFontSize = clampCertificateTitleFontSize(normalized.theme.certificateTitleFontSize)
+  normalized.theme.certificateMetaFontSize = clampCertificateMetaFontSize(
+    normalized.theme.certificateMetaFontSize
+  )
   normalized.theme.certificateDescriptionFontSize = clampCertificateDescriptionFontSize(normalized.theme.certificateDescriptionFontSize)
   normalized.theme.selfSummaryFontSize = clampSelfSummaryFontSize(normalized.theme.selfSummaryFontSize)
   normalized.theme.boldMajor = Boolean(normalized.theme.boldMajor)

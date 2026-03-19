@@ -15,14 +15,28 @@ import { NAME_FONT_OPTIONS } from '../../modules/resume/nameFont'
 import {
   CONTENT_FONT_SIZE_MAX,
   CONTENT_FONT_SIZE_MIN,
+  EMPHASIS_FONT_SIZE_MAX,
+  EMPHASIS_FONT_SIZE_MIN,
+  META_FONT_SIZE_MAX,
+  META_FONT_SIZE_MIN,
+  clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
+  clampAwardTitleFontSize,
+  clampCertificateMetaFontSize,
   clampCertificateDescriptionFontSize,
+  clampCertificateTitleFontSize,
+  clampInternshipCompanyMetaFontSize,
   clampInternshipHighlightsFontSize,
+  clampInternshipRoleFontSize,
   clampInternshipSummaryFontSize,
+  clampInternshipTimeFontSize,
   NAME_FONT_SIZE_MAX,
   NAME_FONT_SIZE_MIN,
+  clampProjectMetaFontSize,
   clampProjectHighlightsFontSize,
+  clampProjectNameFontSize,
   clampProjectSummaryFontSize,
+  clampProjectTagFontSize,
   SCHOOL_FONT_SIZE_MAX,
   SCHOOL_FONT_SIZE_MIN,
   clampNameFontSize,
@@ -116,6 +130,12 @@ const schoolFontSizeMin = SCHOOL_FONT_SIZE_MIN
 const schoolFontSizeMax = SCHOOL_FONT_SIZE_MAX
 const contentFontSizeMin = CONTENT_FONT_SIZE_MIN
 const contentFontSizeMax = CONTENT_FONT_SIZE_MAX
+const metaFontSizeMin = META_FONT_SIZE_MIN
+const metaFontSizeMax = META_FONT_SIZE_MAX
+const emphasisFontSizeMin = EMPHASIS_FONT_SIZE_MIN
+const emphasisFontSizeMax = EMPHASIS_FONT_SIZE_MAX
+const internshipHeaderFontSizeMin = Math.max(metaFontSizeMin, emphasisFontSizeMin)
+const internshipHeaderFontSizeMax = Math.min(metaFontSizeMax, emphasisFontSizeMax)
 const photoConfig = computed(() => props.resume.theme.photoConfig)
 const sliderInputProps = {
   theme: 'column',
@@ -207,6 +227,38 @@ function onInternshipHighlightsFontSizeChange(value) {
   )
 }
 
+function getInternshipHeaderFontSize() {
+  const values = [
+    clampInternshipTimeFontSize(props.resume.theme.internshipTimeFontSize),
+    clampInternshipCompanyMetaFontSize(props.resume.theme.internshipCompanyMetaFontSize),
+    clampInternshipRoleFontSize(props.resume.theme.internshipRoleFontSize),
+  ]
+  const average = values.reduce((sum, current) => sum + current, 0) / values.length
+  return Math.min(
+    internshipHeaderFontSizeMax,
+    Math.max(internshipHeaderFontSizeMin, Math.round(average * 10) / 10)
+  )
+}
+
+function onInternshipHeaderFontSizeChange(value) {
+  const nextValue = Math.min(
+    internshipHeaderFontSizeMax,
+    Math.max(internshipHeaderFontSizeMin, Math.round(Number(value) * 10) / 10)
+  )
+  props.resume.theme.internshipTimeFontSize = clampInternshipTimeFontSize(
+    nextValue,
+    props.resume.theme.internshipTimeFontSize
+  )
+  props.resume.theme.internshipCompanyMetaFontSize = clampInternshipCompanyMetaFontSize(
+    nextValue,
+    props.resume.theme.internshipCompanyMetaFontSize
+  )
+  props.resume.theme.internshipRoleFontSize = clampInternshipRoleFontSize(
+    nextValue,
+    props.resume.theme.internshipRoleFontSize
+  )
+}
+
 function onProjectSummaryFontSizeChange(value) {
   props.resume.theme.projectSummaryFontSize = clampProjectSummaryFontSize(
     value,
@@ -221,10 +273,59 @@ function onProjectHighlightsFontSizeChange(value) {
   )
 }
 
+function onProjectNameFontSizeChange(value) {
+  props.resume.theme.projectNameFontSize = clampProjectNameFontSize(
+    value,
+    props.resume.theme.projectNameFontSize
+  )
+}
+
+function onProjectMetaFontSizeChange(value) {
+  props.resume.theme.projectMetaFontSize = clampProjectMetaFontSize(
+    value,
+    props.resume.theme.projectMetaFontSize
+  )
+}
+
+function onProjectTagFontSizeChange(value) {
+  props.resume.theme.projectTagFontSize = clampProjectTagFontSize(
+    value,
+    props.resume.theme.projectTagFontSize
+  )
+}
+
+function onAwardTitleFontSizeChange(value) {
+  props.resume.theme.awardTitleFontSize = clampAwardTitleFontSize(
+    value,
+    props.resume.theme.awardTitleFontSize
+  )
+}
+
+function onAwardMetaFontSizeChange(value) {
+  props.resume.theme.awardMetaFontSize = clampAwardMetaFontSize(
+    value,
+    props.resume.theme.awardMetaFontSize
+  )
+}
+
 function onAwardDescriptionFontSizeChange(value) {
   props.resume.theme.awardDescriptionFontSize = clampAwardDescriptionFontSize(
     value,
     props.resume.theme.awardDescriptionFontSize
+  )
+}
+
+function onCertificateTitleFontSizeChange(value) {
+  props.resume.theme.certificateTitleFontSize = clampCertificateTitleFontSize(
+    value,
+    props.resume.theme.certificateTitleFontSize
+  )
+}
+
+function onCertificateMetaFontSizeChange(value) {
+  props.resume.theme.certificateMetaFontSize = clampCertificateMetaFontSize(
+    value,
+    props.resume.theme.certificateMetaFontSize
   )
 }
 
@@ -687,8 +788,48 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.internship" class="panel-body mt-4 space-y-3">
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <div class="internship-font-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">实习岗位信息字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="getInternshipHeaderFontSize()"
+                  :min="internshipHeaderFontSizeMin"
+                  :max="internshipHeaderFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onInternshipHeaderFontSizeChange"
+                />
+              </div>
+              <p class="mt-2 text-xs leading-5 text-slate-500">同步控制时间、公司信息和岗位</p>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">公司信息字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.internshipCompanyMetaFontSize"
+                  :min="metaFontSizeMin"
+                  :max="metaFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onInternshipCompanyMetaFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">岗位字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.internshipRoleFontSize"
+                  :min="emphasisFontSizeMin"
+                  :max="emphasisFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onInternshipRoleFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
             <label class="field-label mb-2 block">简介字号</label>
             <div class="setting-slider">
               <Slider
@@ -883,8 +1024,47 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.project" class="panel-body mt-4 space-y-3">
-        <div class="grid gap-3 sm:grid-cols-2">
-          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">项目名称字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.projectNameFontSize"
+                  :min="emphasisFontSizeMin"
+                  :max="emphasisFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onProjectNameFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">角色时间字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.projectMetaFontSize"
+                  :min="metaFontSizeMin"
+                  :max="metaFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onProjectMetaFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">技术栈字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.projectTagFontSize"
+                  :min="metaFontSizeMin"
+                  :max="metaFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onProjectTagFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
             <label class="field-label mb-2 block">简介字号</label>
             <div class="setting-slider">
               <Slider
@@ -1039,8 +1219,36 @@ function movePersonalDetail(index, offset) {
           />
         </button>
       </div>
-      <div v-if="panels.awards" class="panel-body mt-4 space-y-3">
-        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+        <div v-if="panels.awards" class="panel-body mt-4 space-y-3">
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">标题字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.awardTitleFontSize"
+                  :min="emphasisFontSizeMin"
+                  :max="emphasisFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onAwardTitleFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">元信息字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.awardMetaFontSize"
+                  :min="metaFontSizeMin"
+                  :max="metaFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onAwardMetaFontSizeChange"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
           <label class="field-label mb-2 block">描述字号</label>
           <div class="setting-slider">
             <Slider
@@ -1159,8 +1367,36 @@ function movePersonalDetail(index, offset) {
           />
         </button>
       </div>
-      <div v-if="panels.certificates" class="panel-body mt-4 space-y-3">
-        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+        <div v-if="panels.certificates" class="panel-body mt-4 space-y-3">
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">标题字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.certificateTitleFontSize"
+                  :min="emphasisFontSizeMin"
+                  :max="emphasisFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onCertificateTitleFontSizeChange"
+                />
+              </div>
+            </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+              <label class="field-label mb-2 block">元信息字号</label>
+              <div class="setting-slider">
+                <Slider
+                  :model-value="resume.theme.certificateMetaFontSize"
+                  :min="metaFontSizeMin"
+                  :max="metaFontSizeMax"
+                  :step="0.5"
+                  :input-number-props="sliderInputProps"
+                  @change="onCertificateMetaFontSizeChange"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
           <label class="field-label mb-2 block">描述字号</label>
           <div class="setting-slider">
             <Slider

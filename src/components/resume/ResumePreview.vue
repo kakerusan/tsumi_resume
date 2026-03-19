@@ -536,12 +536,12 @@ const hasAnyVisibleSection = computed(
         <div class="resume-list resume-list--compact">
           <article v-for="item in visibleAwards" :key="item.id" class="plain-meta">
             <div class="plain-meta-head">
-              <p class="plain-meta-title">
+              <p class="plain-meta-title plain-meta-title--award">
                 <span>{{ item.name || '奖项名称' }}</span>
-                <span v-if="cleanText(item.level)" class="plain-meta-level">{{ item.level }}</span>
-                <span v-if="cleanText(item.issuer)" class="plain-meta-issuer">· {{ item.issuer }}</span>
+                <span v-if="cleanText(item.level)" class="plain-meta-level plain-meta-level--award">{{ item.level }}</span>
+                <span v-if="cleanText(item.issuer)" class="plain-meta-issuer plain-meta-issuer--award">· {{ item.issuer }}</span>
               </p>
-              <p class="plain-meta-date">{{ item.date || '获奖时间' }}</p>
+              <p class="plain-meta-date plain-meta-date--award">{{ item.date || '获奖时间' }}</p>
             </div>
             <p v-if="cleanText(item.description)" class="plain-meta-desc plain-meta-desc--award" v-html="richText(item.description)"></p>
           </article>
@@ -556,10 +556,10 @@ const hasAnyVisibleSection = computed(
         <div class="resume-list resume-list--compact">
           <article v-for="item in visibleCertificates" :key="item.id" class="plain-meta">
             <div class="plain-meta-head">
-              <p class="plain-meta-title">{{ item.name || '证书名称' }}</p>
-              <p class="plain-meta-date">{{ item.date || '获得时间' }}</p>
+              <p class="plain-meta-title plain-meta-title--certificate">{{ item.name || '证书名称' }}</p>
+              <p class="plain-meta-date plain-meta-date--certificate">{{ item.date || '获得时间' }}</p>
             </div>
-            <p class="plain-meta-sub" v-if="cleanText(item.issuer) || cleanText(item.credentialId)">
+            <p class="plain-meta-sub plain-meta-sub--certificate" v-if="cleanText(item.issuer) || cleanText(item.credentialId)">
               <span v-if="cleanText(item.issuer)">{{ item.issuer }}</span>
               <span v-if="cleanText(item.issuer) && cleanText(item.credentialId)"> / </span>
               <span v-if="cleanText(item.credentialId)">编号：{{ item.credentialId }}</span>
