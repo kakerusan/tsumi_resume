@@ -20,6 +20,7 @@ import {
   clampNameFontSize,
   clampSchoolFontSize,
 } from '../../modules/resume/typography'
+import { ORDERABLE_SECTION_LABELS, normalizeLayoutOrder } from '../../modules/resume/sections'
 
 const props = defineProps({
   resume: { type: Object, required: true },
@@ -36,7 +37,8 @@ const props = defineProps({
   },
 })
 
-defineEmits([
+const emit = defineEmits([
+  'update-layout-order',
   'toggle-panel',
   'photo-change',
   'remove-photo',
@@ -103,6 +105,31 @@ const sliderInputProps = {
   theme: 'column',
   size: 'small',
 }
+const orderableSections = computed({
+  get() {
+    return normalizeLayoutOrder(props.resume.layout?.order).map((id) => ({
+      id,
+      label: ORDERABLE_SECTION_LABELS[id] || id,
+    }))
+  },
+  set(value) {
+    emit(
+      'update-layout-order',
+      value.map((item) => item.id)
+    )
+  },
+})
+const editorSectionOrderMap = computed(() => {
+  const map = {}
+  normalizeLayoutOrder(props.resume.layout?.order).forEach((id, index) => {
+    map[id] = index + 10
+  })
+  return map
+})
+
+function getEditorSectionOrder(id, fallback = 99) {
+  return editorSectionOrderMap.value[id] ?? fallback
+}
 
 function updatePhotoConfig(patch = {}) {
   props.resume.theme.photoConfig = normalizePhotoConfig({
@@ -149,7 +176,41 @@ function onSchoolFontSizeChange(value) {
 
 <template>
   <aside class="no-print flex flex-col gap-4 xl:sticky xl:top-5 xl:h-[calc(100vh-5rem)] xl:overflow-auto">
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: 100 }">
+      <div class="panel-head">
+        <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'layout')">
+          <span class="panel-caret">{{ panels.layout ? '▾' : '▸' }}</span>
+          <span class="panel-title">模块顺序管理</span>
+        </button>
+      </div>
+      <div v-if="panels.layout" class="panel-body mt-4 space-y-3">
+        <p class="text-sm leading-6 text-slate-500">
+          基本信息和教育背景固定在顶部，下面这些栏目可以自由拖拽排序。
+        </p>
+        <draggable
+          v-model="orderableSections"
+          item-key="id"
+          handle=".module-drag-handle"
+          class="space-y-2"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
+          <template #item="{ element: item, index }">
+            <div class="module-order-row flex items-center justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="text-xs font-semibold text-slate-400">{{ index + 1 }}</span>
+                <span class="truncate text-sm font-medium text-slate-700">{{ item.label }}</span>
+              </div>
+              <button type="button" class="module-drag-handle" title="拖拽排序">::</button>
+            </div>
+          </template>
+        </draggable>
+      </div>
+    </article>
+
+    <article class="panel-card" :style="{ order: 1 }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'profile')">
           <span class="panel-caret">{{ panels.profile ? '▾' : '▸' }}</span>
@@ -276,7 +337,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: 2 }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'education')">
           <span class="panel-caret">{{ panels.education ? '▾' : '▸' }}</span>
@@ -415,7 +476,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('skills') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'skills')">
           <span class="panel-caret">{{ panels.skills ? '▾' : '▸' }}</span>
@@ -449,7 +510,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('internships') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'internship')">
           <span class="panel-caret">{{ panels.internship ? '▾' : '▸' }}</span>
@@ -617,7 +678,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('projects') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'project')">
           <span class="panel-caret">{{ panels.project ? '▾' : '▸' }}</span>
@@ -738,7 +799,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('awards') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'awards')">
           <span class="panel-caret">{{ panels.awards ? '▾' : '▸' }}</span>
@@ -845,7 +906,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('certificates') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'certificates')">
           <span class="panel-caret">{{ panels.certificates ? '▾' : '▸' }}</span>
@@ -956,7 +1017,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('selfSummary') }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'selfSummary')">
           <span class="panel-caret">{{ panels.selfSummary ? '▾' : '▸' }}</span>
@@ -994,7 +1055,7 @@ function onSchoolFontSizeChange(value) {
       </div>
     </article>
 
-    <article class="panel-card">
+    <article class="panel-card" :style="{ order: 99 }">
       <div class="panel-head">
         <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'theme')">
           <span class="panel-caret">{{ panels.theme ? '▾' : '▸' }}</span>

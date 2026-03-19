@@ -92,6 +92,7 @@ export function createSectionVisibility(partial = {}) {
 
 export function createPanelsState() {
   return {
+    layout: true,
     profile: true,
     education: true,
     skills: true,

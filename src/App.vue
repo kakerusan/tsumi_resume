@@ -60,6 +60,7 @@ const {
   toggleCertificateHidden,
   moveCertificateUp,
   moveCertificateDown,
+  updateLayoutOrder,
   onPhotoChange,
   removePhoto,
   onPageOverflowChange,
@@ -220,6 +221,7 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
           :photo-upload-message="photoUploadMessage"
           :photo-upload-error="photoUploadError"
           :education-logo-feedback="educationLogoFeedback"
+          @update-layout-order="updateLayoutOrder"
           @toggle-panel="togglePanel"
           @photo-change="onPhotoChange"
           @remove-photo="removePhoto"

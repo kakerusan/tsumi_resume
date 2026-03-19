@@ -177,13 +177,6 @@ function getSectionOrder(id) {
   return sectionOrderMap.value[id] ?? 99
 }
 
-const headerOrder = computed(() => {
-  const orderList = []
-  if (showProfile.value) orderList.push(getSectionOrder('profile'))
-  if (showEducationSection.value) orderList.push(getSectionOrder('education'))
-  return orderList.length ? Math.min(...orderList) : 99
-})
-
 const contactItems = computed(() => {
   const items = []
   const phone = cleanText(props.resume.profile.phone)
@@ -213,7 +206,7 @@ const hasAnyVisibleSection = computed(
   <section class="glass-card flex justify-center p-2 sm:p-4 lg:p-5">
     <article id="resume-preview-page" ref="pageRef" class="resume-page resume-page--editorial">
       <div class="resume-flow">
-        <header v-if="showHeader" class="resume-head resume-head--plain" :style="{ order: headerOrder }">
+        <header v-if="showHeader" class="resume-head resume-head--plain">
           <div :class="['resume-identity', hasPhoto ? 'resume-identity--with-photo' : 'resume-identity--no-photo']">
             <div class="resume-info" :class="hasPhoto ? 'text-left' : 'text-center'" :style="hasPhoto ? resumeInfoStyle : null">
               <template v-if="showProfile">

@@ -1,6 +1,9 @@
-export const ORDERABLE_SECTION_IDS = [
+export const FIXED_HEADER_SECTION_IDS = [
   'profile',
   'education',
+]
+
+export const ORDERABLE_SECTION_IDS = [
   'skills',
   'internships',
   'projects',
@@ -10,8 +13,6 @@ export const ORDERABLE_SECTION_IDS = [
 ]
 
 export const ORDERABLE_SECTION_LABELS = {
-  profile: '基本信息',
-  education: '教育背景',
   skills: '技术栈',
   internships: '实习经历',
   projects: '项目经历',
