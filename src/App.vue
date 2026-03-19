@@ -28,7 +28,6 @@ const {
   saveDraft,
   restoreDraft,
   exportPdf,
-  exportImage,
   exportJson,
   triggerJsonImport,
   handleJsonImport,
@@ -115,7 +114,6 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
         @export-json="exportJson"
         @import-json="triggerJsonImport"
         @export-pdf="exportPdf"
-        @export-image="exportImage"
         @expand-all-panels="expandAllPanels"
         @collapse-all-panels="collapseAllPanels"
       />

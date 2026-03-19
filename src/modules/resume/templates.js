@@ -77,9 +77,9 @@ export function createDemoResume() {
       }),
       
     ],
-    skills: `• **编程语言**：熟练掌握 Java、Python，熟悉 JavaScript/TypeScript
-• **后端框架**：精通 Spring Boot、MyBatis，了解 Spring Cloud 微服务架构
-• **数据库**：熟悉 MySQL 优化与事务，掌握 Redis 缓存设计与使用`,
+    skills: `**编程语言**：熟练掌握 Java、Python，熟悉 JavaScript/TypeScript
+**后端框架**：精通 Spring Boot、MyBatis，了解 Spring Cloud 微服务架构
+**数据库**：熟悉 MySQL 优化与事务，掌握 Redis 缓存设计与使用`,
     internships: [
       createInternshipItem({
         id: 'internship-demo-1',
@@ -89,9 +89,9 @@ export function createDemoResume() {
         period: '2023.07 - 2023.12',
         location: '北京',
         summary: '参与业务系统开发，负责核心接口设计与性能优化工作。',
-        highlights: `• 使用 **Redis + 布隆过滤器** 解决缓存穿透问题，提升接口响应速度 30%
-• 优化数据库查询语句，通过索引优化将核心接口延迟降低 40%
-• 设计并实现消息队列异步处理机制，提升系统吞吐量 2 倍`,
+        highlights: `使用 **Redis + 布隆过滤器** 解决缓存穿透问题，提升接口响应速度 30%
+优化数据库查询语句，通过索引优化将核心接口延迟降低 40%
+设计并实现消息队列异步处理机制，提升系统吞吐量 2 倍`,
         logo: '',
       }),
     ],

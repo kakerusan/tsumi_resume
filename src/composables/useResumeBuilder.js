@@ -62,6 +62,8 @@ export function useResumeBuilder() {
     const raw = localStorage.getItem(PANELS_STORAGE_KEY)
     if (!raw) return
 
+    let svgUrl = ''
+
     try {
       const parsed = JSON.parse(raw)
       if (!parsed || typeof parsed !== 'object') return
@@ -243,9 +245,53 @@ export function useResumeBuilder() {
     return cssText
   }
 
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result || ''))
+      reader.onerror = () => reject(new Error('BLOB_TO_DATA_URL_FAILED'))
+      reader.readAsDataURL(blob)
+    })
+  }
+
+  async function toInlineImageUrl(src = '') {
+    const source = String(src || '').trim()
+    if (!source) return ''
+    if (source.startsWith('data:')) return source
+
+    const response = await fetch(source)
+    if (!response.ok) {
+      throw new Error('EXPORT_IMAGE_FETCH_FAILED')
+    }
+
+    const blob = await response.blob()
+    return blobToDataUrl(blob)
+  }
+
+  async function inlineCloneImages(node) {
+    const images = Array.from(node.querySelectorAll('img'))
+    await Promise.all(
+      images.map(async (image) => {
+        const src = image.currentSrc || image.src || image.getAttribute('src') || ''
+        if (!src) return
+
+        try {
+          const dataUrl = await toInlineImageUrl(src)
+          if (dataUrl) {
+            image.setAttribute('src', dataUrl)
+          }
+        } catch (error) {
+          console.warn('Inline export image failed:', src, error)
+        }
+      })
+    )
+  }
+
   function loadImage(src) {
     return new Promise((resolve, reject) => {
       const image = new Image()
+      image.decoding = 'sync'
+      image.crossOrigin = 'anonymous'
       image.onload = () => resolve(image)
       image.onerror = () => reject(new Error('IMAGE_LOAD_FAILED'))
       image.src = src
@@ -266,6 +312,7 @@ export function useResumeBuilder() {
       const cloned = target.cloneNode(true)
       const width = Math.ceil(target.scrollWidth)
       const height = Math.ceil(target.scrollHeight)
+      await inlineCloneImages(cloned)
       const cssText = readStyleText()
       const serialized = new XMLSerializer().serializeToString(cloned)
       const svgText = `
@@ -278,9 +325,12 @@ export function useResumeBuilder() {
           </foreignObject>
         </svg>
       `
-      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`
+      const svgBlob = new Blob([svgText], {
+        type: 'image/svg+xml;charset=utf-8',
+      })
+      svgUrl = URL.createObjectURL(svgBlob)
       const image = await loadImage(svgUrl)
-      const scale = 2
+      const scale = Math.max(2, Math.min(3, Math.ceil(window.devicePixelRatio || 1)))
       const canvas = document.createElement('canvas')
       canvas.width = width * scale
       canvas.height = height * scale
@@ -290,6 +340,7 @@ export function useResumeBuilder() {
       context.fillStyle = '#ffffff'
       context.fillRect(0, 0, canvas.width, canvas.height)
       context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(svgUrl)
 
       const url = canvas.toDataURL('image/png')
       const anchor = document.createElement('a')
@@ -681,7 +732,6 @@ export function useResumeBuilder() {
     saveDraft,
     restoreDraft,
     exportPdf,
-    exportImage,
     exportJson,
     triggerJsonImport,
     handleJsonImport,

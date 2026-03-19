@@ -7,7 +7,6 @@ defineEmits([
   'export-json',
   'import-json',
   'export-pdf',
-  'export-image',
   'expand-all-panels',
   'collapse-all-panels',
 ])
@@ -31,7 +30,6 @@ defineEmits([
         <button type="button" class="toolbar-btn" @click="$emit('collapse-all-panels')">全部收起</button>
         <button type="button" class="toolbar-btn" @click="$emit('export-json')">导出 JSON</button>
         <button type="button" class="toolbar-btn" @click="$emit('import-json')">导入 JSON</button>
-        <button type="button" class="toolbar-btn" @click="$emit('export-image')">导出 PNG</button>
         <button type="button" class="toolbar-btn toolbar-btn-primary" @click="$emit('export-pdf')">导出 PDF</button>
       </div>
     </div>
