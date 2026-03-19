@@ -14,7 +14,18 @@ import { createDemoResume, createEmptyResume } from '../modules/resume/templates
 import { processProfilePhoto } from '../modules/resume/photo'
 import { deepBrandFrom, nameBrandFrom, schoolBrandFrom } from '../modules/resume/color'
 import { getNameFontFamily, getSchoolFontFamily } from '../modules/resume/nameFont'
-import { clampNameFontSize, clampSchoolFontSize } from '../modules/resume/typography'
+import {
+  clampAwardDescriptionFontSize,
+  clampCertificateDescriptionFontSize,
+  clampInternshipHighlightsFontSize,
+  clampInternshipSummaryFontSize,
+  clampNameFontSize,
+  clampProjectHighlightsFontSize,
+  clampProjectSummaryFontSize,
+  clampSchoolFontSize,
+  clampSelfSummaryFontSize,
+  clampSkillsFontSize,
+} from '../modules/resume/typography'
 import {
   deleteResumeDraft,
   loadResumeDraft,
@@ -642,7 +653,7 @@ export function useResumeBuilder() {
       (item) => Boolean(String(item.company || item.summary || item.highlights || '').trim()) && !item.hidden
     )
     const hasProjects = resume.projects.some(
-      (item) => Boolean(String(item.name || item.summary || '').trim()) && !item.hidden
+      (item) => Boolean(String(item.name || item.summary || item.highlights || '').trim()) && !item.hidden
     )
     return hasSkills || hasInternships || hasProjects
   }
@@ -706,6 +717,14 @@ export function useResumeBuilder() {
     '--name-font-size': `${clampNameFontSize(resume.theme.nameFontSize)}px`,
     '--school-font': getSchoolFontFamily(resume.theme.schoolFont),
     '--school-font-size': `${clampSchoolFontSize(resume.theme.schoolFontSize)}px`,
+    '--skills-font-size': `${clampSkillsFontSize(resume.theme.skillsFontSize)}px`,
+    '--internship-summary-font-size': `${clampInternshipSummaryFontSize(resume.theme.internshipSummaryFontSize)}px`,
+    '--internship-highlights-font-size': `${clampInternshipHighlightsFontSize(resume.theme.internshipHighlightsFontSize)}px`,
+    '--project-summary-font-size': `${clampProjectSummaryFontSize(resume.theme.projectSummaryFontSize)}px`,
+    '--project-highlights-font-size': `${clampProjectHighlightsFontSize(resume.theme.projectHighlightsFontSize)}px`,
+    '--award-description-font-size': `${clampAwardDescriptionFontSize(resume.theme.awardDescriptionFontSize)}px`,
+    '--certificate-description-font-size': `${clampCertificateDescriptionFontSize(resume.theme.certificateDescriptionFontSize)}px`,
+    '--self-summary-font-size': `${clampSelfSummaryFontSize(resume.theme.selfSummaryFontSize)}px`,
   }))
 
   return {

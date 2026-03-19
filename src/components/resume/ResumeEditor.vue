@@ -13,12 +13,22 @@ import {
 } from '../../modules/resume/photoConfig'
 import { NAME_FONT_OPTIONS } from '../../modules/resume/nameFont'
 import {
+  CONTENT_FONT_SIZE_MAX,
+  CONTENT_FONT_SIZE_MIN,
+  clampAwardDescriptionFontSize,
+  clampCertificateDescriptionFontSize,
+  clampInternshipHighlightsFontSize,
+  clampInternshipSummaryFontSize,
   NAME_FONT_SIZE_MAX,
   NAME_FONT_SIZE_MIN,
+  clampProjectHighlightsFontSize,
+  clampProjectSummaryFontSize,
   SCHOOL_FONT_SIZE_MAX,
   SCHOOL_FONT_SIZE_MIN,
   clampNameFontSize,
   clampSchoolFontSize,
+  clampSelfSummaryFontSize,
+  clampSkillsFontSize,
 } from '../../modules/resume/typography'
 import { createPersonalDetailItem } from '../../modules/resume/factories'
 import { ORDERABLE_SECTION_LABELS, normalizeLayoutOrder } from '../../modules/resume/sections'
@@ -104,6 +114,8 @@ const nameFontSizeMin = NAME_FONT_SIZE_MIN
 const nameFontSizeMax = NAME_FONT_SIZE_MAX
 const schoolFontSizeMin = SCHOOL_FONT_SIZE_MIN
 const schoolFontSizeMax = SCHOOL_FONT_SIZE_MAX
+const contentFontSizeMin = CONTENT_FONT_SIZE_MIN
+const contentFontSizeMax = CONTENT_FONT_SIZE_MAX
 const photoConfig = computed(() => props.resume.theme.photoConfig)
 const sliderInputProps = {
   theme: 'column',
@@ -175,6 +187,59 @@ function onNameFontSizeChange(value) {
 
 function onSchoolFontSizeChange(value) {
   props.resume.theme.schoolFontSize = clampSchoolFontSize(value, props.resume.theme.schoolFontSize)
+}
+
+function onSkillsFontSizeChange(value) {
+  props.resume.theme.skillsFontSize = clampSkillsFontSize(value, props.resume.theme.skillsFontSize)
+}
+
+function onInternshipSummaryFontSizeChange(value) {
+  props.resume.theme.internshipSummaryFontSize = clampInternshipSummaryFontSize(
+    value,
+    props.resume.theme.internshipSummaryFontSize
+  )
+}
+
+function onInternshipHighlightsFontSizeChange(value) {
+  props.resume.theme.internshipHighlightsFontSize = clampInternshipHighlightsFontSize(
+    value,
+    props.resume.theme.internshipHighlightsFontSize
+  )
+}
+
+function onProjectSummaryFontSizeChange(value) {
+  props.resume.theme.projectSummaryFontSize = clampProjectSummaryFontSize(
+    value,
+    props.resume.theme.projectSummaryFontSize
+  )
+}
+
+function onProjectHighlightsFontSizeChange(value) {
+  props.resume.theme.projectHighlightsFontSize = clampProjectHighlightsFontSize(
+    value,
+    props.resume.theme.projectHighlightsFontSize
+  )
+}
+
+function onAwardDescriptionFontSizeChange(value) {
+  props.resume.theme.awardDescriptionFontSize = clampAwardDescriptionFontSize(
+    value,
+    props.resume.theme.awardDescriptionFontSize
+  )
+}
+
+function onCertificateDescriptionFontSizeChange(value) {
+  props.resume.theme.certificateDescriptionFontSize = clampCertificateDescriptionFontSize(
+    value,
+    props.resume.theme.certificateDescriptionFontSize
+  )
+}
+
+function onSelfSummaryFontSizeChange(value) {
+  props.resume.theme.selfSummaryFontSize = clampSelfSummaryFontSize(
+    value,
+    props.resume.theme.selfSummaryFontSize
+  )
 }
 
 function addPersonalDetail() {
@@ -574,7 +639,20 @@ function movePersonalDetail(index, offset) {
           />
         </button>
       </div>
-      <div v-if="panels.skills" class="panel-body mt-4">
+      <div v-if="panels.skills" class="panel-body mt-4 space-y-3">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">正文字号</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.skillsFontSize"
+              :min="contentFontSizeMin"
+              :max="contentFontSizeMax"
+              :step="0.5"
+              :input-number-props="sliderInputProps"
+              @change="onSkillsFontSizeChange"
+            />
+          </div>
+        </div>
         <label class="field-wrap">
           <span class="field-label">技能内容（支持 **加粗**）</span>
           <textarea v-model="resume.skills" class="field-input field-textarea h-40"></textarea>
@@ -609,6 +687,34 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.internship" class="panel-body mt-4 space-y-3">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">简介字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.internshipSummaryFontSize"
+                :min="contentFontSizeMin"
+                :max="contentFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onInternshipSummaryFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">亮点字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.internshipHighlightsFontSize"
+                :min="contentFontSizeMin"
+                :max="contentFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onInternshipHighlightsFontSizeChange"
+              />
+            </div>
+          </div>
+        </div>
         <div
           v-if="!resume.internships.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
@@ -777,6 +883,34 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.project" class="panel-body mt-4 space-y-3">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">简介字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.projectSummaryFontSize"
+                :min="contentFontSizeMin"
+                :max="contentFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onProjectSummaryFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">亮点字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.projectHighlightsFontSize"
+                :min="contentFontSizeMin"
+                :max="contentFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onProjectHighlightsFontSizeChange"
+              />
+            </div>
+          </div>
+        </div>
         <div
           v-if="!resume.projects.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
@@ -906,6 +1040,19 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.awards" class="panel-body mt-4 space-y-3">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">描述字号</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.awardDescriptionFontSize"
+              :min="contentFontSizeMin"
+              :max="contentFontSizeMax"
+              :step="0.5"
+              :input-number-props="sliderInputProps"
+              @change="onAwardDescriptionFontSizeChange"
+            />
+          </div>
+        </div>
         <div
           v-if="!resume.awards.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
@@ -1013,6 +1160,19 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.certificates" class="panel-body mt-4 space-y-3">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">描述字号</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.certificateDescriptionFontSize"
+              :min="contentFontSizeMin"
+              :max="contentFontSizeMax"
+              :step="0.5"
+              :input-number-props="sliderInputProps"
+              @change="onCertificateDescriptionFontSizeChange"
+            />
+          </div>
+        </div>
         <div
           v-if="!resume.certificates.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
@@ -1124,6 +1284,19 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.selfSummary" class="panel-body mt-4 space-y-3">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">正文字号</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.selfSummaryFontSize"
+              :min="contentFontSizeMin"
+              :max="contentFontSizeMax"
+              :step="0.5"
+              :input-number-props="sliderInputProps"
+              @change="onSelfSummaryFontSizeChange"
+            />
+          </div>
+        </div>
         <label class="field-wrap">
           <span class="field-label">内容</span>
           <textarea v-model="resume.selfSummary.content" class="field-input field-textarea h-28"></textarea>

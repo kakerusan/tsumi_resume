@@ -356,7 +356,9 @@
   }
 
   .skill-line {
-    @apply flex items-start gap-2 text-[12.5px] leading-5 text-slate-800;
+    @apply flex items-start gap-2 text-slate-800;
+    font-size: var(--skills-font-size);
+    line-height: 1.6;
   }
 
   .skill-line-dot {
@@ -408,7 +410,7 @@
   }
 
   .entry-role {
-    @apply text-[12px] leading-5 text-slate-700;
+    @apply text-[13px] font-semibold leading-5 text-slate-700;
   }
 
   .entry-logo {
@@ -424,7 +426,9 @@
   }
 
   .entry-summary {
-    @apply text-[12.5px] leading-5 text-slate-800;
+    @apply text-slate-800;
+    font-size: var(--internship-summary-font-size);
+    line-height: 1.6;
   }
 
   .entry-label {
@@ -436,7 +440,9 @@
   }
 
   .entry-bullet {
-    @apply flex items-start gap-2 text-[12.5px] leading-5 text-slate-800;
+    @apply flex items-start gap-2 text-slate-800;
+    font-size: var(--internship-highlights-font-size);
+    line-height: 1.6;
   }
 
   .entry-bullet-dot {
@@ -472,7 +478,9 @@
   }
 
   .project-summary {
-    @apply text-[12.5px] leading-5 text-slate-500;
+    @apply text-slate-500;
+    font-size: var(--project-summary-font-size);
+    line-height: 1.6;
   }
 
   .project-summary-label {
@@ -484,7 +492,9 @@
   }
 
   .project-highlight-item {
-    @apply flex items-start gap-2 text-[12.5px] leading-5 text-slate-900;
+    @apply flex items-start gap-2 text-slate-900;
+    font-size: var(--project-highlights-font-size);
+    line-height: 1.6;
   }
 
   .project-highlight-dot {
@@ -520,11 +530,22 @@
   }
 
   .plain-meta-desc {
-    @apply text-[12.5px] leading-5 text-slate-800;
+    @apply text-slate-800;
+    line-height: 1.6;
+  }
+
+  .plain-meta-desc--award {
+    font-size: var(--award-description-font-size);
+  }
+
+  .plain-meta-desc--certificate {
+    font-size: var(--certificate-description-font-size);
   }
 
   .summary-text {
-    @apply mt-2 text-[12.5px] leading-5 text-slate-800;
+    @apply mt-2 text-slate-800;
+    font-size: var(--self-summary-font-size);
+    line-height: 1.6;
   }
 }
 

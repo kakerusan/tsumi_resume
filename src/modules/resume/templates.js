@@ -11,7 +11,18 @@ import {
 import { normalizePhotoConfig } from './photoConfig'
 import { createDefaultLayout } from './sections'
 import { DEFAULT_NAME_FONT, DEFAULT_SCHOOL_FONT } from './nameFont'
-import { DEFAULT_NAME_FONT_SIZE, DEFAULT_SCHOOL_FONT_SIZE } from './typography'
+import {
+  DEFAULT_AWARD_DESCRIPTION_FONT_SIZE,
+  DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE,
+  DEFAULT_INTERNSHIP_HIGHLIGHTS_FONT_SIZE,
+  DEFAULT_INTERNSHIP_SUMMARY_FONT_SIZE,
+  DEFAULT_NAME_FONT_SIZE,
+  DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE,
+  DEFAULT_PROJECT_SUMMARY_FONT_SIZE,
+  DEFAULT_SCHOOL_FONT_SIZE,
+  DEFAULT_SELF_SUMMARY_FONT_SIZE,
+  DEFAULT_SKILLS_FONT_SIZE,
+} from './typography'
 
 export function createEmptyResume() {
   return {
@@ -48,6 +59,14 @@ export function createEmptyResume() {
       nameFontSize: DEFAULT_NAME_FONT_SIZE,
       schoolFont: DEFAULT_SCHOOL_FONT,
       schoolFontSize: DEFAULT_SCHOOL_FONT_SIZE,
+      skillsFontSize: DEFAULT_SKILLS_FONT_SIZE,
+      internshipSummaryFontSize: DEFAULT_INTERNSHIP_SUMMARY_FONT_SIZE,
+      internshipHighlightsFontSize: DEFAULT_INTERNSHIP_HIGHLIGHTS_FONT_SIZE,
+      projectSummaryFontSize: DEFAULT_PROJECT_SUMMARY_FONT_SIZE,
+      projectHighlightsFontSize: DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE,
+      awardDescriptionFontSize: DEFAULT_AWARD_DESCRIPTION_FONT_SIZE,
+      certificateDescriptionFontSize: DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE,
+      selfSummaryFontSize: DEFAULT_SELF_SUMMARY_FONT_SIZE,
       boldMajor: false,
       educationFirst: true,
       photoConfig: normalizePhotoConfig(),
@@ -154,6 +173,14 @@ export function createDemoResume() {
       nameFontSize: DEFAULT_NAME_FONT_SIZE,
       schoolFont: DEFAULT_SCHOOL_FONT,
       schoolFontSize: DEFAULT_SCHOOL_FONT_SIZE,
+      skillsFontSize: DEFAULT_SKILLS_FONT_SIZE,
+      internshipSummaryFontSize: DEFAULT_INTERNSHIP_SUMMARY_FONT_SIZE,
+      internshipHighlightsFontSize: DEFAULT_INTERNSHIP_HIGHLIGHTS_FONT_SIZE,
+      projectSummaryFontSize: DEFAULT_PROJECT_SUMMARY_FONT_SIZE,
+      projectHighlightsFontSize: DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE,
+      awardDescriptionFontSize: DEFAULT_AWARD_DESCRIPTION_FONT_SIZE,
+      certificateDescriptionFontSize: DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE,
+      selfSummaryFontSize: DEFAULT_SELF_SUMMARY_FONT_SIZE,
       boldMajor: false,
       educationFirst: true,
       photoConfig: normalizePhotoConfig(),

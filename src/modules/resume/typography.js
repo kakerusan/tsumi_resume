@@ -1,11 +1,22 @@
 export const DEFAULT_NAME_FONT_SIZE = 18
 export const DEFAULT_SCHOOL_FONT_SIZE = 13
+export const DEFAULT_SKILLS_FONT_SIZE = 12.5
+export const DEFAULT_INTERNSHIP_SUMMARY_FONT_SIZE = 12.5
+export const DEFAULT_INTERNSHIP_HIGHLIGHTS_FONT_SIZE = 12.5
+export const DEFAULT_PROJECT_SUMMARY_FONT_SIZE = 12.5
+export const DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE = 12.5
+export const DEFAULT_AWARD_DESCRIPTION_FONT_SIZE = 12.5
+export const DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE = 12.5
+export const DEFAULT_SELF_SUMMARY_FONT_SIZE = 12.5
 
 export const NAME_FONT_SIZE_MIN = 14
 export const NAME_FONT_SIZE_MAX = 32
 
 export const SCHOOL_FONT_SIZE_MIN = 11
 export const SCHOOL_FONT_SIZE_MAX = 22
+
+export const CONTENT_FONT_SIZE_MIN = 11
+export const CONTENT_FONT_SIZE_MAX = 16
 
 function clampSize(value, min, max, fallback) {
   const parsed = Number(value)
@@ -19,4 +30,36 @@ export function clampNameFontSize(value, fallback = DEFAULT_NAME_FONT_SIZE) {
 
 export function clampSchoolFontSize(value, fallback = DEFAULT_SCHOOL_FONT_SIZE) {
   return clampSize(value, SCHOOL_FONT_SIZE_MIN, SCHOOL_FONT_SIZE_MAX, fallback)
+}
+
+export function clampSkillsFontSize(value, fallback = DEFAULT_SKILLS_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampInternshipSummaryFontSize(value, fallback = DEFAULT_INTERNSHIP_SUMMARY_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampInternshipHighlightsFontSize(value, fallback = DEFAULT_INTERNSHIP_HIGHLIGHTS_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampProjectSummaryFontSize(value, fallback = DEFAULT_PROJECT_SUMMARY_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampProjectHighlightsFontSize(value, fallback = DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampAwardDescriptionFontSize(value, fallback = DEFAULT_AWARD_DESCRIPTION_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampCertificateDescriptionFontSize(value, fallback = DEFAULT_CERTIFICATE_DESCRIPTION_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampSelfSummaryFontSize(value, fallback = DEFAULT_SELF_SUMMARY_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
 }

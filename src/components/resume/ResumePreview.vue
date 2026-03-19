@@ -543,7 +543,7 @@ const hasAnyVisibleSection = computed(
               </p>
               <p class="plain-meta-date">{{ item.date || '获奖时间' }}</p>
             </div>
-            <p v-if="cleanText(item.description)" class="plain-meta-desc" v-html="richText(item.description)"></p>
+            <p v-if="cleanText(item.description)" class="plain-meta-desc plain-meta-desc--award" v-html="richText(item.description)"></p>
           </article>
         </div>
       </section>
@@ -564,7 +564,7 @@ const hasAnyVisibleSection = computed(
               <span v-if="cleanText(item.issuer) && cleanText(item.credentialId)"> / </span>
               <span v-if="cleanText(item.credentialId)">编号：{{ item.credentialId }}</span>
             </p>
-            <p v-if="cleanText(item.description)" class="plain-meta-desc" v-html="richText(item.description)"></p>
+            <p v-if="cleanText(item.description)" class="plain-meta-desc plain-meta-desc--certificate" v-html="richText(item.description)"></p>
           </article>
         </div>
       </section>
