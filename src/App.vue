@@ -1,5 +1,6 @@
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
+import { Dialog } from 'tdesign-vue-next'
 import ResumeEditor from './components/resume/ResumeEditor.vue'
 import ResumePreview from './components/resume/ResumePreview.vue'
 import ResumeToolbar from './components/resume/ResumeToolbar.vue'
@@ -74,9 +75,30 @@ const dismissedNotices = reactive({
   exportWarning: false,
   pageOverflow: false,
 })
+const clearConfirmVisible = ref(false)
+const clearConfirmLoading = ref(false)
 
 function dismissNotice(type) {
   dismissedNotices[type] = true
+}
+
+function requestClearAll() {
+  clearConfirmVisible.value = true
+}
+
+function closeClearConfirm() {
+  if (clearConfirmLoading.value) return
+  clearConfirmVisible.value = false
+}
+
+async function confirmClearAll() {
+  clearConfirmLoading.value = true
+  try {
+    await clearAll()
+    clearConfirmVisible.value = false
+  } finally {
+    clearConfirmLoading.value = false
+  }
 }
 
 watch(() => jsonStatusMessage.value, () => {
@@ -109,7 +131,7 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
     <main class="mx-auto w-full max-w-[1480px] px-4 py-6 lg:px-8 lg:py-8">
       <ResumeToolbar
         @load-demo="loadDemo"
-        @clear-all="clearAll"
+        @clear-all="requestClearAll"
         @save-draft="saveDraft"
         @restore-draft="restoreDraft"
         @export-json="exportJson"
@@ -118,6 +140,26 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
         @expand-all-panels="expandAllPanels"
         @collapse-all-panels="collapseAllPanels"
       />
+
+      <Dialog
+        v-model:visible="clearConfirmVisible"
+        header="确认清空当前内容"
+        placement="center"
+        width="480px"
+        destroy-on-close
+        :close-on-overlay-click="!clearConfirmLoading"
+        :close-on-esc-keydown="!clearConfirmLoading"
+        :confirm-btn="{ content: '确认清空', theme: 'danger', loading: clearConfirmLoading }"
+        :cancel-btn="{ content: '取消', disabled: clearConfirmLoading }"
+        @confirm="confirmClearAll"
+        @close="closeClearConfirm"
+        @cancel="closeClearConfirm"
+      >
+        <div class="space-y-2 text-[15px] leading-7 text-slate-700">
+          <p>这会清空当前简历内容，并删除本地草稿。</p>
+          <p class="text-slate-500">如果有还没导出的修改，清空后将无法恢复。</p>
+        </div>
+      </Dialog>
 
       <input
         ref="jsonInputRef"
