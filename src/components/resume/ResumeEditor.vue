@@ -861,6 +861,14 @@ function movePersonalDetail(index, offset) {
                     placeholder="建议包含业务目标、核心能力和结果"
                   ></textarea>
                 </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">项目亮点（每行一条）</span>
+                  <textarea
+                    v-model="item.highlights"
+                    class="field-input field-textarea h-32"
+                    placeholder="例如：&#10;实现 JWT + RSA 非对称鉴权&#10;设计 Redis 缓存和限流策略"
+                  ></textarea>
+                </label>
               </div>
             </article>
           </template>

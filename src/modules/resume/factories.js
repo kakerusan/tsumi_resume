@@ -58,6 +58,7 @@ export function createProjectItem(partial = {}) {
     period: partial.period || '',
     tags: partial.tags || '',
     summary: partial.summary || '',
+    highlights: partial.highlights || '',
   }
 }
 

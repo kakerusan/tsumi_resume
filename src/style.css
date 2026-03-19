@@ -471,6 +471,26 @@
     @apply rounded-sm bg-sky-50 px-1.5 py-0.5 text-[11px] font-medium leading-4 text-sky-700;
   }
 
+  .project-summary {
+    @apply text-[12.5px] leading-5 text-slate-500;
+  }
+
+  .project-summary-label {
+    @apply font-semibold text-slate-600;
+  }
+
+  .project-highlights {
+    @apply space-y-0.5;
+  }
+
+  .project-highlight-item {
+    @apply flex items-start gap-2 text-[12.5px] leading-5 text-slate-900;
+  }
+
+  .project-highlight-dot {
+    @apply mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--brand)];
+  }
+
   .plain-meta {
     @apply space-y-0.5;
   }

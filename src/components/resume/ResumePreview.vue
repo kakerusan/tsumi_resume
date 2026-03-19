@@ -514,10 +514,16 @@ const hasAnyVisibleSection = computed(
                 </span>
               </div>
             </div>
-            <p v-if="cleanText(item.summary)" class="entry-summary">
-              <span class="entry-label">简介：</span>
+            <p v-if="cleanText(item.summary)" class="project-summary">
+              <span class="project-summary-label">简介：</span>
               <span v-html="richText(item.summary)"></span>
             </p>
+            <ul v-if="splitLines(item.highlights).length" class="project-highlights">
+              <li v-for="(line, index) in splitLines(item.highlights)" :key="`${item.id}-project-highlight-${index}`" class="project-highlight-item">
+                <span class="project-highlight-dot"></span>
+                <span v-html="richText(line)"></span>
+              </li>
+            </ul>
           </article>
         </div>
       </section>
