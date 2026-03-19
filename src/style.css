@@ -224,7 +224,9 @@
 
   .resume-page {
     width: min(100%, 820px);
-    min-height: 1100px;
+    height: 1122px;
+    min-height: 1122px;
+    overflow: hidden;
     background: #ffffff;
     border: 1px solid rgba(175, 216, 247, 0.8);
     box-shadow:
@@ -622,7 +624,9 @@
 
   .resume-page {
     width: 100%;
-    min-height: auto;
+    height: 1122px;
+    min-height: 1122px;
+    overflow: hidden;
     border: none;
     box-shadow: none;
     border-radius: 0;
