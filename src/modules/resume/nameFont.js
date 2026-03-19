@@ -1,5 +1,5 @@
-export const DEFAULT_NAME_FONT = 'serif'
-export const DEFAULT_SCHOOL_FONT = 'serif'
+export const DEFAULT_NAME_FONT = 'sans'
+export const DEFAULT_SCHOOL_FONT = 'sans'
 
 export const NAME_FONT_OPTIONS = [
   { value: 'serif', label: '衬线正式' },
