@@ -61,6 +61,11 @@ const emit = defineEmits([
   'toggle-project-hidden',
   'move-project-up',
   'move-project-down',
+  'add-research-experience',
+  'remove-research-experience',
+  'toggle-research-experience-hidden',
+  'move-research-experience-up',
+  'move-research-experience-down',
   'add-award',
   'remove-award',
   'toggle-award-hidden',
@@ -674,6 +679,170 @@ function onSchoolFontSizeChange(value) {
         </draggable>
         <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-internship')">
           + 新增实习经历
+        </button>
+      </div>
+    </article>
+
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('researchExperiences') }">
+      <div class="panel-head">
+        <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'research')">
+          <span class="panel-caret">{{ panels.research ? '▾' : '▸' }}</span>
+          <span class="panel-title">科研经历</span>
+        </button>
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.researchExperiences ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.researchExperiences = !resume.sectionVisibility.researchExperiences"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.researchExperiences"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+        </button>
+      </div>
+      <div v-if="panels.research" class="panel-body mt-4 space-y-3">
+        <div
+          v-if="!resume.researchExperiences.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无科研经历，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.researchExperiences"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
+          <template #item="{ element: item, index }">
+            <article class="sub-card drag-item">
+              <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <button type="button" class="drag-handle" title="拖拽排序">::</button>
+                  <span class="text-sm font-semibold text-slate-800">科研 {{ index + 1 }}</span>
+                  <span
+                    v-if="item.hidden"
+                    class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                  >
+                    已隐藏（预览不显示）
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" class="small-btn" @click="$emit('toggle-research-experience-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-research-experience-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.researchExperiences.length - 1"
+                    @click="$emit('move-research-experience-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn small-btn-danger"
+                    @click="$emit('remove-research-experience', item.id)"
+                  >
+                    删除
+                  </button>
+                </div>
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">科研课题 / 方向</span>
+                  <input v-model="item.title" class="field-input" placeholder="例如：具身智能导航中的多模态感知研究" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">实验室 / 课题组</span>
+                  <input v-model="item.lab" class="field-input" placeholder="例如：智能感知与机器人实验室" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">角色 / 身份</span>
+                  <input v-model="item.role" class="field-input" placeholder="例如：本科科研助理 / 一作" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">指导老师</span>
+                  <input v-model="item.supervisor" class="field-input" placeholder="例如：李某某教授" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">时间</span>
+                  <input v-model="item.period" class="field-input" placeholder="例如：2024.03 - 2025.01" />
+                </label>
+                <label class="switch-field sm:col-span-2">
+                  <input v-model="item.hidePaperInfo" type="checkbox" class="h-4 w-4 accent-sky-600" />
+                  <span>隐藏论文信息区域（适用于暂未发表/投稿的情况）</span>
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">论文标题 / 成果标题</span>
+                  <input
+                    v-model="item.paperTitle"
+                    class="field-input"
+                    placeholder="例如：Robust Object Recognition for Indoor Navigation"
+                    :disabled="item.hidePaperInfo"
+                  />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">期刊 / 会议 / 平台</span>
+                  <input
+                    v-model="item.journal"
+                    class="field-input"
+                    placeholder="例如：IEEE T-RO / 中文核心 / 预印本"
+                    :disabled="item.hidePaperInfo"
+                  />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">论文状态</span>
+                  <input
+                    v-model="item.publicationStatus"
+                    class="field-input"
+                    placeholder="例如：已录用 / 审稿中 / 已发表"
+                    :disabled="item.hidePaperInfo"
+                  />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">研究简介</span>
+                  <textarea
+                    v-model="item.summary"
+                    class="field-input field-textarea h-24"
+                    placeholder="简要说明研究问题、方法或你负责的部分"
+                  ></textarea>
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">成果亮点（按行输入）</span>
+                  <textarea
+                    v-model="item.highlights"
+                    class="field-input field-textarea h-28"
+                    placeholder="每行一条，可写实验结果、论文贡献、投稿情况等"
+                  ></textarea>
+                </label>
+              </div>
+            </article>
+          </template>
+        </draggable>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-research-experience')">
+          + 新增科研经历
         </button>
       </div>
     </article>

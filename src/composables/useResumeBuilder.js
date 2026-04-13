@@ -7,6 +7,7 @@ import {
   createInternshipItem,
   createPanelsState,
   createProjectItem,
+  createResearchExperienceItem,
 } from '../modules/resume/factories'
 import { normalizeResumeData } from '../modules/resume/normalize'
 import { normalizeLayoutOrder } from '../modules/resume/sections'
@@ -511,6 +512,28 @@ export function useResumeBuilder() {
     resume.projects.push(createProjectItem())
   }
 
+  function addResearchExperience() {
+    resume.researchExperiences.push(createResearchExperienceItem())
+  }
+
+  function removeResearchExperience(id) {
+    const index = resume.researchExperiences.findIndex((item) => item.id === id)
+    if (index >= 0) resume.researchExperiences.splice(index, 1)
+  }
+
+  function toggleResearchExperienceHidden(id) {
+    const target = resume.researchExperiences.find((item) => item.id === id)
+    if (target) target.hidden = !target.hidden
+  }
+
+  function moveResearchExperienceUp(index) {
+    moveItem(resume.researchExperiences, index, index - 1)
+  }
+
+  function moveResearchExperienceDown(index) {
+    moveItem(resume.researchExperiences, index, index + 1)
+  }
+
   function removeProject(id) {
     const index = resume.projects.findIndex((item) => item.id === id)
     if (index >= 0) resume.projects.splice(index, 1)
@@ -641,10 +664,24 @@ export function useResumeBuilder() {
     const hasInternships = resume.internships.some(
       (item) => Boolean(String(item.company || item.summary || item.highlights || '').trim()) && !item.hidden
     )
+    const hasResearchExperiences = resume.researchExperiences.some(
+      (item) =>
+        Boolean(
+          String(
+            item.title ||
+              item.lab ||
+              item.paperTitle ||
+              item.journal ||
+              item.summary ||
+              item.highlights ||
+              ''
+          ).trim()
+        ) && !item.hidden
+    )
     const hasProjects = resume.projects.some(
       (item) => Boolean(String(item.name || item.summary || '').trim()) && !item.hidden
     )
-    return hasSkills || hasInternships || hasProjects
+    return hasSkills || hasInternships || hasResearchExperiences || hasProjects
   }
 
   function validateBeforeExport() {
@@ -656,7 +693,7 @@ export function useResumeBuilder() {
       warnings.push('所有栏目当前都处于隐藏状态')
     }
     if (!hasCoreContent()) {
-      warnings.push('技术栈、实习经历、项目经历目前都为空')
+      warnings.push('技术栈、实习经历、科研经历、项目经历目前都为空')
     }
     exportWarningMessage.value = warnings.length ? `导出提醒：${warnings.join('；')}。` : ''
     return warnings
@@ -749,6 +786,11 @@ export function useResumeBuilder() {
     moveInternshipDown,
     onLogoChange,
     removeLogo,
+    addResearchExperience,
+    removeResearchExperience,
+    toggleResearchExperienceHidden,
+    moveResearchExperienceUp,
+    moveResearchExperienceDown,
     addProject,
     removeProject,
     toggleProjectHidden,

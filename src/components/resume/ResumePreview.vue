@@ -127,6 +127,7 @@ const sectionVisibility = computed(() => ({
   education: props.resume.sectionVisibility?.education !== false,
   skills: props.resume.sectionVisibility?.skills !== false,
   internships: props.resume.sectionVisibility?.internships !== false,
+  researchExperiences: props.resume.sectionVisibility?.researchExperiences !== false,
   projects: props.resume.sectionVisibility?.projects !== false,
   awards: props.resume.sectionVisibility?.awards !== false,
   certificates: props.resume.sectionVisibility?.certificates !== false,
@@ -144,6 +145,12 @@ const showSkills = computed(() => sectionVisibility.value.skills && skillLines.v
 
 const visibleInternships = computed(() =>
   sectionVisibility.value.internships ? (props.resume.internships || []).filter((item) => !item.hidden) : []
+)
+
+const visibleResearchExperiences = computed(() =>
+  sectionVisibility.value.researchExperiences
+    ? (props.resume.researchExperiences || []).filter((item) => !item.hidden)
+    : []
 )
 
 const visibleProjects = computed(() =>
@@ -195,6 +202,7 @@ const hasAnyVisibleSection = computed(
     showEducationSection.value ||
     showSkills.value ||
     visibleInternships.value.length > 0 ||
+    visibleResearchExperiences.value.length > 0 ||
     visibleProjects.value.length > 0 ||
     visibleAwards.value.length > 0 ||
     visibleCertificates.value.length > 0 ||
@@ -444,6 +452,61 @@ const hasAnyVisibleSection = computed(
                 </li>
               </ul>
             </div>
+          </article>
+        </div>
+      </section>
+
+        <section
+          v-if="visibleResearchExperiences.length"
+          class="resume-section"
+          :style="{ order: getSectionOrder('researchExperiences') }"
+        >
+        <h3 class="resume-section-title">
+          科研经历
+          <span class="resume-section-subtitle">RESEARCH EXPERIENCE</span>
+        </h3>
+        <div class="resume-list">
+          <article v-for="item in visibleResearchExperiences" :key="item.id" class="project-entry">
+            <div class="project-entry-head">
+              <div class="project-entry-title-row">
+                <p class="project-entry-name">{{ item.title || '科研课题' }}</p>
+                <p class="project-entry-meta" v-if="cleanText(item.role) || cleanText(item.period)">
+                  <span v-if="cleanText(item.role)">{{ item.role }}</span>
+                  <span v-if="cleanText(item.role) && cleanText(item.period)"> / </span>
+                  <span v-if="cleanText(item.period)">{{ item.period }}</span>
+                </p>
+              </div>
+              <p class="plain-meta-sub" v-if="cleanText(item.lab) || cleanText(item.supervisor)">
+                <span v-if="cleanText(item.lab)">{{ item.lab }}</span>
+                <span v-if="cleanText(item.lab) && cleanText(item.supervisor)"> / </span>
+                <span v-if="cleanText(item.supervisor)">{{ item.supervisor }}</span>
+              </p>
+              <p v-if="!item.hidePaperInfo && cleanText(item.paperTitle)" class="entry-summary">
+                <span class="entry-label">论文：</span>
+                <strong>{{ item.paperTitle }}</strong>
+              </p>
+              <div
+                v-if="!item.hidePaperInfo && (cleanText(item.journal) || cleanText(item.publicationStatus))"
+                class="project-tag-row"
+              >
+                <span v-if="cleanText(item.journal)" class="project-tag">{{ item.journal }}</span>
+                <span v-if="cleanText(item.publicationStatus)" class="project-tag">{{ item.publicationStatus }}</span>
+              </div>
+            </div>
+            <p v-if="cleanText(item.summary)" class="entry-summary">
+              <span class="entry-label">简介：</span>
+              <span v-html="richText(item.summary)"></span>
+            </p>
+            <ul v-if="splitLines(item.highlights).length" class="entry-bullets">
+              <li
+                v-for="(line, index) in splitLines(item.highlights)"
+                :key="`${item.id}-research-highlight-${index}`"
+                class="entry-bullet"
+              >
+                <span class="entry-bullet-dot"></span>
+                <span v-html="richText(line)"></span>
+              </li>
+            </ul>
           </article>
         </div>
       </section>

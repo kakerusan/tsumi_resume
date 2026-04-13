@@ -5,6 +5,7 @@ import {
   createEducationItem,
   createInternshipItem,
   createProjectItem,
+  createResearchExperienceItem,
   createSectionVisibility,
 } from './factories'
 import { normalizePhotoConfig } from './photoConfig'
@@ -29,6 +30,7 @@ export function createEmptyResume() {
     educations: [],
     skills: '',
     internships: [],
+    researchExperiences: [],
     projects: [],
     awards: [],
     certificates: [],
@@ -93,6 +95,23 @@ export function createDemoResume() {
 优化数据库查询语句，通过索引优化将核心接口延迟降低 40%
 设计并实现消息队列异步处理机制，提升系统吞吐量 2 倍`,
         logo: '',
+      }),
+    ],
+    researchExperiences: [
+      createResearchExperienceItem({
+        id: 'research-demo-1',
+        title: '多模态视觉导航中的鲁棒目标识别研究',
+        lab: '智能感知与机器人实验室',
+        role: '本科科研助理',
+        supervisor: '指导教师：李教授',
+        period: '2024.03 - 2025.01',
+        paperTitle: 'Robust Object Recognition for Indoor Navigation with Multi-Modal Fusion',
+        journal: '在投 SCI 期刊 / 一作',
+        publicationStatus: '审稿中',
+        summary: '围绕室内移动机器人导航场景，负责目标检测、特征融合与实验评估模块开发，完成数据整理与论文撰写支持。',
+        highlights: `搭建 **RGB + 深度信息融合** 识别流程，在自建数据集上将复杂遮挡场景识别准确率提升 11%
+负责论文实验部分复现与可视化，整理对比实验、消融实验与图表结果
+协助完成投稿材料撰写，包括摘要润色、图表排版与期刊格式适配`,
       }),
     ],
     projects: [
