@@ -123,6 +123,7 @@
 
   .field-textarea {
     @apply resize-y leading-6;
+    min-height: 80px;
   }
 
   .file-input {

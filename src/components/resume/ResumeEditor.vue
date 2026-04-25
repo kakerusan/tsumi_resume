@@ -98,6 +98,34 @@ const emit = defineEmits([
   'move-certificate-down',
 ])
 
+/**
+ * v-auto-resize — textarea 内容变化时自动撑高
+ * 设置 height = scrollHeight，保证编辑框始终可见全部内容。
+ */
+const vAutoResize = {
+  mounted(el) {
+    const fit = () => {
+      el.style.height = 'auto'
+      el.style.height = el.scrollHeight + 'px'
+    }
+    el.__autoResizeFit = fit
+    el.addEventListener('input', fit)
+    requestAnimationFrame(fit)
+  },
+  updated(el) {
+    requestAnimationFrame(() => {
+      el.style.height = 'auto'
+      el.style.height = el.scrollHeight + 'px'
+    })
+  },
+  unmounted(el) {
+    if (el.__autoResizeFit) {
+      el.removeEventListener('input', el.__autoResizeFit)
+      delete el.__autoResizeFit
+    }
+  },
+}
+
 const photoMetaSummary = computed(() => {
   const meta = props.resume.profile.photoMeta
   if (!meta) return ''
@@ -756,7 +784,7 @@ function movePersonalDetail(index, offset) {
         </div>
         <label class="field-wrap">
           <span class="field-label">技能内容（支持 **加粗**）</span>
-          <textarea v-model="resume.skills" class="field-input field-textarea h-40"></textarea>
+          <textarea v-model="resume.skills" v-auto-resize class="field-input field-textarea"></textarea>
         </label>
       </div>
     </article>
@@ -936,7 +964,8 @@ function movePersonalDetail(index, offset) {
                   <span class="field-label">工作简介</span>
                   <textarea
                     v-model="item.summary"
-                    class="field-input field-textarea h-24"
+                    v-auto-resize
+                    class="field-input field-textarea"
                     placeholder="简要描述职责范围和业务背景"
                   ></textarea>
                 </label>
@@ -944,7 +973,8 @@ function movePersonalDetail(index, offset) {
                   <span class="field-label">成果亮点（按行输入）</span>
                   <textarea
                     v-model="item.highlights"
-                    class="field-input field-textarea h-28"
+                    v-auto-resize
+                    class="field-input field-textarea"
                     placeholder="每行一条，可用 **关键字** 强调"
                   ></textarea>
                 </label>
@@ -1171,7 +1201,8 @@ function movePersonalDetail(index, offset) {
                   <span class="field-label">项目描述</span>
                   <textarea
                     v-model="item.summary"
-                    class="field-input field-textarea h-28"
+                    v-auto-resize
+                    class="field-input field-textarea"
                     placeholder="建议包含业务目标、核心能力和结果"
                   ></textarea>
                 </label>
@@ -1179,7 +1210,8 @@ function movePersonalDetail(index, offset) {
                   <span class="field-label">项目亮点（每行一条）</span>
                   <textarea
                     v-model="item.highlights"
-                    class="field-input field-textarea h-32"
+                    v-auto-resize
+                    class="field-input field-textarea"
                     placeholder="例如：&#10;实现 JWT + RSA 非对称鉴权&#10;设计 Redis 缓存和限流策略"
                   ></textarea>
                 </label>
@@ -1329,7 +1361,7 @@ function movePersonalDetail(index, offset) {
                 </label>
                 <label class="field-wrap sm:col-span-2">
                   <span class="field-label">补充描述</span>
-                  <textarea v-model="item.description" class="field-input field-textarea h-24"></textarea>
+                  <textarea v-model="item.description" v-auto-resize class="field-input field-textarea"></textarea>
                 </label>
               </div>
             </article>
@@ -1481,7 +1513,7 @@ function movePersonalDetail(index, offset) {
                 </label>
                 <label class="field-wrap sm:col-span-2">
                   <span class="field-label">补充描述</span>
-                  <textarea v-model="item.description" class="field-input field-textarea h-24"></textarea>
+                  <textarea v-model="item.description" v-auto-resize class="field-input field-textarea"></textarea>
                 </label>
               </div>
             </article>
@@ -1535,7 +1567,7 @@ function movePersonalDetail(index, offset) {
         </div>
         <label class="field-wrap">
           <span class="field-label">内容</span>
-          <textarea v-model="resume.selfSummary.content" class="field-input field-textarea h-28"></textarea>
+          <textarea v-model="resume.selfSummary.content" v-auto-resize class="field-input field-textarea"></textarea>
         </label>
         <label class="switch-field">
           <input v-model="resume.selfSummary.hidden" type="checkbox" class="h-4 w-4 accent-sky-600" />
