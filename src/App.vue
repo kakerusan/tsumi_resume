@@ -46,6 +46,11 @@ const {
   moveInternshipDown,
   onLogoChange,
   removeLogo,
+  addResearchExperience,
+  removeResearchExperience,
+  toggleResearchExperienceHidden,
+  moveResearchExperienceUp,
+  moveResearchExperienceDown,
   addProject,
   removeProject,
   toggleProjectHidden,
@@ -281,6 +286,11 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
           @move-internship-down="moveInternshipDown"
           @logo-change="onLogoChange"
           @remove-logo="removeLogo"
+          @add-research-experience="addResearchExperience"
+          @remove-research-experience="removeResearchExperience"
+          @toggle-research-experience-hidden="toggleResearchExperienceHidden"
+          @move-research-experience-up="moveResearchExperienceUp"
+          @move-research-experience-down="moveResearchExperienceDown"
           @add-project="addProject"
           @remove-project="removeProject"
           @toggle-project-hidden="toggleProjectHidden"

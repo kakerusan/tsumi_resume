@@ -6,6 +6,7 @@ import {
   createInternshipItem,
   createPersonalDetailItem,
   createProjectItem,
+  createResearchExperienceItem,
   createSectionVisibility,
 } from './factories'
 import { normalizePhotoConfig } from './photoConfig'
@@ -89,6 +90,13 @@ export function normalizeResumeData(source = {}) {
       ? [source.project]
       : []
   normalized.projects = sourceProjects.map((item) => createProjectItem(item))
+
+  const sourceResearchExperiences = Array.isArray(source.researchExperiences)
+    ? source.researchExperiences
+    : source.researchExperience && typeof source.researchExperience === 'object'
+      ? [source.researchExperience]
+      : []
+  normalized.researchExperiences = sourceResearchExperiences.map((item) => createResearchExperienceItem(item))
 
   const sourceAwards = Array.isArray(source.awards)
     ? source.awards

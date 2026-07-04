@@ -6,6 +6,7 @@ export const FIXED_HEADER_SECTION_IDS = [
 export const ORDERABLE_SECTION_IDS = [
   'skills',
   'internships',
+  'researchExperiences',
   'projects',
   'awards',
   'certificates',
@@ -15,6 +16,7 @@ export const ORDERABLE_SECTION_IDS = [
 export const ORDERABLE_SECTION_LABELS = {
   skills: '技术栈',
   internships: '实习经历',
+  researchExperiences: '科研经历',
   projects: '项目经历',
   awards: '荣誉奖项',
   certificates: '证书',
@@ -26,6 +28,7 @@ export const SECTION_TO_PANEL_KEY = {
   education: 'education',
   skills: 'skills',
   internships: 'internship',
+  researchExperiences: 'research',
   projects: 'project',
   awards: 'awards',
   certificates: 'certificates',
