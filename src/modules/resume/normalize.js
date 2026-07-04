@@ -14,6 +14,7 @@ import { createDefaultLayout, normalizeLayoutOrder } from './sections'
 import { createEmptyResume } from './templates'
 import { normalizeNameFont, normalizeSchoolFont } from './nameFont'
 import {
+  clampLineHeight,
   clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
   clampAwardTitleFontSize,
@@ -154,6 +155,14 @@ export function normalizeResumeData(source = {}) {
   )
   normalized.theme.certificateDescriptionFontSize = clampCertificateDescriptionFontSize(normalized.theme.certificateDescriptionFontSize)
   normalized.theme.selfSummaryFontSize = clampSelfSummaryFontSize(normalized.theme.selfSummaryFontSize)
+  normalized.theme.skillsLineHeight = clampLineHeight(normalized.theme.skillsLineHeight)
+  normalized.theme.internshipSummaryLineHeight = clampLineHeight(normalized.theme.internshipSummaryLineHeight)
+  normalized.theme.internshipHighlightsLineHeight = clampLineHeight(normalized.theme.internshipHighlightsLineHeight)
+  normalized.theme.projectSummaryLineHeight = clampLineHeight(normalized.theme.projectSummaryLineHeight)
+  normalized.theme.projectHighlightsLineHeight = clampLineHeight(normalized.theme.projectHighlightsLineHeight)
+  normalized.theme.awardDescriptionLineHeight = clampLineHeight(normalized.theme.awardDescriptionLineHeight)
+  normalized.theme.certificateDescriptionLineHeight = clampLineHeight(normalized.theme.certificateDescriptionLineHeight)
+  normalized.theme.selfSummaryLineHeight = clampLineHeight(normalized.theme.selfSummaryLineHeight)
   normalized.theme.boldMajor = Boolean(normalized.theme.boldMajor)
   normalized.theme.educationFirst = normalized.theme.educationFirst !== false
   normalized.theme.photoConfig = normalizePhotoConfig(normalized.theme.photoConfig)

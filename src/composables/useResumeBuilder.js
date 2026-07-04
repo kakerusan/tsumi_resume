@@ -16,6 +16,7 @@ import { processProfilePhoto } from '../modules/resume/photo'
 import { deepBrandFrom, nameBrandFrom, schoolBrandFrom } from '../modules/resume/color'
 import { getNameFontFamily, getSchoolFontFamily } from '../modules/resume/nameFont'
 import {
+  clampLineHeight,
   clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
   clampAwardTitleFontSize,
@@ -781,6 +782,14 @@ export function useResumeBuilder() {
     '--certificate-title-font-size': `${clampCertificateTitleFontSize(resume.theme.certificateTitleFontSize)}px`,
     '--certificate-meta-font-size': `${clampCertificateMetaFontSize(resume.theme.certificateMetaFontSize)}px`,
     '--certificate-description-font-size': `${clampCertificateDescriptionFontSize(resume.theme.certificateDescriptionFontSize)}px`,
+    '--skills-line-height': String(clampLineHeight(resume.theme.skillsLineHeight)),
+    '--internship-summary-line-height': String(clampLineHeight(resume.theme.internshipSummaryLineHeight)),
+    '--internship-highlights-line-height': String(clampLineHeight(resume.theme.internshipHighlightsLineHeight)),
+    '--project-summary-line-height': String(clampLineHeight(resume.theme.projectSummaryLineHeight)),
+    '--project-highlights-line-height': String(clampLineHeight(resume.theme.projectHighlightsLineHeight)),
+    '--award-description-line-height': String(clampLineHeight(resume.theme.awardDescriptionLineHeight)),
+    '--certificate-description-line-height': String(clampLineHeight(resume.theme.certificateDescriptionLineHeight)),
+    '--self-summary-line-height': String(clampLineHeight(resume.theme.selfSummaryLineHeight)),
     '--self-summary-font-size': `${clampSelfSummaryFontSize(resume.theme.selfSummaryFontSize)}px`,
   }))
 

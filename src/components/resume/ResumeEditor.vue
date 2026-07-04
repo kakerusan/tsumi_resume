@@ -13,6 +13,9 @@ import {
 } from '../../modules/resume/photoConfig'
 import { NAME_FONT_OPTIONS } from '../../modules/resume/nameFont'
 import {
+  LINE_HEIGHT_MAX,
+  LINE_HEIGHT_MIN,
+  clampLineHeight,
   CONTENT_FONT_SIZE_MAX,
   CONTENT_FONT_SIZE_MIN,
   EMPHASIS_FONT_SIZE_MAX,
@@ -163,6 +166,9 @@ const schoolFontSizeMin = SCHOOL_FONT_SIZE_MIN
 const schoolFontSizeMax = SCHOOL_FONT_SIZE_MAX
 const contentFontSizeMin = CONTENT_FONT_SIZE_MIN
 const contentFontSizeMax = CONTENT_FONT_SIZE_MAX
+const lineHeightMin = LINE_HEIGHT_MIN
+const lineHeightMax = LINE_HEIGHT_MAX
+const lineHeightStep = 0.1
 const metaFontSizeMin = META_FONT_SIZE_MIN
 const metaFontSizeMax = META_FONT_SIZE_MAX
 const emphasisFontSizeMin = EMPHASIS_FONT_SIZE_MIN
@@ -787,6 +793,19 @@ function movePersonalDetail(index, offset) {
             />
           </div>
         </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">正文行距</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.skillsLineHeight"
+              :min="lineHeightMin"
+              :max="lineHeightMax"
+              :step="lineHeightStep"
+              :input-number-props="sliderInputProps"
+              @update:model-value="resume.theme.skillsLineHeight = clampLineHeight($event)"
+            />
+          </div>
+        </div>
         <label class="field-wrap">
           <span class="field-label">技能内容（支持 **加粗**）</span>
           <textarea v-model="resume.skills" v-auto-resize class="field-input field-textarea"></textarea>
@@ -875,6 +894,19 @@ function movePersonalDetail(index, offset) {
               />
             </div>
           </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">简介行距</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.internshipSummaryLineHeight"
+                :min="lineHeightMin"
+                :max="lineHeightMax"
+                :step="lineHeightStep"
+                :input-number-props="sliderInputProps"
+                @update:model-value="resume.theme.internshipSummaryLineHeight = clampLineHeight($event)"
+              />
+            </div>
+          </div>
           <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
             <label class="field-label mb-2 block">亮点字号</label>
             <div class="setting-slider">
@@ -885,6 +917,19 @@ function movePersonalDetail(index, offset) {
                 :step="0.5"
                 :input-number-props="sliderInputProps"
                 @change="onInternshipHighlightsFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">亮点行距</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.internshipHighlightsLineHeight"
+                :min="lineHeightMin"
+                :max="lineHeightMax"
+                :step="lineHeightStep"
+                :input-number-props="sliderInputProps"
+                @update:model-value="resume.theme.internshipHighlightsLineHeight = clampLineHeight($event)"
               />
             </div>
           </div>
@@ -1276,6 +1321,19 @@ function movePersonalDetail(index, offset) {
               />
             </div>
           </div>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">简介行距</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.projectSummaryLineHeight"
+                :min="lineHeightMin"
+                :max="lineHeightMax"
+                :step="lineHeightStep"
+                :input-number-props="sliderInputProps"
+                @update:model-value="resume.theme.projectSummaryLineHeight = clampLineHeight($event)"
+              />
+            </div>
+          </div>
           <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
             <label class="field-label mb-2 block">亮点字号</label>
             <div class="setting-slider">
@@ -1286,6 +1344,19 @@ function movePersonalDetail(index, offset) {
                 :step="0.5"
                 :input-number-props="sliderInputProps"
                 @change="onProjectHighlightsFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">亮点行距</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.projectHighlightsLineHeight"
+                :min="lineHeightMin"
+                :max="lineHeightMax"
+                :step="lineHeightStep"
+                :input-number-props="sliderInputProps"
+                @update:model-value="resume.theme.projectHighlightsLineHeight = clampLineHeight($event)"
               />
             </div>
           </div>
@@ -1462,6 +1533,19 @@ function movePersonalDetail(index, offset) {
             />
           </div>
         </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">描述行距</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.awardDescriptionLineHeight"
+              :min="lineHeightMin"
+              :max="lineHeightMax"
+              :step="lineHeightStep"
+              :input-number-props="sliderInputProps"
+              @update:model-value="resume.theme.awardDescriptionLineHeight = clampLineHeight($event)"
+            />
+          </div>
+        </div>
         <div
           v-if="!resume.awards.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
@@ -1610,6 +1694,19 @@ function movePersonalDetail(index, offset) {
             />
           </div>
         </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">描述行距</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.certificateDescriptionLineHeight"
+              :min="lineHeightMin"
+              :max="lineHeightMax"
+              :step="lineHeightStep"
+              :input-number-props="sliderInputProps"
+              @update:model-value="resume.theme.certificateDescriptionLineHeight = clampLineHeight($event)"
+            />
+          </div>
+        </div>
         <div
           v-if="!resume.certificates.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
@@ -1731,6 +1828,19 @@ function movePersonalDetail(index, offset) {
               :step="0.5"
               :input-number-props="sliderInputProps"
               @change="onSelfSummaryFontSizeChange"
+            />
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">正文行距</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.selfSummaryLineHeight"
+              :min="lineHeightMin"
+              :max="lineHeightMax"
+              :step="lineHeightStep"
+              :input-number-props="sliderInputProps"
+              @update:model-value="resume.theme.selfSummaryLineHeight = clampLineHeight($event)"
             />
           </div>
         </div>

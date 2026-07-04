@@ -366,7 +366,7 @@
   .skill-line {
     @apply flex items-start gap-2 text-slate-800;
     font-size: var(--skills-font-size);
-    line-height: 1.6;
+    line-height: var(--skills-line-height, 1.6);
   }
 
   .skill-line-dot {
@@ -439,7 +439,7 @@
   .entry-summary {
     @apply text-slate-800;
     font-size: var(--internship-summary-font-size);
-    line-height: 1.6;
+    line-height: var(--internship-summary-line-height, 1.6);
   }
 
   .entry-label {
@@ -453,7 +453,7 @@
   .entry-bullet {
     @apply flex items-start gap-2 text-slate-800;
     font-size: var(--internship-highlights-font-size);
-    line-height: 1.6;
+    line-height: var(--internship-highlights-line-height, 1.6);
   }
 
   .entry-bullet-dot {
@@ -494,7 +494,7 @@
   .project-summary {
     @apply text-slate-500;
     font-size: var(--project-summary-font-size);
-    line-height: 1.6;
+    line-height: var(--project-summary-line-height, 1.6);
   }
 
   .project-summary-label {
@@ -508,7 +508,7 @@
   .project-highlight-item {
     @apply flex items-start gap-2 text-slate-900;
     font-size: var(--project-highlights-font-size);
-    line-height: 1.6;
+    line-height: var(--project-highlights-line-height, 1.6);
   }
 
   .project-highlight-dot {
@@ -564,21 +564,22 @@
 
   .plain-meta-desc {
     @apply text-slate-800;
-    line-height: 1.6;
   }
 
   .plain-meta-desc--award {
     font-size: var(--award-description-font-size);
+    line-height: var(--award-description-line-height, 1.6);
   }
 
   .plain-meta-desc--certificate {
     font-size: var(--certificate-description-font-size);
+    line-height: var(--certificate-description-line-height, 1.6);
   }
 
   .summary-text {
     @apply mt-2 text-slate-800;
     font-size: var(--self-summary-font-size);
-    line-height: 1.6;
+    line-height: var(--self-summary-line-height, 1.6);
   }
 }
 
