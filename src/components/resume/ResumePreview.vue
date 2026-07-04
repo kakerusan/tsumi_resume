@@ -102,6 +102,16 @@ function getInternshipLogoStyle(item) {
   return { height: `${parseLogoSize(item?.logoSize)}px` }
 }
 
+function clampCustomImageWidth(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 100
+  return Math.min(100, Math.max(40, Math.round(parsed)))
+}
+
+function getCustomImageStyle(item) {
+  return { width: `${clampCustomImageWidth(item?.widthPercent)}%` }
+}
+
 function emitOverflowStatus() {
   const element = pageRef.value
   if (!element) return
@@ -154,6 +164,7 @@ const sectionVisibility = computed(() => ({
   internships: props.resume.sectionVisibility?.internships !== false,
   researchExperiences: props.resume.sectionVisibility?.researchExperiences !== false,
   projects: props.resume.sectionVisibility?.projects !== false,
+  customImages: props.resume.sectionVisibility?.customImages !== false,
   awards: props.resume.sectionVisibility?.awards !== false,
   certificates: props.resume.sectionVisibility?.certificates !== false,
   selfSummary: props.resume.sectionVisibility?.selfSummary !== false,
@@ -182,6 +193,12 @@ const visibleResearchExperiences = computed(() =>
 
 const visibleProjects = computed(() =>
   sectionVisibility.value.projects ? (props.resume.projects || []).filter((item) => !item.hidden) : []
+)
+
+const visibleCustomImages = computed(() =>
+  sectionVisibility.value.customImages
+    ? (props.resume.customImages || []).filter((item) => !item.hidden && cleanText(item.image))
+    : []
 )
 
 const visibleAwards = computed(() =>
@@ -236,6 +253,7 @@ const hasAnyVisibleSection = computed(
     visibleInternships.value.length > 0 ||
     visibleResearchExperiences.value.length > 0 ||
     visibleProjects.value.length > 0 ||
+    visibleCustomImages.value.length > 0 ||
     visibleAwards.value.length > 0 ||
     visibleCertificates.value.length > 0 ||
     showSelfSummary.value
@@ -587,6 +605,28 @@ const hasAnyVisibleSection = computed(
                 <span v-html="richText(line)"></span>
               </li>
             </ul>
+          </article>
+        </div>
+      </section>
+
+        <section v-if="visibleCustomImages.length" class="resume-section" :style="{ order: getSectionOrder('customImages') }">
+        <div class="custom-image-list">
+          <article v-for="item in visibleCustomImages" :key="item.id" class="custom-image-entry">
+            <h3 class="resume-section-title">
+              {{ cleanText(item.title) || '图片展示' }}
+              <span class="resume-section-subtitle">{{ cleanText(item.subtitle) || 'CUSTOM IMAGE' }}</span>
+            </h3>
+            <figure class="custom-image-figure">
+              <img
+                :src="item.image"
+                :alt="cleanText(item.alt) || cleanText(item.title) || 'custom image'"
+                class="custom-image-content"
+                :style="getCustomImageStyle(item)"
+              />
+              <figcaption v-if="cleanText(item.caption)" class="custom-image-caption">
+                {{ item.caption }}
+              </figcaption>
+            </figure>
           </article>
         </div>
       </section>

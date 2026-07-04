@@ -1,10 +1,17 @@
 let idSeed = 0
 const DEFAULT_INTERNSHIP_LOGO_SIZE = 22
+const DEFAULT_CUSTOM_IMAGE_WIDTH = 100
 
 function clampLogoSize(value) {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return DEFAULT_INTERNSHIP_LOGO_SIZE
   return Math.min(48, Math.max(14, Math.round(parsed)))
+}
+
+function clampCustomImageWidth(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return DEFAULT_CUSTOM_IMAGE_WIDTH
+  return Math.min(100, Math.max(40, Math.round(parsed)))
 }
 
 export function createId(prefix) {
@@ -62,6 +69,19 @@ export function createProjectItem(partial = {}) {
   }
 }
 
+export function createCustomImageItem(partial = {}) {
+  return {
+    id: partial.id || createId('custom-image'),
+    hidden: Boolean(partial.hidden),
+    title: partial.title || '自定义图片',
+    subtitle: partial.subtitle || 'CUSTOM IMAGE',
+    image: partial.image || '',
+    alt: partial.alt || '',
+    caption: partial.caption || '',
+    widthPercent: clampCustomImageWidth(partial.widthPercent),
+  }
+}
+
 export function createResearchExperienceItem(partial = {}) {
   return {
     id: partial.id || createId('research'),
@@ -112,6 +132,7 @@ export function createSectionVisibility(partial = {}) {
     internships: partial.internships !== false,
     researchExperiences: partial.researchExperiences !== false,
     projects: partial.projects !== false,
+    customImages: partial.customImages !== false,
     awards: partial.awards !== false,
     certificates: partial.certificates !== false,
     selfSummary: partial.selfSummary !== false,
@@ -130,6 +151,7 @@ export function createPanelsState() {
     awards: true,
     certificates: true,
     selfSummary: true,
+    customImages: true,
     theme: true,
   }
 }

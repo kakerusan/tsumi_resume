@@ -56,6 +56,11 @@ const {
   toggleProjectHidden,
   moveProjectUp,
   moveProjectDown,
+  addCustomImage,
+  removeCustomImage,
+  toggleCustomImageHidden,
+  moveCustomImageUp,
+  moveCustomImageDown,
   addAward,
   removeAward,
   toggleAwardHidden,
@@ -69,6 +74,8 @@ const {
   updateLayoutOrder,
   onPhotoChange,
   removePhoto,
+  onCustomImageChange,
+  removeCustomImageFile,
   onPageOverflowChange,
 } = useResumeBuilder()
 
@@ -296,6 +303,13 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
           @toggle-project-hidden="toggleProjectHidden"
           @move-project-up="moveProjectUp"
           @move-project-down="moveProjectDown"
+          @add-custom-image="addCustomImage"
+          @remove-custom-image="removeCustomImage"
+          @toggle-custom-image-hidden="toggleCustomImageHidden"
+          @move-custom-image-up="moveCustomImageUp"
+          @move-custom-image-down="moveCustomImageDown"
+          @custom-image-change="onCustomImageChange"
+          @remove-custom-image-file="removeCustomImageFile"
           @add-award="addAward"
           @remove-award="removeAward"
           @toggle-award-hidden="toggleAwardHidden"

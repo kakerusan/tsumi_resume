@@ -89,6 +89,13 @@ const emit = defineEmits([
   'toggle-project-hidden',
   'move-project-up',
   'move-project-down',
+  'add-custom-image',
+  'remove-custom-image',
+  'toggle-custom-image-hidden',
+  'move-custom-image-up',
+  'move-custom-image-down',
+  'custom-image-change',
+  'remove-custom-image-file',
   'add-research-experience',
   'remove-research-experience',
   'toggle-research-experience-hidden',
@@ -1461,6 +1468,149 @@ function movePersonalDetail(index, offset) {
         </draggable>
         <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-project')">
           + 新增项目经历
+        </button>
+      </div>
+    </article>
+
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('customImages') }">
+      <div class="panel-head">
+        <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'customImages')">
+          <span class="panel-caret">{{ panels.customImages ? '▾' : '▸' }}</span>
+          <span class="panel-title">图片展示</span>
+        </button>
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.customImages ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.customImages = !resume.sectionVisibility.customImages"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.customImages"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+        </button>
+      </div>
+      <div v-if="panels.customImages" class="panel-body mt-4 space-y-3">
+        <p class="rounded-lg border border-sky-100 bg-sky-50 px-3 py-2 text-sm leading-6 text-slate-600">
+          可上传 GitHub 活跃图、作品截图、数据看板等图片，支持 JPG / PNG / WebP / SVG，单张不超过 5MB。
+        </p>
+        <div
+          v-if="!resume.customImages.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无图片展示，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.customImages"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
+          <template #item="{ element: item, index }">
+            <article class="sub-card drag-item">
+              <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <button type="button" class="drag-handle" title="拖拽排序">::</button>
+                  <span class="text-sm font-semibold text-slate-800">图片 {{ index + 1 }}</span>
+                  <span
+                    v-if="item.hidden"
+                    class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                  >
+                    已隐藏（预览不显示）
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" class="small-btn" @click="$emit('toggle-custom-image-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-custom-image-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.customImages.length - 1"
+                    @click="$emit('move-custom-image-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-custom-image', item.id)">
+                    删除
+                  </button>
+                </div>
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="field-wrap">
+                  <span class="field-label">标题</span>
+                  <input v-model="item.title" class="field-input" placeholder="例如：GitHub 活跃度" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">英文副标题</span>
+                  <input v-model="item.subtitle" class="field-input" placeholder="例如：GITHUB ACTIVITY" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">替代文本</span>
+                  <input v-model="item.alt" class="field-input" placeholder="用于导出和无障碍说明，可留空" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">说明文字</span>
+                  <input v-model="item.caption" class="field-input" placeholder="可写图片来源或成果说明，不填写则不展示" />
+                </label>
+                <div class="field-wrap sm:col-span-2">
+                  <span class="field-label">图片文件</span>
+                  <div class="mt-2 flex flex-wrap items-center gap-3">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                      class="file-input"
+                      @change="$emit('custom-image-change', item.id, $event)"
+                    />
+                    <button
+                      type="button"
+                      class="toolbar-btn !px-3 !py-1.5 !text-xs"
+                      @click="$emit('remove-custom-image-file', item.id)"
+                    >
+                      移除图片
+                    </button>
+                  </div>
+                </div>
+                <div class="field-wrap sm:col-span-2">
+                  <span class="field-label">展示宽度（40%-100%）</span>
+                  <div class="mt-2 flex items-center gap-2">
+                    <input v-model.number="item.widthPercent" type="range" min="40" max="100" class="w-full accent-sky-600" />
+                    <input
+                      v-model.number="item.widthPercent"
+                      type="number"
+                      min="40"
+                      max="100"
+                      class="field-input !w-24 !px-2 !py-1.5 text-center"
+                    />
+                  </div>
+                </div>
+              </div>
+            </article>
+          </template>
+        </draggable>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-custom-image')">
+          + 新增图片展示
         </button>
       </div>
     </article>

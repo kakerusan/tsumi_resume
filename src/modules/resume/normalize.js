@@ -2,6 +2,7 @@ import { SCHEMA_VERSION } from './constants'
 import {
   createAwardItem,
   createCertificateItem,
+  createCustomImageItem,
   createEducationItem,
   createInternshipItem,
   createPersonalDetailItem,
@@ -91,6 +92,10 @@ export function normalizeResumeData(source = {}) {
       ? [source.project]
       : []
   normalized.projects = sourceProjects.map((item) => createProjectItem(item))
+
+  normalized.customImages = Array.isArray(source.customImages)
+    ? source.customImages.map((item) => createCustomImageItem(item))
+    : []
 
   const sourceResearchExperiences = Array.isArray(source.researchExperiences)
     ? source.researchExperiences

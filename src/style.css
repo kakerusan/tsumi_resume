@@ -576,6 +576,26 @@
     line-height: var(--certificate-description-line-height, 1.6);
   }
 
+
+  .custom-image-list {
+    @apply mt-2 space-y-3;
+  }
+
+  .custom-image-entry {
+    @apply space-y-2;
+  }
+
+  .custom-image-figure {
+    @apply m-0 flex flex-col items-center gap-1.5 rounded-md border border-slate-100 bg-white px-2 py-2;
+  }
+
+  .custom-image-content {
+    @apply block max-w-full rounded object-contain;
+  }
+
+  .custom-image-caption {
+    @apply text-center text-[11px] leading-5 text-slate-500;
+  }
   .summary-text {
     @apply mt-2 text-slate-800;
     font-size: var(--self-summary-font-size);

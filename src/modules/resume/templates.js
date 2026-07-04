@@ -2,6 +2,7 @@ import { SCHEMA_VERSION } from './constants'
 import {
   createAwardItem,
   createCertificateItem,
+  createCustomImageItem,
   createEducationItem,
   createInternshipItem,
   createPersonalDetailItem,
@@ -56,6 +57,7 @@ export function createEmptyResume() {
     internships: [],
     researchExperiences: [],
     projects: [],
+    customImages: [],
     awards: [],
     certificates: [],
     selfSummary: {
@@ -185,6 +187,16 @@ export function createDemoResume() {
         tags: 'SpringBoot, MySQL, Redis, RabbitMQ, Vue3',
         summary:
           '基于微服务架构的电商系统，实现商品管理、订单处理、支付集成等核心功能，采用分布式锁、缓存策略等技术保障系统性能与可靠性。',
+      }),
+    ],
+    customImages: [
+      createCustomImageItem({
+        id: 'custom-image-demo-1',
+        title: 'GitHub 活跃度',
+        subtitle: 'GITHUB ACTIVITY',
+        alt: 'GitHub contribution graph',
+        caption: '可替换为自己的 GitHub 贡献图、作品截图或数据看板。',
+        widthPercent: 100,
       }),
     ],
     awards: [

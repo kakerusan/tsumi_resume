@@ -3,6 +3,7 @@ import { PANELS_STORAGE_KEY, SCHEMA_VERSION } from '../modules/resume/constants'
 import {
   createAwardItem,
   createCertificateItem,
+  createCustomImageItem,
   createEducationItem,
   createInternshipItem,
   createPanelsState,
@@ -47,6 +48,14 @@ import {
 
 const EDUCATION_LOGO_MAX_BYTES = 2 * 1024 * 1024
 const EDUCATION_LOGO_SUPPORTED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
+const CUSTOM_IMAGE_MAX_BYTES = 5 * 1024 * 1024
+const CUSTOM_IMAGE_SUPPORTED_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/svg+xml',
+])
 const AUTO_SAVE_DELAY = 800
 
 function moveItem(list, fromIndex, toIndex) {
@@ -574,6 +583,28 @@ export function useResumeBuilder() {
     moveItem(resume.projects, index, index + 1)
   }
 
+  function addCustomImage() {
+    resume.customImages.push(createCustomImageItem())
+  }
+
+  function removeCustomImage(id) {
+    const index = resume.customImages.findIndex((item) => item.id === id)
+    if (index >= 0) resume.customImages.splice(index, 1)
+  }
+
+  function toggleCustomImageHidden(id) {
+    const target = resume.customImages.find((item) => item.id === id)
+    if (target) target.hidden = !target.hidden
+  }
+
+  function moveCustomImageUp(index) {
+    moveItem(resume.customImages, index, index - 1)
+  }
+
+  function moveCustomImageDown(index) {
+    moveItem(resume.customImages, index, index + 1)
+  }
+
   function addAward() {
     resume.awards.push(createAwardItem())
   }
@@ -642,6 +673,53 @@ export function useResumeBuilder() {
     if (target) target.logo = ''
   }
 
+  function onCustomImageChange(id, event) {
+    const input = event.target
+    const [file] = input.files || []
+    if (!file) return
+
+    if (!CUSTOM_IMAGE_SUPPORTED_TYPES.has(file.type)) {
+      actionErrorMessage.value = '自定义图片仅支持 JPG / PNG / WebP / SVG。'
+      input.value = ''
+      return
+    }
+
+    if (file.size > CUSTOM_IMAGE_MAX_BYTES) {
+      actionErrorMessage.value = '自定义图片不能超过 5MB。'
+      input.value = ''
+      return
+    }
+
+    const target = resume.customImages.find((item) => item.id === id)
+    if (!target) {
+      input.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      target.image = String(reader.result || '')
+      target.alt = target.alt || file.name
+      actionStatusMessage.value = `自定义图片上传成功（${(file.size / 1024).toFixed(1)}KB）。`
+      actionErrorMessage.value = ''
+    }
+    reader.onerror = () => {
+      actionErrorMessage.value = '自定义图片读取失败，请重试。'
+      actionStatusMessage.value = ''
+    }
+    reader.readAsDataURL(file)
+    input.value = ''
+  }
+
+  function removeCustomImageFile(id) {
+    const target = resume.customImages.find((item) => item.id === id)
+    if (target) {
+      target.image = ''
+      actionStatusMessage.value = '已移除自定义图片。'
+      actionErrorMessage.value = ''
+    }
+  }
+
   async function onPhotoChange(event) {
     const input = event.target
     const [file] = input.files || []
@@ -703,7 +781,10 @@ export function useResumeBuilder() {
     const hasProjects = resume.projects.some(
       (item) => Boolean(String(item.name || item.summary || item.highlights || '').trim()) && !item.hidden
     )
-    return hasSkills || hasInternships || hasResearchExperiences || hasProjects
+    const hasCustomImages = resume.customImages.some(
+      (item) => Boolean(String(item.image || '').trim()) && !item.hidden
+    )
+    return hasSkills || hasInternships || hasResearchExperiences || hasProjects || hasCustomImages
   }
 
   function validateBeforeExport() {
@@ -715,7 +796,7 @@ export function useResumeBuilder() {
       warnings.push('所有栏目当前都处于隐藏状态')
     }
     if (!hasCoreContent()) {
-      warnings.push('技术栈、实习经历、科研经历、项目经历目前都为空')
+      warnings.push('技术栈、实习经历、科研经历、项目经历、图片展示目前都为空')
     }
     exportWarningMessage.value = warnings.length ? `导出提醒：${warnings.join('；')}。` : ''
     return warnings
@@ -844,6 +925,11 @@ export function useResumeBuilder() {
     toggleProjectHidden,
     moveProjectUp,
     moveProjectDown,
+    addCustomImage,
+    removeCustomImage,
+    toggleCustomImageHidden,
+    moveCustomImageUp,
+    moveCustomImageDown,
     addAward,
     removeAward,
     toggleAwardHidden,
@@ -857,6 +943,8 @@ export function useResumeBuilder() {
     updateLayoutOrder,
     onPhotoChange,
     removePhoto,
+    onCustomImageChange,
+    removeCustomImageFile,
     onPageOverflowChange,
   }
 }
