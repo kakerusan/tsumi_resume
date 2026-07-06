@@ -17,6 +17,7 @@ import { normalizeNameFont, normalizeSchoolFont } from './nameFont'
 import {
   clampLineHeight,
   clampSectionGap,
+  clampEducationLogoSize,
   clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
   clampAwardTitleFontSize,
@@ -170,6 +171,7 @@ export function normalizeResumeData(source = {}) {
   normalized.theme.certificateDescriptionLineHeight = clampLineHeight(normalized.theme.certificateDescriptionLineHeight)
   normalized.theme.selfSummaryLineHeight = clampLineHeight(normalized.theme.selfSummaryLineHeight)
   normalized.theme.sectionGap = clampSectionGap(normalized.theme.sectionGap)
+  normalized.theme.educationLogoSize = clampEducationLogoSize(normalized.theme.educationLogoSize)
   normalized.theme.boldMajor = Boolean(normalized.theme.boldMajor)
   normalized.theme.educationFirst = normalized.theme.educationFirst !== false
   normalized.theme.photoConfig = normalizePhotoConfig(normalized.theme.photoConfig)

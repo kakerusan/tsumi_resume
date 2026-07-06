@@ -17,8 +17,11 @@ import {
   LINE_HEIGHT_MIN,
   SECTION_GAP_MAX,
   SECTION_GAP_MIN,
+  EDUCATION_LOGO_SIZE_MAX,
+  EDUCATION_LOGO_SIZE_MIN,
   clampLineHeight,
   clampSectionGap,
+  clampEducationLogoSize,
   CONTENT_FONT_SIZE_MAX,
   CONTENT_FONT_SIZE_MIN,
   EMPHASIS_FONT_SIZE_MAX,
@@ -181,6 +184,8 @@ const lineHeightMax = LINE_HEIGHT_MAX
 const lineHeightStep = 0.1
 const sectionGapMin = SECTION_GAP_MIN
 const sectionGapMax = SECTION_GAP_MAX
+const educationLogoSizeMin = EDUCATION_LOGO_SIZE_MIN
+const educationLogoSizeMax = EDUCATION_LOGO_SIZE_MAX
 const metaFontSizeMin = META_FONT_SIZE_MIN
 const metaFontSizeMax = META_FONT_SIZE_MAX
 const emphasisFontSizeMin = EMPHASIS_FONT_SIZE_MIN
@@ -653,6 +658,19 @@ function movePersonalDetail(index, offset) {
         </button>
       </div>
       <div v-if="panels.education" class="panel-body mt-4 space-y-3">
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">学校 Logo 大小</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.educationLogoSize"
+              :min="educationLogoSizeMin"
+              :max="educationLogoSizeMax"
+              :step="1"
+              :input-number-props="sliderInputProps"
+              @update:model-value="resume.theme.educationLogoSize = clampEducationLogoSize($event)"
+            />
+          </div>
+        </div>
         <div
           v-if="!resume.educations.length"
           class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"

@@ -301,7 +301,7 @@ const hasAnyVisibleSection = computed(
                           {{ part.text }}
                         </strong>
                       </span>
-                      <strong v-else-if="part.key === 'major'" class="font-semibold text-slate-800">
+                      <strong v-else-if="part.key === 'major'" class="font-semibold text-slate-800" style="font-size: var(--school-font-size)">
                         {{ part.text }}
                       </strong>
                       <span
@@ -440,7 +440,7 @@ const hasAnyVisibleSection = computed(
                           {{ part.text }}
                         </strong>
                       </span>
-                      <strong v-else-if="part.key === 'major'" class="font-semibold text-slate-800">
+                      <strong v-else-if="part.key === 'major'" class="font-semibold text-slate-800" style="font-size: var(--school-font-size)">
                         {{ part.text }}
                       </strong>
                       <span

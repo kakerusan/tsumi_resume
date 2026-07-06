@@ -298,8 +298,8 @@
   }
 
   .education-school-logo {
-    width: 18px;
-    height: 18px;
+    width: var(--education-logo-size, 18px);
+    height: var(--education-logo-size, 18px);
     object-fit: contain;
     vertical-align: middle;
     flex-shrink: 0;
@@ -315,7 +315,7 @@
 
   .education-line--with-slot {
     display: inline-grid;
-    grid-template-columns: 18px auto;
+    grid-template-columns: var(--education-logo-size, 18px) auto;
     column-gap: 4px;
     align-items: center;
   }
@@ -324,9 +324,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    width: 18px;
-    min-width: 18px;
-    height: 18px;
+    width: var(--education-logo-size, 18px);
+    min-width: var(--education-logo-size, 18px);
+    height: var(--education-logo-size, 18px);
   }
 
   .education-line-content {

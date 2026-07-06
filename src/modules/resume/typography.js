@@ -25,6 +25,10 @@ export const NAME_FONT_SIZE_MAX = 32
 export const SCHOOL_FONT_SIZE_MIN = 11
 export const SCHOOL_FONT_SIZE_MAX = 22
 
+export const DEFAULT_EDUCATION_LOGO_SIZE = 18
+export const EDUCATION_LOGO_SIZE_MIN = 14
+export const EDUCATION_LOGO_SIZE_MAX = 48
+
 export const CONTENT_FONT_SIZE_MIN = 11
 export const CONTENT_FONT_SIZE_MAX = 16
 export const META_FONT_SIZE_MIN = 11
@@ -56,6 +60,12 @@ export function clampSectionGap(value, fallback = DEFAULT_SECTION_GAP) {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return fallback
   return Math.min(SECTION_GAP_MAX, Math.max(SECTION_GAP_MIN, Math.round(parsed)))
+}
+
+export function clampEducationLogoSize(value, fallback = DEFAULT_EDUCATION_LOGO_SIZE) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return fallback
+  return Math.min(EDUCATION_LOGO_SIZE_MAX, Math.max(EDUCATION_LOGO_SIZE_MIN, Math.round(parsed)))
 }
 export function clampNameFontSize(value, fallback = DEFAULT_NAME_FONT_SIZE) {
   return clampSize(value, NAME_FONT_SIZE_MIN, NAME_FONT_SIZE_MAX, fallback)
