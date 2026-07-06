@@ -18,6 +18,7 @@ import { deepBrandFrom, nameBrandFrom, schoolBrandFrom } from '../modules/resume
 import { getNameFontFamily, getSchoolFontFamily } from '../modules/resume/nameFont'
 import {
   clampLineHeight,
+  clampSectionGap,
   clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
   clampAwardTitleFontSize,
@@ -872,6 +873,7 @@ export function useResumeBuilder() {
     '--certificate-description-line-height': String(clampLineHeight(resume.theme.certificateDescriptionLineHeight)),
     '--self-summary-line-height': String(clampLineHeight(resume.theme.selfSummaryLineHeight)),
     '--self-summary-font-size': `${clampSelfSummaryFontSize(resume.theme.selfSummaryFontSize)}px`,
+    '--section-gap': `${clampSectionGap(resume.theme.sectionGap)}px`,
   }))
 
   // Keep theme variables in a real <style> tag (not only on #app inline style) so

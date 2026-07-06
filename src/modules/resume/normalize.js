@@ -16,6 +16,7 @@ import { createEmptyResume } from './templates'
 import { normalizeNameFont, normalizeSchoolFont } from './nameFont'
 import {
   clampLineHeight,
+  clampSectionGap,
   clampAwardMetaFontSize,
   clampAwardDescriptionFontSize,
   clampAwardTitleFontSize,
@@ -168,6 +169,7 @@ export function normalizeResumeData(source = {}) {
   normalized.theme.awardDescriptionLineHeight = clampLineHeight(normalized.theme.awardDescriptionLineHeight)
   normalized.theme.certificateDescriptionLineHeight = clampLineHeight(normalized.theme.certificateDescriptionLineHeight)
   normalized.theme.selfSummaryLineHeight = clampLineHeight(normalized.theme.selfSummaryLineHeight)
+  normalized.theme.sectionGap = clampSectionGap(normalized.theme.sectionGap)
   normalized.theme.boldMajor = Boolean(normalized.theme.boldMajor)
   normalized.theme.educationFirst = normalized.theme.educationFirst !== false
   normalized.theme.photoConfig = normalizePhotoConfig(normalized.theme.photoConfig)

@@ -42,9 +42,20 @@ export const DEFAULT_LINE_HEIGHT = 1.6
 export const LINE_HEIGHT_MIN = 1.2
 export const LINE_HEIGHT_MAX = 2.2
 
+export const DEFAULT_SECTION_GAP = 10
+export const SECTION_GAP_MIN = 4
+export const SECTION_GAP_MAX = 32
+
 export function clampLineHeight(value, fallback = DEFAULT_LINE_HEIGHT) {
   if (value === null || value === undefined || value === '') return fallback
   return clampSize(value, LINE_HEIGHT_MIN, LINE_HEIGHT_MAX, fallback)
+}
+
+export function clampSectionGap(value, fallback = DEFAULT_SECTION_GAP) {
+  if (value === null || value === undefined || value === '') return fallback
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return fallback
+  return Math.min(SECTION_GAP_MAX, Math.max(SECTION_GAP_MIN, Math.round(parsed)))
 }
 export function clampNameFontSize(value, fallback = DEFAULT_NAME_FONT_SIZE) {
   return clampSize(value, NAME_FONT_SIZE_MIN, NAME_FONT_SIZE_MAX, fallback)

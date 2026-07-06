@@ -15,6 +15,7 @@ import { createDefaultLayout } from './sections'
 import { DEFAULT_NAME_FONT, DEFAULT_SCHOOL_FONT } from './nameFont'
 import {
   DEFAULT_LINE_HEIGHT,
+  DEFAULT_SECTION_GAP,
   DEFAULT_AWARD_META_FONT_SIZE,
   DEFAULT_AWARD_DESCRIPTION_FONT_SIZE,
   DEFAULT_AWARD_TITLE_FONT_SIZE,
@@ -100,6 +101,7 @@ export function createEmptyResume() {
       certificateDescriptionLineHeight: DEFAULT_LINE_HEIGHT,
       selfSummaryLineHeight: DEFAULT_LINE_HEIGHT,
       selfSummaryFontSize: DEFAULT_SELF_SUMMARY_FONT_SIZE,
+      sectionGap: DEFAULT_SECTION_GAP,
       boldMajor: false,
       educationFirst: true,
       photoConfig: normalizePhotoConfig(),
@@ -259,6 +261,7 @@ export function createDemoResume() {
       awardDescriptionLineHeight: DEFAULT_LINE_HEIGHT,
       certificateDescriptionLineHeight: DEFAULT_LINE_HEIGHT,
       selfSummaryLineHeight: DEFAULT_LINE_HEIGHT,
+      sectionGap: DEFAULT_SECTION_GAP,
       boldMajor: false,
       educationFirst: true,
       photoConfig: normalizePhotoConfig(),

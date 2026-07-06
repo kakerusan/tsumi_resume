@@ -15,7 +15,10 @@ import { NAME_FONT_OPTIONS } from '../../modules/resume/nameFont'
 import {
   LINE_HEIGHT_MAX,
   LINE_HEIGHT_MIN,
+  SECTION_GAP_MAX,
+  SECTION_GAP_MIN,
   clampLineHeight,
+  clampSectionGap,
   CONTENT_FONT_SIZE_MAX,
   CONTENT_FONT_SIZE_MIN,
   EMPHASIS_FONT_SIZE_MAX,
@@ -176,6 +179,8 @@ const contentFontSizeMax = CONTENT_FONT_SIZE_MAX
 const lineHeightMin = LINE_HEIGHT_MIN
 const lineHeightMax = LINE_HEIGHT_MAX
 const lineHeightStep = 0.1
+const sectionGapMin = SECTION_GAP_MIN
+const sectionGapMax = SECTION_GAP_MAX
 const metaFontSizeMin = META_FONT_SIZE_MIN
 const metaFontSizeMax = META_FONT_SIZE_MAX
 const emphasisFontSizeMin = EMPHASIS_FONT_SIZE_MIN
@@ -2052,6 +2057,19 @@ function movePersonalDetail(index, offset) {
               :step="0.5"
               :input-number-props="sliderInputProps"
               @change="onSchoolFontSizeChange"
+            />
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <label class="field-label mb-2 block">模块间距</label>
+          <div class="setting-slider">
+            <Slider
+              :model-value="resume.theme.sectionGap"
+              :min="sectionGapMin"
+              :max="sectionGapMax"
+              :step="1"
+              :input-number-props="sliderInputProps"
+              @update:model-value="resume.theme.sectionGap = clampSectionGap($event)"
             />
           </div>
         </div>

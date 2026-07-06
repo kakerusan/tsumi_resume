@@ -342,7 +342,7 @@
   }
 
   .resume-section {
-    margin-top: 10px;
+    margin-top: var(--section-gap, 10px);
   }
 
   .resume-section-title {
@@ -600,6 +600,32 @@
     @apply mt-2 text-slate-800;
     font-size: var(--self-summary-font-size);
     line-height: var(--self-summary-line-height, 1.6);
+  }
+
+  .resume-page code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.85em;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 0.1em 0.35em;
+    border-radius: 0.25em;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .resume-page del {
+    text-decoration: line-through;
+    color: #64748b;
+  }
+
+  .resume-page em {
+    font-style: italic;
+    color: #1e293b;
+  }
+
+  .resume-page a {
+    color: var(--brand-deep);
+    text-decoration: underline;
   }
 }
 

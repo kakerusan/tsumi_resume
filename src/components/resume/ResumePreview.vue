@@ -4,6 +4,7 @@ import { Image as TImage } from 'tdesign-vue-next'
 
 import { normalizePhotoConfig } from '../../modules/resume/photoConfig'
 import { normalizeLayoutOrder } from '../../modules/resume/sections'
+import { richText } from '../../modules/resume/richText'
 
 const A4_HEIGHT_PX = 1122
 
@@ -17,21 +18,6 @@ const props = defineProps({
 const emit = defineEmits(['page-overflow-change'])
 const pageRef = ref(null)
 let resizeObserver = null
-
-function escapeHtml(text = '') {
-  return String(text)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-function richText(text = '') {
-  return escapeHtml(text)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br />')
-}
 
 function splitLines(text = '') {
   return String(text)
