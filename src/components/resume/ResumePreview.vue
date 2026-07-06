@@ -1,12 +1,13 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Image as TImage } from 'tdesign-vue-next'
+import { GovDanghui } from 'govui-vue3'
 
 import { normalizePhotoConfig } from '../../modules/resume/photoConfig'
 import { normalizeLayoutOrder } from '../../modules/resume/sections'
 import { richText } from '../../modules/resume/richText'
 
-const A4_HEIGHT_PX = 1122
+const A4_HEIGHT_PX = 1123
 
 const props = defineProps({
   resume: {
@@ -202,6 +203,11 @@ const showSelfSummary = computed(() => {
 
 const educationFirst = computed(() => Boolean(props.resume.theme?.educationFirst))
 const profileTitle = computed(() => cleanText(props.resume.profile.title))
+const showPoliticalAffiliation = computed(() => {
+  const affiliation = cleanText(props.resume.profile?.politicalAffiliation)
+  return Boolean(props.resume.profile?.showPoliticalAffiliation) && Boolean(affiliation)
+})
+const politicalAffiliationLabel = computed(() => cleanText(props.resume.profile?.politicalAffiliation || ''))
 const visiblePersonalDetails = computed(() =>
   (props.resume.profile?.personalDetails || [])
     .map((item) => formatPersonalDetail(item))
@@ -312,12 +318,20 @@ const hasAnyVisibleSection = computed(
               </div>
 
               <div
-                v-if="showProfile && visiblePersonalDetails.length"
+                v-if="showProfile && (visiblePersonalDetails.length || showPoliticalAffiliation)"
                 class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] leading-5"
                 :class="hasPhoto ? 'justify-start' : 'justify-center'"
               >
+                <span v-if="showPoliticalAffiliation" class="political-affiliation-tag">
+                  <GovDanghui
+                    class="political-affiliation-icon"
+                    type="red"
+                    :width="14"
+                  />
+                  <span class="ml-1 text-red-600">{{ politicalAffiliationLabel }}</span>
+                </span>
                 <template v-for="(item, index) in visiblePersonalDetails" :key="`personal-${index}-${item.label}-${item.value}`">
-                  <span v-if="index > 0" class="text-slate-300">/</span>
+                  <span v-if="index > 0 || showPoliticalAffiliation" class="text-slate-300">/</span>
                   <span>
                     <strong v-if="item.label" class="font-semibold text-[color:var(--brand)]">{{ item.label }}</strong>
                     <span v-if="item.label" class="text-[color:var(--brand)]">
