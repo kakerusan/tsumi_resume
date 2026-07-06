@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Image as TImage } from 'tdesign-vue-next'
 
@@ -261,7 +261,7 @@ const hasAnyVisibleSection = computed(
 </script>
 
 <template>
-  <section class="glass-card flex justify-center p-2 sm:p-4 lg:p-5">
+  <section class="glass-card flex justify-center overflow-x-auto p-2 sm:p-4 lg:p-5">
     <article id="resume-preview-page" ref="pageRef" class="resume-page resume-page--editorial">
       <div class="resume-flow">
         <header v-if="showHeader" class="resume-head resume-head--plain">

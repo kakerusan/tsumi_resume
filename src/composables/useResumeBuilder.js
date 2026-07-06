@@ -1,4 +1,4 @@
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, watchEffect } from 'vue'
 import { PANELS_STORAGE_KEY, SCHEMA_VERSION } from '../modules/resume/constants'
 import {
   createAwardItem,
@@ -873,6 +873,38 @@ export function useResumeBuilder() {
     '--self-summary-line-height': String(clampLineHeight(resume.theme.selfSummaryLineHeight)),
     '--self-summary-font-size': `${clampSelfSummaryFontSize(resume.theme.selfSummaryFontSize)}px`,
   }))
+
+  // Keep theme variables in a real <style> tag (not only on #app inline style) so
+  // Safari/WebKit print contexts inherit them reliably. Also duplicate them inside
+  // @media print to prevent @media print resets from dropping inherited custom
+  // properties.
+  watchEffect(() => {
+    if (typeof document === 'undefined') return
+
+    const styleId = 'resume-theme-vars'
+    let styleTag = document.getElementById(styleId)
+    if (!styleTag) {
+      styleTag = document.createElement('style')
+      styleTag.id = styleId
+      document.head.appendChild(styleTag)
+    }
+
+    const declarations = Object.entries(brandStyle.value)
+      .map(([key, value]) => `${key}: ${value};`)
+      .join('\n    ')
+
+    styleTag.textContent = `
+:root {
+    ${declarations}
+}
+
+@media print {
+  :root {
+    ${declarations}
+  }
+}
+    `.trim()
+  })
 
   return {
     resume,

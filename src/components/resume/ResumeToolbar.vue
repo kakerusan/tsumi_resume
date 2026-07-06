@@ -30,7 +30,14 @@ defineEmits([
         <button type="button" class="toolbar-btn" @click="$emit('collapse-all-panels')">全部收起</button>
         <button type="button" class="toolbar-btn" @click="$emit('export-json')">导出 JSON</button>
         <button type="button" class="toolbar-btn" @click="$emit('import-json')">导入 JSON</button>
-        <button type="button" class="toolbar-btn toolbar-btn-primary" @click="$emit('export-pdf')">导出 PDF</button>
+        <button
+          type="button"
+          class="toolbar-btn toolbar-btn-primary"
+          title="导出 PDF 时请选择 A4、边距“无”、关闭页眉页脚，macOS Safari 请取消勾选“自动缩放”"
+          @click="$emit('export-pdf')"
+        >
+          导出 PDF
+        </button>
       </div>
     </div>
   </header>
