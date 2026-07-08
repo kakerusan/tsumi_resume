@@ -362,7 +362,7 @@ export function useResumeBuilder() {
       const svgBlob = new Blob([svgText], {
         type: 'image/svg+xml;charset=utf-8',
       })
-      svgUrl = URL.createObjectURL(svgBlob)
+      const svgUrl = URL.createObjectURL(svgBlob)
       const image = await loadImage(svgUrl)
       const scale = Math.max(2, Math.min(3, Math.ceil(window.devicePixelRatio || 1)))
       const canvas = document.createElement('canvas')

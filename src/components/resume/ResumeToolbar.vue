@@ -33,7 +33,7 @@ defineEmits([
         <button
           type="button"
           class="toolbar-btn toolbar-btn-primary"
-          title="导出 PDF 时请选择 A4、边距“无”、关闭页眉页脚，macOS Safari 请取消勾选“自动缩放”"
+          title="导出 PDF 时请选择 A4、边距'无'、关闭页眉页脚，macOS Safari 请取消勾选'自动缩放'"
           @click="$emit('export-pdf')"
         >
           导出 PDF

@@ -11,6 +11,7 @@ import {
   getPhotoHeightByRatio,
   normalizePhotoConfig,
 } from '../../modules/resume/photoConfig'
+import { POLITICAL_AFFILIATION_DEFAULT, POLITICAL_AFFILIATION_OPTIONS } from '../../modules/resume/constants'
 import { NAME_FONT_OPTIONS } from '../../modules/resume/nameFont'
 import {
   LINE_HEIGHT_MAX,
@@ -171,6 +172,15 @@ if (!Array.isArray(props.resume.profile.personalDetails)) {
 
 const photoRatioOptions = PHOTO_RATIO_OPTIONS
 const nameFontOptions = NAME_FONT_OPTIONS
+const politicalAffiliationOptions = POLITICAL_AFFILIATION_OPTIONS
+const politicalAffiliationDefault = POLITICAL_AFFILIATION_DEFAULT
+
+if (!Object.prototype.hasOwnProperty.call(props.resume.profile, 'politicalAffiliation')) {
+  props.resume.profile.politicalAffiliation = politicalAffiliationDefault
+}
+if (!Object.prototype.hasOwnProperty.call(props.resume.profile, 'showPoliticalAffiliation')) {
+  props.resume.profile.showPoliticalAffiliation = false
+}
 const photoSizeMin = PHOTO_SIZE_MIN
 const photoSizeMax = PHOTO_SIZE_MAX
 const nameFontSizeMin = NAME_FONT_SIZE_MIN
@@ -488,6 +498,30 @@ function movePersonalDetail(index, offset) {
           <span class="field-label">邮箱</span>
           <input v-model="resume.profile.email" class="field-input" placeholder="请输入邮箱" />
         </label>
+        <div class="field-wrap md:col-span-3">
+          <div class="flex flex-wrap items-end gap-4">
+            <label class="field-wrap min-w-[160px]">
+              <span class="field-label">政治面貌</span>
+              <select v-model="resume.profile.politicalAffiliation" class="field-input">
+                <option
+                  v-for="opt in politicalAffiliationOptions"
+                  :key="opt.value"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </option>
+              </select>
+            </label>
+            <label class="switch-field mb-0.5">
+              <input
+                type="checkbox"
+                class="h-4 w-4 accent-sky-600"
+                v-model="resume.profile.showPoliticalAffiliation"
+              />
+              <span>在简历中显示</span>
+            </label>
+          </div>
+        </div>
         <label class="field-wrap">
           <span class="field-label">联系方式</span>
           <input v-model="resume.profile.phone" class="field-input" placeholder="请输入电话号" />
@@ -894,7 +928,7 @@ function movePersonalDetail(index, offset) {
                   :max="metaFontSizeMax"
                   :step="0.5"
                   :input-number-props="sliderInputProps"
-                  @change="onInternshipCompanyMetaFontSizeChange"
+                  @update:model-value="resume.theme.internshipCompanyMetaFontSize = clampInternshipCompanyMetaFontSize($event)"
                 />
               </div>
             </div>
@@ -907,7 +941,7 @@ function movePersonalDetail(index, offset) {
                   :max="emphasisFontSizeMax"
                   :step="0.5"
                   :input-number-props="sliderInputProps"
-                  @change="onInternshipRoleFontSizeChange"
+                  @update:model-value="resume.theme.internshipRoleFontSize = clampInternshipRoleFontSize($event)"
                 />
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { SCHEMA_VERSION } from './constants'
+import { POLITICAL_AFFILIATION_DEFAULT, POLITICAL_AFFILIATION_OPTIONS, SCHEMA_VERSION } from './constants'
 import {
   createAwardItem,
   createCertificateItem,
@@ -52,6 +52,12 @@ export function normalizeResumeData(source = {}) {
     normalized.profile.personalDetails = Array.isArray(source.profile.personalDetails)
       ? source.profile.personalDetails.map((item) => createPersonalDetailItem(item))
       : []
+
+    const validPoliticalValues = POLITICAL_AFFILIATION_OPTIONS.map((o) => o.value)
+    normalized.profile.politicalAffiliation = validPoliticalValues.includes(source.profile.politicalAffiliation)
+      ? source.profile.politicalAffiliation
+      : POLITICAL_AFFILIATION_DEFAULT
+    normalized.profile.showPoliticalAffiliation = Boolean(source.profile.showPoliticalAffiliation)
   }
 
   const sourceEducations = Array.isArray(source.educations)
