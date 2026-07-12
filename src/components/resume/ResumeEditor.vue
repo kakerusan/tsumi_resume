@@ -47,6 +47,10 @@ import {
   clampProjectNameFontSize,
   clampProjectSummaryFontSize,
   clampProjectTagFontSize,
+  clampStudentHighlightsFontSize,
+  clampStudentMetaFontSize,
+  clampStudentNameFontSize,
+  clampStudentSummaryFontSize,
   SCHOOL_FONT_SIZE_MAX,
   SCHOOL_FONT_SIZE_MIN,
   clampNameFontSize,
@@ -96,6 +100,11 @@ const emit = defineEmits([
   'toggle-project-hidden',
   'move-project-up',
   'move-project-down',
+  'add-student-experience',
+  'remove-student-experience',
+  'toggle-student-experience-hidden',
+  'move-student-experience-up',
+  'move-student-experience-down',
   'add-custom-image',
   'remove-custom-image',
   'toggle-custom-image-hidden',
@@ -358,6 +367,22 @@ function onProjectTagFontSizeChange(value) {
     value,
     props.resume.theme.projectTagFontSize
   )
+}
+
+function onStudentNameFontSizeChange(value) {
+  props.resume.theme.studentNameFontSize = clampStudentNameFontSize(value, props.resume.theme.studentNameFontSize)
+}
+
+function onStudentMetaFontSizeChange(value) {
+  props.resume.theme.studentMetaFontSize = clampStudentMetaFontSize(value, props.resume.theme.studentMetaFontSize)
+}
+
+function onStudentSummaryFontSizeChange(value) {
+  props.resume.theme.studentSummaryFontSize = clampStudentSummaryFontSize(value, props.resume.theme.studentSummaryFontSize)
+}
+
+function onStudentHighlightsFontSizeChange(value) {
+  props.resume.theme.studentHighlightsFontSize = clampStudentHighlightsFontSize(value, props.resume.theme.studentHighlightsFontSize)
 }
 
 function onAwardTitleFontSizeChange(value) {
@@ -1525,6 +1550,173 @@ function movePersonalDetail(index, offset) {
         </draggable>
         <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-project')">
           + 新增项目经历
+        </button>
+      </div>
+    </article>
+
+    <article class="panel-card" :style="{ order: getEditorSectionOrder('studentExperiences') }">
+      <div class="panel-head">
+        <button type="button" class="panel-head-main" @click="$emit('toggle-panel', 'student')">
+          <span class="panel-caret">{{ panels.student ? '▾' : '▸' }}</span>
+          <span class="panel-title">学生经历</span>
+        </button>
+        <button
+          type="button"
+          class="panel-eye"
+          :class="resume.sectionVisibility.studentExperiences ? '' : 'panel-eye-off'"
+          @click="resume.sectionVisibility.studentExperiences = !resume.sectionVisibility.studentExperiences"
+        >
+          <browse-icon
+            v-if="resume.sectionVisibility.studentExperiences"
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+          <browse-off-icon
+            v-else
+            :fill-color="['transparent', 'transparent']"
+            :stroke-color="['currentColor', '#0052d9']"
+            :stroke-width="2"
+          />
+        </button>
+      </div>
+      <div v-if="panels.student" class="panel-body mt-4 space-y-3">
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">组织名称字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.studentNameFontSize"
+                :min="emphasisFontSizeMin"
+                :max="emphasisFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onStudentNameFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">角色时间字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.studentMetaFontSize"
+                :min="metaFontSizeMin"
+                :max="metaFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onStudentMetaFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">简介字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.studentSummaryFontSize"
+                :min="contentFontSizeMin"
+                :max="contentFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onStudentSummaryFontSizeChange"
+              />
+            </div>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <label class="field-label mb-2 block">亮点字号</label>
+            <div class="setting-slider">
+              <Slider
+                :model-value="resume.theme.studentHighlightsFontSize"
+                :min="contentFontSizeMin"
+                :max="contentFontSizeMax"
+                :step="0.5"
+                :input-number-props="sliderInputProps"
+                @change="onStudentHighlightsFontSizeChange"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="!resume.studentExperiences.length"
+          class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600"
+        >
+          暂无学生经历，点击下方按钮新增。
+        </div>
+        <draggable
+          v-else
+          v-model="resume.studentExperiences"
+          item-key="id"
+          handle=".drag-handle"
+          class="drag-list"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          drag-class="drag-dragging"
+          :animation="180"
+        >
+          <template #item="{ element: item, index }">
+            <article class="sub-card drag-item">
+              <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <button type="button" class="drag-handle" title="拖拽排序">::</button>
+                  <span class="text-sm font-semibold text-slate-800">学生 {{ index + 1 }}</span>
+                  <span
+                    v-if="item.hidden"
+                    class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                  >
+                    已隐藏（预览不显示）
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" class="small-btn" @click="$emit('toggle-student-experience-hidden', item.id)">
+                    {{ item.hidden ? '显示' : '隐藏' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === 0"
+                    @click="$emit('move-student-experience-up', index)"
+                  >
+                    上移
+                  </button>
+                  <button
+                    type="button"
+                    class="small-btn disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="index === resume.studentExperiences.length - 1"
+                    @click="$emit('move-student-experience-down', index)"
+                  >
+                    下移
+                  </button>
+                  <button type="button" class="small-btn small-btn-danger" @click="$emit('remove-student-experience', item.id)">
+                    删除
+                  </button>
+                </div>
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="field-wrap">
+                  <span class="field-label">组织/单位</span>
+                  <input v-model="item.organization" class="field-input" placeholder="例如：党委学生工作部教育科" />
+                </label>
+                <label class="field-wrap">
+                  <span class="field-label">角色/职务</span>
+                  <input v-model="item.role" class="field-input" placeholder="例如：学生助理" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">时间</span>
+                  <input v-model="item.period" class="field-input" placeholder="例如：2024.09 - 2025.06" />
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">简介</span>
+                  <textarea v-model="item.summary" v-auto-resize class="field-input field-textarea" placeholder="简要描述职责与工作内容"></textarea>
+                </label>
+                <label class="field-wrap sm:col-span-2">
+                  <span class="field-label">成果亮点（每行一条）</span>
+                  <textarea v-model="item.highlights" v-auto-resize class="field-input field-textarea" placeholder="每行一条，可用 **关键字** 强调"></textarea>
+                </label>
+              </div>
+            </article>
+          </template>
+        </draggable>
+        <button type="button" class="toolbar-btn w-full border-dashed" @click="$emit('add-student-experience')">
+          + 新增学生经历
         </button>
       </div>
     </article>

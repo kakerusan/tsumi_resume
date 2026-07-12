@@ -8,6 +8,7 @@ import {
   createPersonalDetailItem,
   createProjectItem,
   createResearchExperienceItem,
+  createStudentExperienceItem,
   createSectionVisibility,
 } from './factories'
 import { normalizePhotoConfig } from './photoConfig'
@@ -34,6 +35,10 @@ import {
   DEFAULT_PROJECT_NAME_FONT_SIZE,
   DEFAULT_PROJECT_SUMMARY_FONT_SIZE,
   DEFAULT_PROJECT_TAG_FONT_SIZE,
+  DEFAULT_STUDENT_HIGHLIGHTS_FONT_SIZE,
+  DEFAULT_STUDENT_META_FONT_SIZE,
+  DEFAULT_STUDENT_NAME_FONT_SIZE,
+  DEFAULT_STUDENT_SUMMARY_FONT_SIZE,
   DEFAULT_SCHOOL_FONT_SIZE,
   DEFAULT_SELF_SUMMARY_FONT_SIZE,
   DEFAULT_SKILLS_FONT_SIZE,
@@ -59,6 +64,7 @@ export function createEmptyResume() {
     internships: [],
     researchExperiences: [],
     projects: [],
+    studentExperiences: [],
     customImages: [],
     awards: [],
     certificates: [],
@@ -87,6 +93,10 @@ export function createEmptyResume() {
       projectNameFontSize: DEFAULT_PROJECT_NAME_FONT_SIZE,
       projectMetaFontSize: DEFAULT_PROJECT_META_FONT_SIZE,
       projectTagFontSize: DEFAULT_PROJECT_TAG_FONT_SIZE,
+      studentNameFontSize: DEFAULT_STUDENT_NAME_FONT_SIZE,
+      studentMetaFontSize: DEFAULT_STUDENT_META_FONT_SIZE,
+      studentSummaryFontSize: DEFAULT_STUDENT_SUMMARY_FONT_SIZE,
+      studentHighlightsFontSize: DEFAULT_STUDENT_HIGHLIGHTS_FONT_SIZE,
       awardTitleFontSize: DEFAULT_AWARD_TITLE_FONT_SIZE,
       awardMetaFontSize: DEFAULT_AWARD_META_FONT_SIZE,
       awardDescriptionFontSize: DEFAULT_AWARD_DESCRIPTION_FONT_SIZE,
@@ -193,6 +203,17 @@ export function createDemoResume() {
           '基于微服务架构的电商系统，实现商品管理、订单处理、支付集成等核心功能，采用分布式锁、缓存策略等技术保障系统性能与可靠性。',
       }),
     ],
+    studentExperiences: [
+      createStudentExperienceItem({
+        id: 'student-demo-1',
+        organization: '党委学生工作部教育科',
+        role: '学生助理',
+        period: '2024.09 - 2025.06',
+        summary: '协助处理日常教务与学生事务，参与活动策划与现场组织。',
+        highlights: `独立负责 **3 场** 校级活动的签到与物资统筹，覆盖 500+ 人次
+撰写活动总结与新闻稿，其中 1 篇被学院公众号转载`,
+      }),
+    ],
     customImages: [
       createCustomImageItem({
         id: 'custom-image-demo-1',
@@ -248,6 +269,10 @@ export function createDemoResume() {
       projectNameFontSize: DEFAULT_PROJECT_NAME_FONT_SIZE,
       projectMetaFontSize: DEFAULT_PROJECT_META_FONT_SIZE,
       projectTagFontSize: DEFAULT_PROJECT_TAG_FONT_SIZE,
+      studentNameFontSize: DEFAULT_STUDENT_NAME_FONT_SIZE,
+      studentMetaFontSize: DEFAULT_STUDENT_META_FONT_SIZE,
+      studentSummaryFontSize: DEFAULT_STUDENT_SUMMARY_FONT_SIZE,
+      studentHighlightsFontSize: DEFAULT_STUDENT_HIGHLIGHTS_FONT_SIZE,
       awardTitleFontSize: DEFAULT_AWARD_TITLE_FONT_SIZE,
       awardMetaFontSize: DEFAULT_AWARD_META_FONT_SIZE,
       awardDescriptionFontSize: DEFAULT_AWARD_DESCRIPTION_FONT_SIZE,

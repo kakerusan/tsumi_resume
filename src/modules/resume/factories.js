@@ -100,6 +100,18 @@ export function createResearchExperienceItem(partial = {}) {
   }
 }
 
+export function createStudentExperienceItem(partial = {}) {
+  return {
+    id: partial.id || createId('student'),
+    hidden: Boolean(partial.hidden),
+    organization: partial.organization || '',
+    role: partial.role || '',
+    period: partial.period || '',
+    summary: partial.summary || '',
+    highlights: partial.highlights || '',
+  }
+}
+
 export function createAwardItem(partial = {}) {
   return {
     id: partial.id || createId('award'),
@@ -132,6 +144,7 @@ export function createSectionVisibility(partial = {}) {
     internships: partial.internships !== false,
     researchExperiences: partial.researchExperiences !== false,
     projects: partial.projects !== false,
+    studentExperiences: partial.studentExperiences !== false,
     customImages: partial.customImages !== false,
     awards: partial.awards !== false,
     certificates: partial.certificates !== false,
@@ -148,6 +161,7 @@ export function createPanelsState() {
     internship: true,
     research: true,
     project: true,
+    student: true,
     awards: true,
     certificates: true,
     selfSummary: true,

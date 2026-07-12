@@ -11,6 +11,10 @@ export const DEFAULT_PROJECT_HIGHLIGHTS_FONT_SIZE = 12.5
 export const DEFAULT_PROJECT_NAME_FONT_SIZE = 13
 export const DEFAULT_PROJECT_META_FONT_SIZE = 12
 export const DEFAULT_PROJECT_TAG_FONT_SIZE = 11
+export const DEFAULT_STUDENT_NAME_FONT_SIZE = 13
+export const DEFAULT_STUDENT_META_FONT_SIZE = 12
+export const DEFAULT_STUDENT_SUMMARY_FONT_SIZE = 12.5
+export const DEFAULT_STUDENT_HIGHLIGHTS_FONT_SIZE = 12.5
 export const DEFAULT_AWARD_TITLE_FONT_SIZE = 13
 export const DEFAULT_AWARD_META_FONT_SIZE = 12
 export const DEFAULT_AWARD_DESCRIPTION_FONT_SIZE = 12.5
@@ -120,6 +124,22 @@ export function clampProjectMetaFontSize(value, fallback = DEFAULT_PROJECT_META_
 
 export function clampProjectTagFontSize(value, fallback = DEFAULT_PROJECT_TAG_FONT_SIZE) {
   return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
+export function clampStudentNameFontSize(value, fallback = DEFAULT_STUDENT_NAME_FONT_SIZE) {
+  return clampSize(value, EMPHASIS_FONT_SIZE_MIN, EMPHASIS_FONT_SIZE_MAX, fallback)
+}
+
+export function clampStudentMetaFontSize(value, fallback = DEFAULT_STUDENT_META_FONT_SIZE) {
+  return clampSize(value, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX, fallback)
+}
+
+export function clampStudentSummaryFontSize(value, fallback = DEFAULT_STUDENT_SUMMARY_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
+}
+
+export function clampStudentHighlightsFontSize(value, fallback = DEFAULT_STUDENT_HIGHLIGHTS_FONT_SIZE) {
+  return clampSize(value, CONTENT_FONT_SIZE_MIN, CONTENT_FONT_SIZE_MAX, fallback)
 }
 
 export function clampAwardTitleFontSize(value, fallback = DEFAULT_AWARD_TITLE_FONT_SIZE) {

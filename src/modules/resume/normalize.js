@@ -8,6 +8,7 @@ import {
   createPersonalDetailItem,
   createProjectItem,
   createResearchExperienceItem,
+  createStudentExperienceItem,
   createSectionVisibility,
 } from './factories'
 import { normalizePhotoConfig } from './photoConfig'
@@ -35,6 +36,10 @@ import {
   clampProjectNameFontSize,
   clampProjectSummaryFontSize,
   clampProjectTagFontSize,
+  clampStudentHighlightsFontSize,
+  clampStudentMetaFontSize,
+  clampStudentNameFontSize,
+  clampStudentSummaryFontSize,
   clampSchoolFontSize,
   clampSelfSummaryFontSize,
   clampSkillsFontSize,
@@ -101,6 +106,11 @@ export function normalizeResumeData(source = {}) {
       : []
   normalized.projects = sourceProjects.map((item) => createProjectItem(item))
 
+  const sourceStudentExperiences = Array.isArray(source.studentExperiences)
+    ? source.studentExperiences
+    : []
+  normalized.studentExperiences = sourceStudentExperiences.map((item) => createStudentExperienceItem(item))
+
   normalized.customImages = Array.isArray(source.customImages)
     ? source.customImages.map((item) => createCustomImageItem(item))
     : []
@@ -159,6 +169,10 @@ export function normalizeResumeData(source = {}) {
   normalized.theme.projectNameFontSize = clampProjectNameFontSize(normalized.theme.projectNameFontSize)
   normalized.theme.projectMetaFontSize = clampProjectMetaFontSize(normalized.theme.projectMetaFontSize)
   normalized.theme.projectTagFontSize = clampProjectTagFontSize(normalized.theme.projectTagFontSize)
+  normalized.theme.studentNameFontSize = clampStudentNameFontSize(normalized.theme.studentNameFontSize)
+  normalized.theme.studentMetaFontSize = clampStudentMetaFontSize(normalized.theme.studentMetaFontSize)
+  normalized.theme.studentSummaryFontSize = clampStudentSummaryFontSize(normalized.theme.studentSummaryFontSize)
+  normalized.theme.studentHighlightsFontSize = clampStudentHighlightsFontSize(normalized.theme.studentHighlightsFontSize)
   normalized.theme.awardTitleFontSize = clampAwardTitleFontSize(normalized.theme.awardTitleFontSize)
   normalized.theme.awardMetaFontSize = clampAwardMetaFontSize(normalized.theme.awardMetaFontSize)
   normalized.theme.awardDescriptionFontSize = clampAwardDescriptionFontSize(normalized.theme.awardDescriptionFontSize)

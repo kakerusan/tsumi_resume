@@ -9,6 +9,7 @@ import {
   createPanelsState,
   createProjectItem,
   createResearchExperienceItem,
+  createStudentExperienceItem,
 } from '../modules/resume/factories'
 import { normalizeResumeData } from '../modules/resume/normalize'
 import { normalizeLayoutOrder } from '../modules/resume/sections'
@@ -37,6 +38,10 @@ import {
   clampProjectNameFontSize,
   clampProjectSummaryFontSize,
   clampProjectTagFontSize,
+  clampStudentHighlightsFontSize,
+  clampStudentMetaFontSize,
+  clampStudentNameFontSize,
+  clampStudentSummaryFontSize,
   clampSchoolFontSize,
   clampSelfSummaryFontSize,
   clampSkillsFontSize,
@@ -541,9 +546,31 @@ export function useResumeBuilder() {
     moveItem(resume.internships, index, index + 1)
   }
 
-  function addProject() {
-    resume.projects.push(createProjectItem())
-  }
+function addProject() {
+  resume.projects.push(createProjectItem())
+}
+
+function addStudentExperience() {
+  resume.studentExperiences.push(createStudentExperienceItem())
+}
+
+function removeStudentExperience(id) {
+  const index = resume.studentExperiences.findIndex((item) => item.id === id)
+  if (index >= 0) resume.studentExperiences.splice(index, 1)
+}
+
+function toggleStudentExperienceHidden(id) {
+  const target = resume.studentExperiences.find((item) => item.id === id)
+  if (target) target.hidden = !target.hidden
+}
+
+function moveStudentExperienceUp(index) {
+  moveItem(resume.studentExperiences, index, index - 1)
+}
+
+function moveStudentExperienceDown(index) {
+  moveItem(resume.studentExperiences, index, index + 1)
+}
 
   function addResearchExperience() {
     resume.researchExperiences.push(createResearchExperienceItem())
@@ -783,10 +810,13 @@ export function useResumeBuilder() {
     const hasProjects = resume.projects.some(
       (item) => Boolean(String(item.name || item.summary || item.highlights || '').trim()) && !item.hidden
     )
+    const hasStudentExperiences = resume.studentExperiences.some(
+      (item) => Boolean(String(item.organization || item.summary || item.highlights || '').trim()) && !item.hidden
+    )
     const hasCustomImages = resume.customImages.some(
       (item) => Boolean(String(item.image || '').trim()) && !item.hidden
     )
-    return hasSkills || hasInternships || hasResearchExperiences || hasProjects || hasCustomImages
+    return hasSkills || hasInternships || hasResearchExperiences || hasProjects || hasStudentExperiences || hasCustomImages
   }
 
   function validateBeforeExport() {
@@ -858,8 +888,12 @@ export function useResumeBuilder() {
     '--project-highlights-font-size': `${clampProjectHighlightsFontSize(resume.theme.projectHighlightsFontSize)}px`,
     '--project-name-font-size': `${clampProjectNameFontSize(resume.theme.projectNameFontSize)}px`,
     '--project-meta-font-size': `${clampProjectMetaFontSize(resume.theme.projectMetaFontSize)}px`,
-    '--project-tag-font-size': `${clampProjectTagFontSize(resume.theme.projectTagFontSize)}px`,
-    '--award-title-font-size': `${clampAwardTitleFontSize(resume.theme.awardTitleFontSize)}px`,
+      '--project-tag-font-size': `${clampProjectTagFontSize(resume.theme.projectTagFontSize)}px`,
+      '--student-name-font-size': `${clampStudentNameFontSize(resume.theme.studentNameFontSize)}px`,
+      '--student-meta-font-size': `${clampStudentMetaFontSize(resume.theme.studentMetaFontSize)}px`,
+      '--student-summary-font-size': `${clampStudentSummaryFontSize(resume.theme.studentSummaryFontSize)}px`,
+      '--student-highlights-font-size': `${clampStudentHighlightsFontSize(resume.theme.studentHighlightsFontSize)}px`,
+      '--award-title-font-size': `${clampAwardTitleFontSize(resume.theme.awardTitleFontSize)}px`,
     '--award-meta-font-size': `${clampAwardMetaFontSize(resume.theme.awardMetaFontSize)}px`,
     '--award-description-font-size': `${clampAwardDescriptionFontSize(resume.theme.awardDescriptionFontSize)}px`,
     '--certificate-title-font-size': `${clampCertificateTitleFontSize(resume.theme.certificateTitleFontSize)}px`,
@@ -961,6 +995,11 @@ export function useResumeBuilder() {
     toggleProjectHidden,
     moveProjectUp,
     moveProjectDown,
+    addStudentExperience,
+    removeStudentExperience,
+    toggleStudentExperienceHidden,
+    moveStudentExperienceUp,
+    moveStudentExperienceDown,
     addCustomImage,
     removeCustomImage,
     toggleCustomImageHidden,

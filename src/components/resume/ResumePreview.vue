@@ -151,6 +151,7 @@ const sectionVisibility = computed(() => ({
   internships: props.resume.sectionVisibility?.internships !== false,
   researchExperiences: props.resume.sectionVisibility?.researchExperiences !== false,
   projects: props.resume.sectionVisibility?.projects !== false,
+  studentExperiences: props.resume.sectionVisibility?.studentExperiences !== false,
   customImages: props.resume.sectionVisibility?.customImages !== false,
   awards: props.resume.sectionVisibility?.awards !== false,
   certificates: props.resume.sectionVisibility?.certificates !== false,
@@ -180,6 +181,12 @@ const visibleResearchExperiences = computed(() =>
 
 const visibleProjects = computed(() =>
   sectionVisibility.value.projects ? (props.resume.projects || []).filter((item) => !item.hidden) : []
+)
+
+const visibleStudentExperiences = computed(() =>
+  sectionVisibility.value.studentExperiences
+    ? (props.resume.studentExperiences || []).filter((item) => !item.hidden)
+    : []
 )
 
 const visibleCustomImages = computed(() =>
@@ -245,6 +252,7 @@ const hasAnyVisibleSection = computed(
     visibleInternships.value.length > 0 ||
     visibleResearchExperiences.value.length > 0 ||
     visibleProjects.value.length > 0 ||
+    visibleStudentExperiences.value.length > 0 ||
     visibleCustomImages.value.length > 0 ||
     visibleAwards.value.length > 0 ||
     visibleCertificates.value.length > 0 ||
@@ -605,11 +613,42 @@ const hasAnyVisibleSection = computed(
                 <span v-html="richText(line)"></span>
               </li>
             </ul>
-          </article>
-        </div>
-      </section>
+      </article>
+    </div>
+  </section>
 
-        <section v-if="visibleCustomImages.length" class="resume-section" :style="{ order: getSectionOrder('customImages') }">
+    <section v-if="visibleStudentExperiences.length" class="resume-section" :style="{ order: getSectionOrder('studentExperiences') }">
+      <h3 class="resume-section-title">
+        学生经历
+        <span class="resume-section-subtitle">STUDENT EXPERIENCE</span>
+      </h3>
+      <div class="resume-list">
+        <article v-for="item in visibleStudentExperiences" :key="item.id" class="project-entry">
+          <div class="project-entry-head">
+            <div class="project-entry-title-row">
+              <p class="project-entry-name" :style="{ fontSize: 'var(--student-name-font-size)' }">{{ item.organization || '组织/单位' }}</p>
+              <p class="project-entry-meta" v-if="cleanText(item.role) || cleanText(item.period)" :style="{ fontSize: 'var(--student-meta-font-size)' }">
+                <span v-if="cleanText(item.role)">{{ item.role }}</span>
+                <span v-if="cleanText(item.role) && cleanText(item.period)"> / </span>
+                <span v-if="cleanText(item.period)">{{ item.period }}</span>
+              </p>
+            </div>
+          </div>
+          <p v-if="cleanText(item.summary)" class="project-summary" :style="{ fontSize: 'var(--student-summary-font-size)' }">
+            <span class="project-summary-label">简介：</span>
+            <span v-html="richText(item.summary)"></span>
+          </p>
+          <ul v-if="splitLines(item.highlights).length" class="project-highlights">
+            <li v-for="(line, index) in splitLines(item.highlights)" :key="`${item.id}-student-highlight-${index}`" class="project-highlight-item" :style="{ fontSize: 'var(--student-highlights-font-size)' }">
+              <span class="project-highlight-dot"></span>
+              <span v-html="richText(line)"></span>
+            </li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section v-if="visibleCustomImages.length" class="resume-section" :style="{ order: getSectionOrder('customImages') }">
         <div class="custom-image-list">
           <article v-for="item in visibleCustomImages" :key="item.id" class="custom-image-entry">
             <h3 class="resume-section-title">

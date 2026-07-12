@@ -56,6 +56,11 @@ const {
   toggleProjectHidden,
   moveProjectUp,
   moveProjectDown,
+  addStudentExperience,
+  removeStudentExperience,
+  toggleStudentExperienceHidden,
+  moveStudentExperienceUp,
+  moveStudentExperienceDown,
   addCustomImage,
   removeCustomImage,
   toggleCustomImageHidden,
@@ -303,6 +308,11 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
           @toggle-project-hidden="toggleProjectHidden"
           @move-project-up="moveProjectUp"
           @move-project-down="moveProjectDown"
+          @add-student-experience="addStudentExperience"
+          @remove-student-experience="removeStudentExperience"
+          @toggle-student-experience-hidden="toggleStudentExperienceHidden"
+          @move-student-experience-up="moveStudentExperienceUp"
+          @move-student-experience-down="moveStudentExperienceDown"
           @add-custom-image="addCustomImage"
           @remove-custom-image="removeCustomImage"
           @toggle-custom-image-hidden="toggleCustomImageHidden"
