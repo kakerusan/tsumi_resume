@@ -7,6 +7,8 @@ import { normalizePhotoConfig } from '../../modules/resume/photoConfig'
 import { normalizeLayoutOrder } from '../../modules/resume/sections'
 import { richText } from '../../modules/resume/richText'
 
+const MARKDOWN_LINK_RE = /\[([^\]]+?)\]\s*\(\s*(https?:\/\/(?:[^()\s]|\([^()\s]*\))+)\s*\)/
+
 const A4_HEIGHT_PX = 1123
 
 const props = defineProps({
@@ -25,6 +27,14 @@ function splitLines(text = '') {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
+}
+
+function extractProjectLink(highlights = '') {
+  for (const line of splitLines(highlights)) {
+    const match = line.match(MARKDOWN_LINK_RE)
+    if (match) return { label: match[1], url: match[2] }
+  }
+  return null
 }
 
 function splitTags(text = '') {
@@ -591,6 +601,19 @@ const hasAnyVisibleSection = computed(
             <div class="project-entry-head">
               <div class="project-entry-title-row">
                 <p class="project-entry-name">{{ item.name || '项目名称' }}</p>
+                <a
+                  v-if="extractProjectLink(item.highlights)"
+                  :href="extractProjectLink(item.highlights).url"
+                  class="project-entry-link"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="打开项目仓库"
+                  @click.stop
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.8A5.3 5.3 0 0 0 19 4.8a4.9 4.9 0 0 0-.1-3.8s-1.1-.3-3.8 1.5a13.2 13.2 0 0 0-7 0C5.4.7 4.3 1 4.3 1a4.9 4.9 0 0 0-.1 3.8A5.3 5.3 0 0 0 2.9 8.7c0 5.3 3.2 6.5 6.2 6.8a3.4 3.4 0 0 0-.9 2.6V22" />
+                  </svg>
+                </a>
                 <p class="project-entry-meta" v-if="cleanText(item.role) || cleanText(item.period)">
                   <span v-if="cleanText(item.role)">{{ item.role }}</span>
                   <span v-if="cleanText(item.role) && cleanText(item.period)"> / </span>
