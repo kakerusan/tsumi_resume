@@ -29,8 +29,12 @@ function splitLines(text = '') {
     .filter(Boolean)
 }
 
-function extractProjectLink(highlights = '') {
-  for (const line of splitLines(highlights)) {
+function extractProjectLink(item = {}) {
+  if (item.repoUrl) {
+    const url = String(item.repoUrl).trim()
+    if (url) return { label: url, url }
+  }
+  for (const line of splitLines(item.highlights)) {
     const match = line.match(MARKDOWN_LINK_RE)
     if (match) return { label: match[1], url: match[2] }
   }
@@ -602,8 +606,8 @@ const hasAnyVisibleSection = computed(
               <div class="project-entry-title-row">
                 <p class="project-entry-name">{{ item.name || '项目名称' }}</p>
                 <a
-                  v-if="extractProjectLink(item.highlights)"
-                  :href="extractProjectLink(item.highlights).url"
+                  v-if="extractProjectLink(item)"
+                  :href="extractProjectLink(item).url"
                   class="project-entry-link"
                   target="_blank"
                   rel="noreferrer"

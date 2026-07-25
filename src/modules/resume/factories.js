@@ -66,6 +66,7 @@ export function createProjectItem(partial = {}) {
     tags: partial.tags || '',
     summary: partial.summary || '',
     highlights: partial.highlights || '',
+    repoUrl: partial.repoUrl || '',
   }
 }
 
