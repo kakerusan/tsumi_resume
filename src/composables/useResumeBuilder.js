@@ -64,6 +64,7 @@ const CUSTOM_IMAGE_SUPPORTED_TYPES = new Set([
   'image/svg+xml',
 ])
 const AUTO_SAVE_DELAY = 800
+const SOURCE_SYNC_INTERVAL = 1000
 
 function moveItem(list, fromIndex, toIndex) {
   if (toIndex < 0 || toIndex >= list.length || fromIndex < 0 || fromIndex >= list.length) return
@@ -96,6 +97,11 @@ export function useResumeBuilder() {
   let bootstrapping = true
   let skipNextAutoSave = false
   let hasShownFallbackNotice = false
+  let skipSourceDirty = false
+  let sourceSyncTimer = null
+  let sourceFingerprint = ''
+  let sourceHasLocalEdits = false
+  let sourceHasConflict = false
 
   function restorePanelsState() {
     const raw = localStorage.getItem(PANELS_STORAGE_KEY)
@@ -123,8 +129,67 @@ export function useResumeBuilder() {
 
   restorePanelsState()
 
-  function applyResumeData(source) {
+  function applyResumeData(source, { imported = false } = {}) {
+    if (imported) {
+      skipSourceDirty = true
+      skipNextAutoSave = true
+    }
     Object.assign(resume, normalizeResumeData(source))
+  }
+
+  async function fetchResumeFromUrl(url) {
+    const response = await fetch(url, { cache: 'no-store' })
+    if (!response.ok) throw new Error(`IMPORT_HTTP_${response.status}`)
+    const parsed = await response.json()
+    if (!parsed || typeof parsed !== 'object') throw new Error('INVALID_JSON_SHAPE')
+    return { fingerprint: JSON.stringify(parsed), parsed }
+  }
+
+  async function importResumeFromUrl(url, { sourceChange = false } = {}) {
+    if (!sourceChange) {
+      jsonStatusMessage.value = ''
+      jsonErrorMessage.value = ''
+    }
+
+    try {
+      const { fingerprint, parsed } = await fetchResumeFromUrl(url)
+      if (fingerprint === sourceFingerprint) return
+
+      if (sourceChange && sourceHasLocalEdits) {
+        if (!sourceHasConflict) {
+          sourceHasConflict = true
+          actionErrorMessage.value = '检测到本地 JSON 更新；当前工作台有未导出的编辑，未自动覆盖。刷新页面可加载外部版本。'
+        }
+        return
+      }
+
+      applyResumeData(parsed, { imported: true })
+      sourceFingerprint = fingerprint
+      sourceHasLocalEdits = false
+      sourceHasConflict = false
+      jsonStatusMessage.value = sourceChange ? '已同步本地 JSON 的最新修改。' : 'JSON 导入成功，已替换当前简历。'
+      jsonErrorMessage.value = ''
+    } catch (error) {
+      console.error(error)
+      if (!sourceChange) {
+        jsonErrorMessage.value = 'JSON 导入失败，请检查文件内容是否正确。'
+      }
+    }
+  }
+
+  async function startResumeSourceSync(url) {
+    stopResumeSourceSync()
+    await importResumeFromUrl(url)
+    sourceSyncTimer = window.setInterval(() => {
+      importResumeFromUrl(url, { sourceChange: true })
+    }, SOURCE_SYNC_INTERVAL)
+  }
+
+  function stopResumeSourceSync() {
+    if (sourceSyncTimer) {
+      window.clearInterval(sourceSyncTimer)
+      sourceSyncTimer = null
+    }
   }
 
   function createResumeSnapshot() {
@@ -862,6 +927,11 @@ function moveStudentExperienceDown(index) {
   watch(
     resume,
     () => {
+      if (skipSourceDirty) {
+        skipSourceDirty = false
+      } else {
+        sourceHasLocalEdits = true
+      }
       scheduleAutoSave()
     },
     { deep: true }
@@ -967,10 +1037,15 @@ function moveStudentExperienceDown(index) {
     clearAll,
     saveDraft,
     restoreDraft,
+    importResumeData: applyResumeData,
+    createResumeSnapshot,
     exportPdf,
     exportJson,
     triggerJsonImport,
     handleJsonImport,
+    importResumeFromUrl,
+    startResumeSourceSync,
+    stopResumeSourceSync,
     addEducation,
     removeEducation,
     toggleEducationHidden,

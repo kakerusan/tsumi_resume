@@ -44,8 +44,8 @@ npm run preview
 
 #### Code Organization
 - **Components:** `src/components/` - organized by feature (e.g., `resume/ResumeEditor.vue`)
-- **Composables:** `src/composables/` - reusable logic (e.g., `useResumeBuilder.js`)
-- **Modules:** `src/modules/` - business logic organized by domain (e.g., `resume/constants.js`, `resume/factories.js`)
+- **Composables:** `src/composables/` - reusable logic (e.g., `useResumeBuilder.js`, `useWorkspace.js` for local-folder version history)
+- **Modules:** `src/modules/` - business logic organized by domain (e.g., `resume/constants.js`, `resume/factories.js`, `resume/workspace.js` for File System Access API workspace/version snapshots)
 - **Styles:** TailwindCSS with custom component classes in `src/style.css`
 
 ### Error Handling

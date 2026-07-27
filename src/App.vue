@@ -1,10 +1,12 @@
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Dialog } from 'tdesign-vue-next'
 import ResumeEditor from './components/resume/ResumeEditor.vue'
 import ResumePreview from './components/resume/ResumePreview.vue'
 import ResumeToolbar from './components/resume/ResumeToolbar.vue'
+import VersionManager from './components/resume/VersionManager.vue'
 import { useResumeBuilder } from './composables/useResumeBuilder'
+import { useWorkspace } from './composables/useWorkspace'
 
 const {
   resume,
@@ -28,10 +30,14 @@ const {
   clearAll,
   saveDraft,
   restoreDraft,
+  importResumeData,
+  createResumeSnapshot,
   exportPdf,
   exportJson,
   triggerJsonImport,
   handleJsonImport,
+  startResumeSourceSync,
+  stopResumeSourceSync,
   addEducation,
   removeEducation,
   toggleEducationHidden,
@@ -94,6 +100,18 @@ const dismissedNotices = reactive({
 })
 const clearConfirmVisible = ref(false)
 const clearConfirmLoading = ref(false)
+const versionManagerVisible = ref(false)
+
+const workspace = useWorkspace({
+  getResumeSnapshot: createResumeSnapshot,
+  onRestore: (data) => importResumeData(data),
+  onStatus: (message) => {
+    actionStatusMessage.value = message
+  },
+  onError: (message) => {
+    actionErrorMessage.value = message
+  },
+})
 
 function dismissNotice(type) {
   dismissedNotices[type] = true
@@ -117,6 +135,17 @@ async function confirmClearAll() {
     clearConfirmLoading.value = false
   }
 }
+
+onMounted(() => {
+  const params = new URLSearchParams(window.location.search)
+  const resumeUrl = params.get('resume')
+  if (resumeUrl) startResumeSourceSync(resumeUrl)
+  workspace.bootstrap()
+})
+
+onBeforeUnmount(() => {
+  stopResumeSourceSync()
+})
 
 watch(() => jsonStatusMessage.value, () => {
   dismissedNotices.jsonStatus = false
@@ -156,7 +185,10 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
         @export-pdf="exportPdf"
         @expand-all-panels="expandAllPanels"
         @collapse-all-panels="collapseAllPanels"
+        @open-versions="versionManagerVisible = true"
       />
+
+      <VersionManager v-model:visible="versionManagerVisible" :workspace="workspace" />
 
       <Dialog
         v-model:visible="clearConfirmVisible"
@@ -256,6 +288,15 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
           >
             ×
           </button>
+        </div>
+        <div
+          v-if="workspace.status.value === 'needs-permission'"
+          class="notice-banner border-amber-200 bg-amber-50 text-amber-700"
+        >
+          <span class="notice-banner__text">
+            上次的工作区「{{ workspace.workspaceName.value }}」需要重新授权才能载入版本历史。
+            <button type="button" class="font-semibold underline" @click="workspace.reconnect()">重新连接</button>
+          </span>
         </div>
         <div
           v-if="pageOverflow && !dismissedNotices.pageOverflow"

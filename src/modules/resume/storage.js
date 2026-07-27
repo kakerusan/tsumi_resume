@@ -3,7 +3,9 @@ import {
   RESUME_DB_VERSION,
   RESUME_DRAFT_KEY,
   RESUME_DRAFT_STORE,
+  RESUME_WORKSPACE_STORE,
   STORAGE_KEY,
+  WORKSPACE_HANDLE_KEY,
 } from './constants'
 
 function hasIndexedDb() {
@@ -24,6 +26,9 @@ function openRequest() {
       if (!database.objectStoreNames.contains(RESUME_DRAFT_STORE)) {
         database.createObjectStore(RESUME_DRAFT_STORE)
       }
+      if (!database.objectStoreNames.contains(RESUME_WORKSPACE_STORE)) {
+        database.createObjectStore(RESUME_WORKSPACE_STORE)
+      }
     }
 
     request.onsuccess = () => resolve(request.result)
@@ -31,12 +36,12 @@ function openRequest() {
   })
 }
 
-function runTransaction(mode, runner) {
+function runStoreTransaction(storeName, mode, runner) {
   return openRequest().then(
     (database) =>
       new Promise((resolve, reject) => {
-        const transaction = database.transaction(RESUME_DRAFT_STORE, mode)
-        const store = transaction.objectStore(RESUME_DRAFT_STORE)
+        const transaction = database.transaction(storeName, mode)
+        const store = transaction.objectStore(storeName)
 
         let request
         try {
@@ -63,6 +68,10 @@ function runTransaction(mode, runner) {
         }
       })
   )
+}
+
+function runTransaction(mode, runner) {
+  return runStoreTransaction(RESUME_DRAFT_STORE, mode, runner)
 }
 
 function saveToLocalStorage(resume) {
@@ -119,6 +128,43 @@ export async function deleteResumeDraft() {
 
 export function hasLegacyLocalDraft() {
   return Boolean(localStorage.getItem(STORAGE_KEY))
+}
+
+export async function saveWorkspaceHandle(handle) {
+  if (!hasIndexedDb()) return false
+  try {
+    await runStoreTransaction(RESUME_WORKSPACE_STORE, 'readwrite', (store) =>
+      store.put(handle, WORKSPACE_HANDLE_KEY)
+    )
+    return true
+  } catch (error) {
+    console.error('Save workspace handle failed:', error)
+    return false
+  }
+}
+
+export async function loadWorkspaceHandle() {
+  if (!hasIndexedDb()) return null
+  try {
+    const handle = await runStoreTransaction(RESUME_WORKSPACE_STORE, 'readonly', (store) =>
+      store.get(WORKSPACE_HANDLE_KEY)
+    )
+    return handle || null
+  } catch (error) {
+    console.error('Load workspace handle failed:', error)
+    return null
+  }
+}
+
+export async function clearWorkspaceHandle() {
+  if (!hasIndexedDb()) return
+  try {
+    await runStoreTransaction(RESUME_WORKSPACE_STORE, 'readwrite', (store) =>
+      store.delete(WORKSPACE_HANDLE_KEY)
+    )
+  } catch (error) {
+    console.error('Clear workspace handle failed:', error)
+  }
 }
 
 export async function migrateLegacyDraftIfNeeded() {
