@@ -1,4 +1,5 @@
-import { computed, reactive, ref, watch, watchEffect } from 'vue'
+import { waitForPrintResources } from '../modules/resume/pdf'
+import { computed, nextTick, reactive, ref, watch, watchEffect } from 'vue'
 import { PANELS_STORAGE_KEY, SCHEMA_VERSION } from '../modules/resume/constants'
 import {
   createAwardItem,
@@ -13,7 +14,7 @@ import {
 } from '../modules/resume/factories'
 import { normalizeResumeData } from '../modules/resume/normalize'
 import { normalizeLayoutOrder } from '../modules/resume/sections'
-import { createDemoResume, createEmptyResume } from '../modules/resume/templates'
+import { createEmptyResume } from '../modules/resume/templates'
 import { processProfilePhoto } from '../modules/resume/photo'
 import { deepBrandFrom, nameBrandFrom, schoolBrandFrom } from '../modules/resume/color'
 import { getNameFontFamily, getSchoolFontFamily } from '../modules/resume/nameFont'
@@ -65,6 +66,49 @@ const CUSTOM_IMAGE_SUPPORTED_TYPES = new Set([
 ])
 const AUTO_SAVE_DELAY = 800
 const SOURCE_SYNC_INTERVAL = 1000
+// 与 ResumePreview.vue 的 A4_HEIGHT_PX 保持一致
+const A4_PAGE_HEIGHT_PX = 1123
+const FIT_MAX_ITERATIONS = 3
+const FIT_MIN_RATIO = 0.85
+const FIT_SAFETY_MARGIN_PX = 16
+
+const FIT_FONT_SIZE_CLAMPS = {
+  nameFontSize: clampNameFontSize,
+  schoolFontSize: clampSchoolFontSize,
+  skillsFontSize: clampSkillsFontSize,
+  internshipSummaryFontSize: clampInternshipSummaryFontSize,
+  internshipHighlightsFontSize: clampInternshipHighlightsFontSize,
+  internshipTimeFontSize: clampInternshipTimeFontSize,
+  internshipCompanyMetaFontSize: clampInternshipCompanyMetaFontSize,
+  internshipRoleFontSize: clampInternshipRoleFontSize,
+  projectSummaryFontSize: clampProjectSummaryFontSize,
+  projectHighlightsFontSize: clampProjectHighlightsFontSize,
+  projectNameFontSize: clampProjectNameFontSize,
+  projectMetaFontSize: clampProjectMetaFontSize,
+  projectTagFontSize: clampProjectTagFontSize,
+  studentNameFontSize: clampStudentNameFontSize,
+  studentMetaFontSize: clampStudentMetaFontSize,
+  studentSummaryFontSize: clampStudentSummaryFontSize,
+  studentHighlightsFontSize: clampStudentHighlightsFontSize,
+  awardTitleFontSize: clampAwardTitleFontSize,
+  awardMetaFontSize: clampAwardMetaFontSize,
+  awardDescriptionFontSize: clampAwardDescriptionFontSize,
+  certificateTitleFontSize: clampCertificateTitleFontSize,
+  certificateMetaFontSize: clampCertificateMetaFontSize,
+  certificateDescriptionFontSize: clampCertificateDescriptionFontSize,
+  selfSummaryFontSize: clampSelfSummaryFontSize,
+}
+
+const FIT_LINE_HEIGHT_KEYS = [
+  'skillsLineHeight',
+  'internshipSummaryLineHeight',
+  'internshipHighlightsLineHeight',
+  'projectSummaryLineHeight',
+  'projectHighlightsLineHeight',
+  'awardDescriptionLineHeight',
+  'certificateDescriptionLineHeight',
+  'selfSummaryLineHeight',
+]
 
 function moveItem(list, fromIndex, toIndex) {
   if (toIndex < 0 || toIndex >= list.length || fromIndex < 0 || fromIndex >= list.length) return
@@ -73,7 +117,7 @@ function moveItem(list, fromIndex, toIndex) {
 }
 
 export function useResumeBuilder() {
-  const resume = reactive(normalizeResumeData(createDemoResume()))
+  const resume = reactive(normalizeResumeData(createEmptyResume()))
   const panels = reactive(createPanelsState())
 
   const photoUploadMessage = ref('')
@@ -100,8 +144,80 @@ export function useResumeBuilder() {
   let skipSourceDirty = false
   let sourceSyncTimer = null
   let sourceFingerprint = ''
+  let externalSourceActive = false
   let sourceHasLocalEdits = false
   let sourceHasConflict = false
+
+  const HISTORY_LIMIT = 100
+  const HISTORY_DELAY = 500
+  const canUndo = ref(false)
+  const canRedo = ref(false)
+  let historyStack = []
+  let historyIndex = -1
+  let historyTimer = null
+  let skipNextHistory = false
+
+  function updateHistoryState() {
+    canUndo.value = historyIndex > 0
+    canRedo.value = historyIndex >= 0 && historyIndex < historyStack.length - 1
+  }
+
+  function pushHistory() {
+    const snapshot = JSON.stringify(createResumeSnapshot())
+    if (historyStack[historyIndex] === snapshot) return
+
+    historyStack = historyStack.slice(0, historyIndex + 1)
+    historyStack.push(snapshot)
+    if (historyStack.length > HISTORY_LIMIT) {
+      historyStack.shift()
+    }
+    historyIndex = historyStack.length - 1
+    updateHistoryState()
+  }
+
+  function flushHistory() {
+    if (historyTimer) {
+      window.clearTimeout(historyTimer)
+      historyTimer = null
+    }
+    pushHistory()
+  }
+
+  function scheduleHistoryPush() {
+    if (bootstrapping) return
+    if (skipNextHistory) {
+      skipNextHistory = false
+      return
+    }
+    if (historyTimer) {
+      window.clearTimeout(historyTimer)
+    }
+    historyTimer = window.setTimeout(() => {
+      historyTimer = null
+      pushHistory()
+    }, HISTORY_DELAY)
+  }
+
+  function applyHistorySnapshot(snapshot) {
+    skipNextHistory = true
+    applyResumeData(JSON.parse(snapshot))
+    updateHistoryState()
+  }
+
+  function undo() {
+    flushHistory()
+    if (historyIndex <= 0) return
+    historyIndex -= 1
+    applyHistorySnapshot(historyStack[historyIndex])
+  }
+
+  function redo() {
+    flushHistory()
+    if (historyIndex >= historyStack.length - 1) return
+    historyIndex += 1
+    applyHistorySnapshot(historyStack[historyIndex])
+  }
+
 
   function restorePanelsState() {
     const raw = localStorage.getItem(PANELS_STORAGE_KEY)
@@ -178,6 +294,7 @@ export function useResumeBuilder() {
   }
 
   async function startResumeSourceSync(url) {
+    externalSourceActive = true
     stopResumeSourceSync()
     await importResumeFromUrl(url)
     sourceSyncTimer = window.setInterval(() => {
@@ -330,9 +447,26 @@ export function useResumeBuilder() {
     }
   }
 
-  function exportPdf() {
-    validateBeforeExport()
-    window.print()
+  let exportInProgress = false
+  async function exportPdf() {
+    if (exportInProgress) return
+    exportInProgress = true
+    clearActionFeedback()
+    actionStatusMessage.value = '正在准备字体和图片…'
+    try {
+      await nextTick()
+      await waitForPrintResources(document.getElementById('resume-preview-page'))
+      validateBeforeExport()
+      actionStatusMessage.value = '已请求打开打印预览，请选择 A4、100% 缩放并关闭页眉页脚；长简历会完整分页。'
+      await nextTick()
+      window.print()
+    } catch (error) {
+      console.error('PDF export failed:', error)
+      actionStatusMessage.value = ''
+      actionErrorMessage.value = error.message || '打印准备失败，请重试。'
+    } finally {
+      exportInProgress = false
+    }
   }
 
   function readStyleText() {
@@ -849,6 +983,52 @@ function moveStudentExperienceDown(index) {
     pageHeight.value = Number(payload?.height || 0)
   }
 
+  function scaleThemeBy(ratio) {
+    Object.entries(FIT_FONT_SIZE_CLAMPS).forEach(([key, clampFn]) => {
+      const current = Number(resume.theme[key])
+      if (!Number.isFinite(current) || current <= 0) return
+      resume.theme[key] = clampFn(Math.round(current * ratio * 10) / 10)
+    })
+    FIT_LINE_HEIGHT_KEYS.forEach((key) => {
+      const current = Number(resume.theme[key])
+      if (!Number.isFinite(current) || current <= 0) return
+      resume.theme[key] = clampLineHeight(Math.round(current * ratio * 100) / 100)
+    })
+    resume.theme.sectionGap = clampSectionGap(
+      Math.round(Number(resume.theme.sectionGap || 0) * ratio)
+    )
+  }
+
+  async function fitToOnePage() {
+    clearActionFeedback()
+    if (!pageOverflow.value) {
+      actionStatusMessage.value = '当前内容没有超过一页，无需压缩。'
+      return
+    }
+
+    // Preserve text size while available section whitespace can absorb overflow.
+    while (pageOverflow.value && Number(resume.theme.sectionGap) > 4) {
+      resume.theme.sectionGap = clampSectionGap(Number(resume.theme.sectionGap) - 1)
+      await nextTick()
+      await new Promise((resolve) => window.setTimeout(resolve, 150))
+    }
+
+    for (let iteration = 0; iteration < FIT_MAX_ITERATIONS && pageOverflow.value; iteration += 1) {
+      const target = A4_PAGE_HEIGHT_PX - FIT_SAFETY_MARGIN_PX
+      const ratio = Math.max(FIT_MIN_RATIO, Math.floor((target / pageHeight.value) * 100) / 100)
+      scaleThemeBy(ratio)
+      await nextTick()
+      // 等预览组件重新测量并回传超高状态
+      await new Promise((resolve) => window.setTimeout(resolve, 150))
+    }
+
+    if (!pageOverflow.value) {
+      actionStatusMessage.value = '已压缩到一页 A4（优先调整栏目间距，必要时收缩文字；可用 Ctrl+Z 撤销）。'
+    } else {
+      actionErrorMessage.value = `已收缩到下限，内容仍超出一页（约 ${pageHeight.value}px），可直接导出完整多页版本，或手动删减内容。`
+    }
+  }
+
   function hasVisibleSection() {
     return Object.values(resume.sectionVisibility || {}).some((visible) => visible !== false)
   }
@@ -904,7 +1084,7 @@ function moveStudentExperienceDown(index) {
       const migrated = await migrateLegacyDraftIfNeeded()
       const draft = await loadResumeDraft()
 
-      if (draft) {
+      if (draft && !externalSourceActive) {
         skipNextAutoSave = true
         applyResumeData(draft)
         resetPhotoFeedback()
@@ -921,6 +1101,10 @@ function moveStudentExperienceDown(index) {
       actionErrorMessage.value = '本地数据库初始化失败，已回退到浏览器本地存储。'
     } finally {
       bootstrapping = false
+      // 以启动后的内容为历史栈起点（含恢复出来的草稿）
+      historyStack = [JSON.stringify(createResumeSnapshot())]
+      historyIndex = 0
+      updateHistoryState()
     }
   }
 
@@ -932,6 +1116,7 @@ function moveStudentExperienceDown(index) {
       } else {
         sourceHasLocalEdits = true
       }
+      scheduleHistoryPush()
       scheduleAutoSave()
     },
     { deep: true }
@@ -1039,6 +1224,10 @@ function moveStudentExperienceDown(index) {
     restoreDraft,
     importResumeData: applyResumeData,
     createResumeSnapshot,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
     exportPdf,
     exportJson,
     triggerJsonImport,
@@ -1096,5 +1285,6 @@ function moveStudentExperienceDown(index) {
     onCustomImageChange,
     removeCustomImageFile,
     onPageOverflowChange,
+    fitToOnePage,
   }
 }

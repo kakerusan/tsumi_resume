@@ -88,6 +88,9 @@ const {
   onCustomImageChange,
   removeCustomImageFile,
   onPageOverflowChange,
+  fitToOnePage,
+  canUndo,
+  undo,
 } = useResumeBuilder()
 
 const dismissedNotices = reactive({
@@ -302,7 +305,11 @@ watch(() => `${pageOverflow.value}-${pageHeight.value}`, () => {
           v-if="pageOverflow && !dismissedNotices.pageOverflow"
           class="notice-banner border-amber-200 bg-amber-50 text-amber-700"
         >
-          <span class="notice-banner__text">当前内容已超过一页 A4，高度约 {{ pageHeight }}px，导出时可能分页。</span>
+          <span class="notice-banner__text">
+            当前为连续内容预览，已超过一页 A4。导出会保留完整内容并自动分页，最终页数与断点以打印预览为准。
+            <button type="button" class="font-semibold underline" @click="fitToOnePage">一键压缩到一页</button>
+            <button type="button" class="ml-2 font-semibold underline" :disabled="!canUndo" @click="undo">撤销调整</button>
+          </span>
           <button
             type="button"
             class="notice-banner__close"
