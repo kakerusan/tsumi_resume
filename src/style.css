@@ -500,7 +500,6 @@
     @apply rounded-sm px-1.5 py-0.5 font-medium leading-4;
     color: var(--brand-deep);
     background: color-mix(in oklab, var(--brand) 7%, white 93%);
-    border: 1px solid color-mix(in oklab, var(--brand) 18%, white 82%);
     font-size: var(--project-tag-font-size);
   }
 
